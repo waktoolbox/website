@@ -1,0 +1,41 @@
+name: Build and deploy
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build and package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+
+      - uses: actions/setup-node@v3.4.1
+        name: Setup Node
+        with:
+          node-version: '16.17.1'
+
+      - name: Build
+        run: npm i concurrently && npm run build:full
+
+      - name: Package
+        run: |
+          mkdir package
+          mkdir package/client
+          mkdir package/client/build
+          cp -R dist/* package
+          cp -R client/build/* package/client/build
+          ls -Rli package
+
+      - name: Deploy to EC2
+        uses: easingthemes/ssh-deploy@v2.2.11
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SOURCE: "./package"
+          REMOTE_HOST: "ec2-52-47-119-157.eu-west-3.compute.amazonaws.com"
+          REMOTE_USER: "ec2-user"
+          TARGET: "/home/ec2-user/waktool"
