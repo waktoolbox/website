@@ -1,5 +1,6 @@
 import fetch from "node-fetch"
 import {Account} from "../account/account";
+import {createToken} from "./token";
 
 const CLIENT_ID = process.env.CLIENT_ID || "";
 const CLIENT_SECRET = process.env.CLIENT_SECRET || "";
@@ -38,7 +39,8 @@ export async function doOAuth(code: string) {
                     account.discordId = discordData.id;
                     account.email = discordData.email;
                     await account.save();
-                    resolve(data);
+
+                    resolve(createToken({discord_id: account.discordId}));
                 })
         });
     })

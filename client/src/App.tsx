@@ -3,6 +3,13 @@ import './App.css';
 import DiscordOAuth from "./components/oauth/discord";
 
 function App() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if(token) {
+    localStorage.setItem('token', token);
+    window.location.replace(window.location.origin);
+  }
+
   return (
     <div className="App">
       <header className="App-header">

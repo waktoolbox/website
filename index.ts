@@ -17,8 +17,8 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 app.get('/api/oauth/discord/redirect', async (req: Request, res: Response) => {
-    doOAuth(req.query.code as string).then(authResult => {
-        res.redirect(301, process.env.LOGON_REDIRECTION || "")
+    doOAuth(req.query.code as string).then(token => {
+        res.redirect(301, process.env.LOGON_REDIRECTION + `?token=${token}` || "")
     }).catch(error => {
         res.status(400).send(); // TODO manage bad OAuth
     })
