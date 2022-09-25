@@ -37,6 +37,6 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           SOURCE: "./package"
-          REMOTE_HOST: "ec2-52-47-119-157.eu-west-3.compute.amazonaws.com"
+          REMOTE_HOST: "52.47.46.242"
           REMOTE_USER: "ec2-user"
           TARGET: "/home/ec2-user/waktool"
