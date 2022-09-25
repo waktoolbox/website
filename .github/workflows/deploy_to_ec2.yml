@@ -25,11 +25,12 @@ jobs:
       - name: Package
         run: |
           mkdir package
+          mkdir package/dist
           mkdir package/client
           mkdir package/client/build
-          cp -R dist/* package
+          cp -R dist/* package/dist
           cp -R client/build/* package/client/build
-          ls -Rli package
+          cp package.json package/
 
       - name: Deploy to EC2
         uses: easingthemes/ssh-deploy@v2.2.11
