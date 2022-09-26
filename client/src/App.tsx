@@ -1,8 +1,10 @@
 import React from 'react';
-import {useTranslation} from "react-i18next";
 import './App.css';
-import DiscordOAuth from "./components/oauth/discord";
 import Menu from "./components/menu";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Tournament from "./routes/tournament";
+import Login from "./routes/login";
+import CreateTournament from "./routes/tournament/create-tournament";
 
 function App() {
     const params = new URLSearchParams(window.location.search);
@@ -12,23 +14,17 @@ function App() {
         window.location.replace(window.location.origin);
     }
 
-    const {t} = useTranslation();
-
     return (
         <div className="App">
-            <Menu/>
-            <header className="App-header">
-                <img src="/logo.svg" className="App-logo" alt="logo"/>
-                <DiscordOAuth/>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {t('title')}
-                </a>
-            </header>
+            <BrowserRouter>
+                <Menu/>
+
+                <Routes>
+                    <Route path="/" element={<Tournament/>}/>
+                    <Route path="/create-tournament" element={<CreateTournament/>}/>
+                    <Route path="/login" element={<Login/>}/>
+                </Routes>
+            </BrowserRouter>
         </div>
     );
 }

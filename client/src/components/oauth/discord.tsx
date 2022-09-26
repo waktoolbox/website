@@ -1,8 +1,6 @@
 import React from "react";
 
 function DiscordOAuth() {
-    console.log(process.env);
-
     return (
         <div>
 

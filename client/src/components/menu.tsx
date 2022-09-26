@@ -5,16 +5,19 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import {AccountBalance, AdUnitsTwoTone} from "@mui/icons-material";
+import {AdUnitsTwoTone} from "@mui/icons-material";
 import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import LanguagePicker from "./language-picker";
+import {useTranslation} from "react-i18next";
+import {Link} from "react-router-dom";
 
 export default function Menu() {
     const [state, setState] = React.useState({
         open: false
     });
+
+    const {t} = useTranslation();
 
     const toggleDrawer =
         (open: boolean) =>
@@ -44,31 +47,20 @@ export default function Menu() {
                     onClick={toggleDrawer(false)}
                     onKeyDown={toggleDrawer(false)}
                 >
+                    <Typography variant={"h3"}>{t('tournament.title')}</Typography>
                     <List>
-                        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                            <ListItem key={text} disablePadding>
+                        <Link to={"create-tournament"}>
+                            <ListItem key="tournament.create">
                                 <ListItemButton>
                                     <ListItemIcon>
-                                        {index % 2 === 0 ? <AdUnitsTwoTone/> : <AccountBalance/>}
+                                        <AdUnitsTwoTone/>
                                     </ListItemIcon>
-                                    <ListItemText primary={text}/>
+                                    <ListItemText primary={t('tournament.create')}/>
                                 </ListItemButton>
                             </ListItem>
-                        ))}
+                        </Link>
                     </List>
-                    <Divider/>
-                    <List>
-                        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                            <ListItem key={text} disablePadding>
-                                <ListItemButton>
-                                    <ListItemIcon>
-                                        {index % 2 === 0 ? <AdUnitsTwoTone/> : <AccountBalance/>}
-                                    </ListItemIcon>
-                                    <ListItemText primary={text}/>
-                                </ListItemButton>
-                            </ListItem>
-                        ))}
-                    </List>
+                    {/*<Divider/>*/}
                 </Box>
             </SwipeableDrawer>
 
@@ -85,9 +77,11 @@ export default function Menu() {
                         <MenuIcon/>
                     </IconButton>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                        News
+                        Waktool
                     </Typography>
-                    <Button color="inherit">Login</Button>
+                    <Link to="/login">
+                        <Button color="inherit">{t('connect')}</Button>
+                    </Link>
                     <LanguagePicker/>
                 </Toolbar>
             </AppBar>
