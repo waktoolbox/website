@@ -22,21 +22,11 @@ jobs:
       - name: Build
         run: npm i concurrently && npm run build:full
 
-      - name: Package
-        run: |
-          mkdir package
-          mkdir package/dist
-          mkdir package/client
-          mkdir package/client/build
-          cp -R dist/* package/dist
-          cp -R client/build/* package/client/build
-          cp package.json package/
-
       - name: Deploy to EC2
         uses: easingthemes/ssh-deploy@v2.2.11
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          SOURCE: "./package"
+          SOURCE: "."
           REMOTE_HOST: "52.47.46.242"
           REMOTE_USER: "ec2-user"
           TARGET: "/home/ec2-user/waktool"
