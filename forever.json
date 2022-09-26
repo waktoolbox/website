@@ -1,0 +1,7 @@
+{
+  "uid": "waktool",
+  "append": true,
+  "watch": true,
+  "script": "dist/index.js",
+  "sourceDir": "/home/ec2-user/waktool/"
+}

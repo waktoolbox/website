@@ -1,0 +1,1 @@
+nohup forever -c "node --es-module-specifier-resolution=node" forever.json &
