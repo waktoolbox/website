@@ -2,10 +2,6 @@ import fetch from "node-fetch"
 import {Account} from "../account/account";
 import {createToken} from "./token";
 
-const CLIENT_ID = process.env.CLIENT_ID || "";
-const CLIENT_SECRET = process.env.CLIENT_SECRET || "";
-const OAUTH_REDIRECTION = process.env.OAUTH_REDIRECTION || "";
-
 interface OAuthResult {
     access_token: string,
     expires_in: number,
@@ -19,12 +15,12 @@ export async function doOAuth(code: string) {
         fetch('https://discord.com/api/oauth2/token', {
             method: "POST", body: new URLSearchParams(
                 {
-                    client_id: CLIENT_ID,
-                    client_secret: CLIENT_SECRET,
+                    client_id: process.env.CLIENT_ID || "",
+                    client_secret: process.env.CLIENT_SECRET || "",
                     code: code,
                     scope: "email",
                     grant_type: "authorization_code",
-                    redirect_uri: OAUTH_REDIRECTION
+                    redirect_uri: process.env.OAUTH_REDIRECTION || ""
                 }
             )
         }).then(async response => {
