@@ -25,6 +25,7 @@ function LanguagePicker() {
             >
                 {Object.keys(languages).map((lng) => (
                     <MenuItem
+                        key={lng}
                         onClick={() => {
                             i18n.changeLanguage(lng);
                             setLanguage(lng);
