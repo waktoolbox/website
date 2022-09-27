@@ -1,11 +1,17 @@
-
 import dotenv from "dotenv";
-import express, { Express, Request, Response } from "express";
+import express, {Express, Request, Response} from "express";
+import * as http from 'http';
 import path from "path";
 import cors from "cors";
 import {doOAuth} from "./server/oauth/discord";
+import {Server} from 'socket.io';
+import {SocketManager} from "./server/api/socket-manager";
 
 const app: Express = express();
+const server = http.createServer(app);
+const io = new Server(server, {cors: {origin: '*'}});
+SocketManager.initIo(io);
+
 const __dirname = path.resolve();
 
 dotenv.config({path: path.join(__dirname, '.env')});
@@ -30,6 +36,6 @@ app.get('/*', (req: Request, res: Response) => {
 
 const port = process.env.PORT || 8000;
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Listening on port ${port}`)
 });

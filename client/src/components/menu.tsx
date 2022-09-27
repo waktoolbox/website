@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {AppBar, Box, Button, IconButton, Toolbar, Typography} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import List from "@mui/material/List";
@@ -11,21 +10,35 @@ import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import LanguagePicker from "./language-picker";
 import {useTranslation} from "react-i18next";
 import {Link} from "react-router-dom";
+import {KeyboardEvent, MouseEvent, useContext, useEffect, useState} from "react";
+import {UserContext} from "../context/user-context";
+import {socket} from "../context/socket-context";
 
 export default function Menu() {
-    const [state, setState] = React.useState({
+    const [state, setState] = useState({
         open: false
     });
 
+    const userContext = useContext(UserContext);
     const {t} = useTranslation();
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            socket.emit('authenticate', token, (connected: boolean) => {
+                userContext.dispatch({type: "setConnected", payload: connected});
+            });
+        }
+    }, [])
+
 
     const toggleDrawer =
         (open: boolean) =>
-            (event: React.KeyboardEvent | React.MouseEvent) => {
+            (event: KeyboardEvent | MouseEvent) => {
                 if (
                     event && event.type === 'keydown' &&
-                    ((event as React.KeyboardEvent).key === 'Tab' ||
-                        (event as React.KeyboardEvent).key === 'Shift')
+                    ((event as KeyboardEvent).key === 'Tab' ||
+                        (event as KeyboardEvent).key === 'Shift')
                 ) {
                     return;
                 }
@@ -79,9 +92,11 @@ export default function Menu() {
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         Waktool
                     </Typography>
-                    <Link to="/login">
-                        <Button color="inherit">{t('connect')}</Button>
-                    </Link>
+                    {!userContext.userState.connected &&
+                        <Link to="/login">
+                            <Button color="inherit">{t('connect')}</Button>
+                        </Link>
+                    }
                     <LanguagePicker/>
                 </Toolbar>
             </AppBar>

@@ -5,26 +5,32 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Tournament from "./routes/tournament";
 import Login from "./routes/login";
 import CreateTournament from "./routes/tournament/create-tournament";
+import {socket, SocketContext} from "./context/socket-context";
+import {UserContextProvider} from "./context/user-context";
 
 function App() {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (token) {
-        localStorage.setItem('token', token);
+    const pathToken = params.get('token');
+    if (pathToken) {
+        localStorage.setItem('token', pathToken);
         window.location.replace(window.location.origin);
     }
 
     return (
         <div className="App">
-            <BrowserRouter>
-                <Menu/>
+            <UserContextProvider>
+                <SocketContext.Provider value={socket}>
+                    <BrowserRouter>
+                        <Menu/>
 
-                <Routes>
-                    <Route path="/" element={<Tournament/>}/>
-                    <Route path="/create-tournament" element={<CreateTournament/>}/>
-                    <Route path="/login" element={<Login/>}/>
-                </Routes>
-            </BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<Tournament/>}/>
+                            <Route path="/create-tournament" element={<CreateTournament/>}/>
+                            <Route path="/login" element={<Login/>}/>
+                        </Routes>
+                    </BrowserRouter>
+                </SocketContext.Provider>
+            </UserContextProvider>
         </div>
     );
 }
