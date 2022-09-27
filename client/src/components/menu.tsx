@@ -29,7 +29,7 @@ export default function Menu() {
                 userContext.dispatch({type: "setConnected", payload: connected});
             });
         }
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
 
     const toggleDrawer =
