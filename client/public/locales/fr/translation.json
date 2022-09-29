@@ -2,6 +2,24 @@
   "connect": "Se connecter",
   "tournament": {
     "create": "Créer un tournoi",
+    "description": "Description",
+    "endDate": "Date de fin",
+    "editor": {
+      "information": {
+        "general": "Informations générales",
+        "phases": "Phases",
+        "users": "Utilisateurs"
+      }
+    },
+    "id": "Identifiant",
+    "level": "Niveau",
+    "name": "Nom",
+    "not.found": "Tournoi introuvable",
+    "rewards": "Récompenses",
+    "rules": "Règles",
+    "startDate": "Date de début",
+    "teamNumber": "Nombre d'équipes",
+    "teamSize": "Taille d'équipe",
     "title": "Tournoi"
   }
 }

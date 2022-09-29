@@ -2,11 +2,16 @@ import {
     CreateTableCommand,
     CreateTableCommandInput,
     CreateTableCommandOutput,
-    DynamoDB,
-    DynamoDBClient, ListTablesCommand,
-    PutItemCommandOutput
+    DynamoDBClient,
+    ListTablesCommand
 } from "@aws-sdk/client-dynamodb";
-import {DynamoDBDocumentClient, PutCommand, PutCommandOutput} from "@aws-sdk/lib-dynamodb";
+import {
+    DynamoDBDocumentClient,
+    GetCommand,
+    GetCommandOutput,
+    PutCommand,
+    PutCommandOutput
+} from "@aws-sdk/lib-dynamodb";
 import init from "./db-populate-tables";
 
 class DynamoWrapper {
@@ -40,7 +45,7 @@ class DynamoWrapper {
     }
 
     put(table: string, obj: any): Promise<PutCommandOutput> {
-        if(!this.isInit) this.init();
+        if (!this.isInit) this.init();
         return new Promise((resolve, reject) => {
             this.db?.send(new PutCommand({
                 TableName: table,
@@ -54,10 +59,27 @@ class DynamoWrapper {
         })
     }
 
-    createTable(params: CreateTableCommandInput): Promise<CreateTableCommandOutput> {
-        if(!this.isInit) this.init();
+    get(table: string, id: string): Promise<GetCommandOutput> {
+        if (!this.isInit) this.init();
         return new Promise((resolve, reject) => {
-            if(this.tables.has(params.TableName || "")) return resolve({} as CreateTableCommandOutput);
+            this.db?.send(new GetCommand({
+                TableName: table,
+                Key: {
+                    PrimaryKey: id
+                }
+            }))
+                .then(data => resolve(data))
+                .catch(error => {
+                    console.error(error);
+                    reject(error)
+                })
+        })
+    }
+
+    createTable(params: CreateTableCommandInput): Promise<CreateTableCommandOutput> {
+        if (!this.isInit) this.init();
+        return new Promise((resolve, reject) => {
+            if (this.tables.has(params.TableName || "")) return resolve({} as CreateTableCommandOutput);
             this.db?.send(new CreateTableCommand(params))
                 .then(data => resolve(data))
                 .catch(error => {

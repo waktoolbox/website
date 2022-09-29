@@ -1,4 +1,4 @@
-import {AppBar, Box, Button, IconButton, Toolbar, Typography} from "@mui/material";
+import {AppBar, Box, Button, Container, IconButton, Toolbar, Typography} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -62,7 +62,7 @@ export default function Menu() {
                 >
                     <Typography variant={"h3"}>{t('tournament.title')}</Typography>
                     <List>
-                        <Link to={"create-tournament"}>
+                        <Link to={"edit-tournament"}>
                             <ListItem key="tournament.create">
                                 <ListItemButton>
                                     <ListItemIcon>
@@ -78,27 +78,34 @@ export default function Menu() {
             </SwipeableDrawer>
 
             <AppBar position="static">
-                <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{mr: 2}}
-                        onClick={toggleDrawer(true)}
-                    >
-                        <MenuIcon/>
-                    </IconButton>
-                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                        Waktool
-                    </Typography>
-                    {!userContext.userState.connected &&
-                        <Link to="/login">
-                            <Button color="inherit">{t('connect')}</Button>
+                <Container maxWidth="xl" sx={{pr: 1}}>
+                    <Toolbar disableGutters sx={{justifyContent: 'space-between'}}>
+                        <IconButton
+                            size="large"
+                            edge="start"
+                            color="inherit"
+                            aria-label="menu"
+                            sx={{mr: 2}}
+                            onClick={toggleDrawer(true)}
+                        >
+                            <MenuIcon/>
+                        </IconButton>
+                        <Link to="/">
+                            <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                                Waktool
+                            </Typography>
                         </Link>
-                    }
-                    <LanguagePicker/>
-                </Toolbar>
+                        {!userContext.userState.connected &&
+                            <Link to="/login">
+                                <Button color="inherit">{t('connect')}</Button>
+                            </Link>
+                        }
+                        <div/>
+                        <Box sx={{justifyContent: "flex-end"}}>
+                            <LanguagePicker/>
+                        </Box>
+                    </Toolbar>
+                </Container>
             </AppBar>
         </Box>
     );
