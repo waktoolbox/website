@@ -1,12 +1,12 @@
 import {useParams} from "react-router-dom";
 import {ChangeEvent, SyntheticEvent, useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
-import {TournamentDefinition} from "@common/tournament/tournament-models";
 import Box from "@mui/material/Box";
 import {Tab, Tabs, TextField, Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
+import {TournamentDefinition} from "../../../../common/tournament/tournament-models";
 
 export default function CreateTournament() {
     const {id} = useParams();

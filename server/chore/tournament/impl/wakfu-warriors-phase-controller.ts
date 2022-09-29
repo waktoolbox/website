@@ -2,12 +2,12 @@ import {
     TournamentPhaseController,
     TournamentPhaseDefinition,
     TournamentTeamModel
-} from "@common/tournament/tournament-models";
+} from "../../../../common/tournament/tournament-models";
 import {
     WakfuWarriorsMatchModel,
     WakfuWarriorsPhaseOneData,
     WakfuWarriorsTeamModel
-} from "@common/tournament/impl/wakfu-warriors";
+} from "../../../../common/tournament/impl/wakfu-warriors";
 
 export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel, WakfuWarriorsPhaseOneData> {
     definition: TournamentPhaseDefinition;
