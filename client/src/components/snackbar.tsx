@@ -41,7 +41,7 @@ export default function MySnackbar() {
             socket.off('warning');
             socket.off('success');
         }
-    }, [])
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleClose = (event: SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') return;

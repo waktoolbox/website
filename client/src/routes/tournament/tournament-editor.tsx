@@ -25,7 +25,7 @@ export default function CreateTournament() {
         } else {
             setTournament({} as TournamentDefinition)
         }
-    }, [])
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleTabChange = (event: SyntheticEvent, newValue: number) => {
         setTab(newValue);
