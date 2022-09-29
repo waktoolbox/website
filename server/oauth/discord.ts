@@ -32,11 +32,11 @@ export async function doOAuth(code: string) {
                     const discordData = (await result.json())
 
                     const account = new Account();
-                    account.discordId = discordData.id;
+                    account.id = discordData.id;
                     account.email = discordData.email;
                     await account.save();
 
-                    resolve(createToken({discord_id: account.discordId}));
+                    resolve(createToken({discord_id: account.id}));
                 })
         });
     })

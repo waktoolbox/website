@@ -2,7 +2,7 @@ import {useParams} from "react-router-dom";
 import {ChangeEvent, SyntheticEvent, useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
 import Box from "@mui/material/Box";
-import {Tab, Tabs, TextField, Typography} from "@mui/material";
+import {Button, Tab, Tabs, TextField, Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
@@ -14,6 +14,7 @@ export default function CreateTournament() {
     const {t} = useTranslation();
 
     const [tournament, setTournament] = useState<TournamentDefinition>();
+    const [changes, setChanges] = useState<any>({})
     const [tab, setTab] = useState(0);
 
     useEffect(() => {
@@ -35,6 +36,10 @@ export default function CreateTournament() {
             ...tournament,
             [event.target.id]: event.target.value
         } as TournamentDefinition)
+        setChanges({
+            ...changes,
+            [event.target.id]: event.target.value
+        });
     }
 
     const handleTournamentDateChange = (field: string, newValue: number | null | undefined, ignored?: string | undefined) => {
@@ -42,6 +47,22 @@ export default function CreateTournament() {
             ...tournament,
             [field]: newValue || undefined
         } as TournamentDefinition)
+        setChanges({
+            ...changes,
+            [field]: newValue
+        });
+    }
+
+    const commitChange = () => {
+        console.log(changes);
+        socket.emit("tournament::set", tournament?.id || undefined, changes, (result: TournamentDefinition) => {
+            if (result) {
+                setChanges({});
+                if (result.id) {
+                    setTournament(result);
+                }
+            }
+        });
     }
 
     return (
@@ -83,14 +104,17 @@ export default function CreateTournament() {
                                    onChange={handleTournamentChange}/>
                         <TextField id="description" label={t('tournament.description')} value={tournament?.description}
                                    onChange={handleTournamentChange}/>
-                        <TextField id="rewards" label={t('tournament.rewards')} value={tournament?.description}
+                        <TextField id="rewards" label={t('tournament.rewards')} value={tournament?.rewards}
                                    onChange={handleTournamentChange}/>
-                        <TextField id="rules" label={t('tournament.rules')} value={tournament?.description}
+                        <TextField id="rules" label={t('tournament.rules')} value={tournament?.rules}
                                    onChange={handleTournamentChange}/>
                         <TextField id="teamNumber" label={t('tournament.teamNumber')} value={tournament?.teamNumber}
                                    type="number" onChange={handleTournamentChange}/>
-                        <TextField id="teamSize" label={t('tournament.teamSize')} value={tournament?.teamNumber}
+                        <TextField id="teamSize" label={t('tournament.teamSize')} value={tournament?.teamSize}
                                    onChange={handleTournamentChange}/>
+
+                        <Button variant="contained" color="success" onClick={commitChange}
+                                disabled={Object.keys(changes).length <= 0}>{t('send')}</Button>
                     </Box>
                 )}
             </div>

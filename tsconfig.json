@@ -24,7 +24,6 @@
   },
   "include": [
     "index.ts",
-    "./common/**",
     "server/**/*"
   ],
   "exclude": [

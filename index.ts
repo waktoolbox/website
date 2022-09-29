@@ -6,6 +6,7 @@ import cors from "cors";
 import {doOAuth} from "./server/oauth/discord";
 import {Server} from 'socket.io';
 import {SocketManager} from "./server/api/socket-manager";
+import {DynamoDb} from "./server/db/db-helper";
 
 const app: Express = express();
 const server = http.createServer(app);
@@ -15,6 +16,7 @@ SocketManager.initIo(io);
 const __dirname = path.resolve();
 
 dotenv.config({path: path.join(__dirname, '.env')});
+DynamoDb.init();
 
 app.use(express.json());
 app.use(cors());

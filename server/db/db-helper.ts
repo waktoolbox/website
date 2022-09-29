@@ -10,7 +10,9 @@ import {
     GetCommand,
     GetCommandOutput,
     PutCommand,
-    PutCommandOutput
+    PutCommandOutput,
+    UpdateCommand,
+    UpdateCommandOutput
 } from "@aws-sdk/lib-dynamodb";
 import init from "./db-populate-tables";
 
@@ -65,8 +67,40 @@ class DynamoWrapper {
             this.db?.send(new GetCommand({
                 TableName: table,
                 Key: {
-                    PrimaryKey: id
+                    id: id
                 }
+            }))
+                .then(data => resolve(data))
+                .catch(error => {
+                    console.error(error);
+                    reject(error)
+                })
+        })
+    }
+
+    update(table: string, id: string, data: any): Promise<UpdateCommandOutput> {
+        if (!this.isInit) this.init();
+        return new Promise((resolve, reject) => {
+            let expr = "set ";
+            const names: any = {}
+            const values: any = {}
+            const entries = Object.entries(data);
+            if (entries.length == null) {
+                reject();
+            }
+            entries.forEach(([key, value]) => {
+                expr += `#${key} = :${key}, `
+                names[`#${key}`] = key;
+                values[`:${key}`] = value;
+            })
+            this.db?.send(new UpdateCommand({
+                TableName: table,
+                Key: {
+                    id: id
+                },
+                UpdateExpression: expr.substring(0, expr.length - 2),
+                ExpressionAttributeNames: names,
+                ExpressionAttributeValues: values
             }))
                 .then(data => resolve(data))
                 .catch(error => {

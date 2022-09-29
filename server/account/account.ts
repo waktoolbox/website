@@ -1,7 +1,7 @@
 import {DynamoDb} from "../db/db-helper";
 
 export class Account {
-    discordId!: string;
+    id!: string;
     email!: string;
 
     async save() {

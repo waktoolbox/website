@@ -1,6 +1,11 @@
 {
   "connect": "Se connecter",
+  "send": "Envoyer",
   "tournament": {
+    "cant": {
+      "create": "Impossible de créer le tournoi",
+      "save": "Impossible de sauvegarder le tournoi"
+    },
     "create": "Créer un tournoi",
     "description": "Description",
     "endDate": "Date de fin",

@@ -5,13 +5,13 @@ function accounts() {
         TableName: "accounts",
         KeySchema: [
             {
-                AttributeName: "discordId",
+                AttributeName: "id",
                 KeyType: "HASH"
             },
         ],
         AttributeDefinitions: [
             {
-                AttributeName: "discordId",
+                AttributeName: "id",
                 AttributeType: "S"
             }
         ],
@@ -50,7 +50,7 @@ function teams() {
 
 function tournaments() {
     DynamoDb.createTable({
-        TableName: "teams",
+        TableName: "tournaments",
         KeySchema: [
             {
                 AttributeName: "id",
