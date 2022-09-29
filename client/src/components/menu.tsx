@@ -9,7 +9,7 @@ import ListItemText from "@mui/material/ListItemText";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import LanguagePicker from "./language-picker";
 import {useTranslation} from "react-i18next";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {KeyboardEvent, MouseEvent, useContext, useEffect, useState} from "react";
 import {UserContext} from "../context/user-context";
 import {socket} from "../context/socket-context";
@@ -20,6 +20,7 @@ export default function Menu() {
     });
 
     const userContext = useContext(UserContext);
+    const navigate = useNavigate();
     const {t} = useTranslation();
 
     useEffect(() => {
@@ -30,6 +31,13 @@ export default function Menu() {
             });
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const disconnect = () => {
+        localStorage.removeItem('token');
+        userContext.dispatch({type: "setConnected", payload: false});
+        socket.disconnect();
+        navigate('/');
+    }
 
 
     const toggleDrawer =
@@ -99,6 +107,9 @@ export default function Menu() {
                             <Link to="/login">
                                 <Button color="inherit">{t('connect')}</Button>
                             </Link>
+                        }
+                        {userContext.userState.connected &&
+                            <Button color="inherit" onClick={disconnect}>{t('disconnect')}</Button>
                         }
                         <div/>
                         <Box sx={{justifyContent: "flex-end"}}>

@@ -1,5 +1,6 @@
 {
   "connect": "Se connecter",
+  "disconnect": "Se déconnecter",
   "send": "Envoyer",
   "tournament": {
     "cant": {
