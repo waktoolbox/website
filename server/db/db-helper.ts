@@ -11,6 +11,9 @@ import {
     GetCommandOutput,
     PutCommand,
     PutCommandOutput,
+    QueryCommand,
+    QueryCommandInput,
+    QueryCommandOutput,
     UpdateCommand,
     UpdateCommandOutput
 } from "@aws-sdk/lib-dynamodb";
@@ -102,6 +105,18 @@ class DynamoWrapper {
                 ExpressionAttributeNames: names,
                 ExpressionAttributeValues: values
             }))
+                .then(data => resolve(data))
+                .catch(error => {
+                    console.error(error);
+                    reject(error)
+                })
+        })
+    }
+
+    query(command: QueryCommandInput): Promise<QueryCommandOutput> {
+        if (!this.isInit) this.init();
+        return new Promise((resolve, reject) => {
+            this.db?.send(new QueryCommand(command))
                 .then(data => resolve(data))
                 .catch(error => {
                     console.error(error);

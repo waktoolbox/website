@@ -7,14 +7,16 @@ import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {TournamentDefinition} from "../../../../common/tournament/tournament-models";
+import {validateTournamentDefinition} from "../../utils/tournament-validator";
 
-export default function CreateTournament() {
+export default function TournamentEditor() {
     const {id} = useParams();
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
 
     const [tournament, setTournament] = useState<TournamentDefinition>();
     const [changes, setChanges] = useState<any>({})
+    const [errors, setErrors] = useState<any>([])
     const [tab, setTab] = useState(0);
 
     useEffect(() => {
@@ -40,6 +42,11 @@ export default function CreateTournament() {
             ...changes,
             [event.target.id]: event.target.value
         });
+        setErrors(validateTournamentDefinition({
+            ...tournament,
+            ...changes,
+            [event.target.id]: event.target.value
+        } as TournamentDefinition, Date.now()));
     }
 
     const handleTournamentDateChange = (field: string, newValue: number | null | undefined, ignored?: string | undefined) => {
@@ -51,11 +58,15 @@ export default function CreateTournament() {
             ...changes,
             [field]: newValue
         });
+        setErrors(validateTournamentDefinition({
+            ...tournament,
+            ...changes,
+            [field]: newValue
+        } as TournamentDefinition, Date.now()));
     }
 
-    const commitChange = () => {
-        console.log(changes);
-        socket.emit("tournament::set", tournament?.id || undefined, changes, (result: TournamentDefinition) => {
+    const commitBaseInformationChange = () => {
+        socket.emit("tournament::setBaseInformation", tournament?.id || undefined, changes, (result: TournamentDefinition) => {
             if (result) {
                 setChanges({});
                 if (result.id) {
@@ -113,8 +124,14 @@ export default function CreateTournament() {
                         <TextField id="teamSize" label={t('tournament.teamSize')} value={tournament?.teamSize}
                                    onChange={handleTournamentChange}/>
 
-                        <Button variant="contained" color="success" onClick={commitChange}
-                                disabled={Object.keys(changes).length <= 0}>{t('send')}</Button>
+                        <Button variant="contained" color="success" onClick={commitBaseInformationChange}
+                                disabled={Object.keys(changes).length <= 0 || errors && errors.length > 0}>{t('send')}</Button>
+
+                        {
+                            errors && errors.length > 0 && errors.map((error: string) => (
+                                <p key={error}>{t(error)}</p>
+                            ))
+                        }
                     </Box>
                 )}
             </div>

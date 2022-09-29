@@ -56,10 +56,18 @@ function tournaments() {
                 AttributeName: "id",
                 KeyType: "HASH"
             },
+            {
+                AttributeName: 'startDate',
+                KeyType: 'RANGE'
+            }
         ],
         AttributeDefinitions: [
             {
                 AttributeName: "id",
+                AttributeType: "S"
+            },
+            {
+                AttributeName: "startDate",
                 AttributeType: "S"
             }
         ],
