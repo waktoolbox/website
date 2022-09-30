@@ -25,7 +25,7 @@ class DbWrapper {
                         email         = $4;
             `, [account.id, account.username, account.discriminator, account.email])
                 .then(result => {
-                    if (result.rows.length <= 0) return reject(undefined);
+                    if (result.rowCount <= 0) return reject(undefined);
                     resolve(account);
                 })
                 .catch(error => reject(error));
