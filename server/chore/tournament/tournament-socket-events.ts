@@ -1,29 +1,14 @@
 import {Socket} from "socket.io";
-import {DynamoDb} from "../../db/db-helper";
 import {TournamentDefinition} from "../../../common/tournament/tournament-models";
 import * as crypto from "crypto";
-import {validateTournamentDefinition} from "../../../client/src/utils/tournament-validator"; // TODO sorry, lack of time
-
-function getTournament(id: string, callback: (command: TournamentDefinition) => void, socket: Socket) {
-    DynamoDb.query({
-        TableName: 'tournaments',
-        KeyConditionExpression: "id = :id",
-        ExpressionAttributeValues: {
-            ":id": id
-        },
-        ScanIndexForward: false,
-        Limit: 1
-    })
-        .then(result => {
-            if (!result || !result.Items || result.Items.length <= 0) return socket?.emit('error', 'tournament.not.found');
-            callback((result?.Items || [undefined])[0] as TournamentDefinition)
-        })
-        .catch(_ => socket?.emit('error', 'tournament.not.found'));
-}
+import {validateTournamentDefinition} from "../../../client/src/utils/tournament-validator";
+import {DbHelper} from "../../db/pg-helper"; // TODO sorry, lack of time
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
-        getTournament(id, callback, socket);
+        DbHelper.getTournament(id)
+            .then(result => callback(result))
+            .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
 }
 
@@ -39,29 +24,25 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             tournament.id = crypto.randomUUID();
             tournament.admins = [];
             tournament.admins.push(socket.data.user);
-            DynamoDb.put("tournaments", tournament)
-                .then(_ => callback(tournament))
+            DbHelper.saveTournament(tournament)
+                .then(_ => {
+                    callback(tournament);
+                    socket.emit('success', 'tournament.saved')
+                })
                 .catch(_ => socket.emit('error', 'tournament.cant.create'));
         }
 
-        DynamoDb.query({
-            TableName: 'tournaments',
-            KeyConditionExpression: "id = :id",
-            ExpressionAttributeValues: {
-                ":id": id
-            },
-            ScanIndexForward: false,
-            Limit: 1
-        }).then(result => {
-            if (!result || !result.Items || result.Items.length <= 0) return socket?.emit('error', 'tournament.not.found');
+        DbHelper.getTournament(id)
+            .then(tournament => {
+                if (!tournament || !tournament.admins || !tournament.admins.includes(socket.data.user)) return socket.emit('error', 'tournament.cant.save');
 
-            const tournament: TournamentDefinition = result.Items[0] as TournamentDefinition;
-            if (!tournament.admins || !tournament.admins.includes(socket.data.user)) return socket.emit('error', 'tournament.cant.save');
-
-            DynamoDb.update("tournaments", id, data)
-                .then(_ => callback(true))
-                .catch(_ => socket.emit('error', 'tournament.cant.save'));
-        }).catch(error => {
+                DbHelper.saveTournament(tournament)
+                    .then(_ => {
+                        callback(true);
+                        socket.emit('success', 'tournament.saved')
+                    })
+                    .catch(_ => socket.emit('error', 'tournament.cant.save'));
+            }).catch(error => {
             socket.emit('error', 'tournament.cant.save')
         });
 

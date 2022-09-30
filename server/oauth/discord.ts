@@ -28,12 +28,14 @@ export async function doOAuth(code: string) {
             const data = (await response.json()) as any as OAuthResult
             getDiscordUser(data.access_token, data.token_type)
                 .then(async result => {
-                    if(result.status && result.status !== 200) return reject(result.status);
+                    if (result.status && result.status !== 200) return reject(result.status);
                     const discordData = (await result.json())
 
                     const account = new Account();
                     account.id = discordData.id;
                     account.email = discordData.email;
+                    account.username = discordData.username;
+                    account.discriminator = discordData.discriminator;
                     await account.save();
 
                     resolve(createToken({discord_id: account.id}));

@@ -10,9 +10,17 @@ CLIENT_FILE_LOCATION: path relative to working directory for client files root
 AWS_ACCESS_KEY: AWS access key, must have DynamoDB rights  
 AWS_SECRET_KEY: AWS secret key
 
-DYNAMO_REGION: configuration of Dynamo
+PGUSER: DB user
+PGHOST: DB host
+PGPASSWORD: DB pass
+PGDATABASE: DB database (...)
+PGPORT: DB port
 
 # Quick note
 
 It's my first React project, I'm sorry, but it's a quite short deadline to do better for now  
 For the same reason, I may be pushed some ugly conf files in this project. And the history is... quite ugly.
+
+# Server setup
+
+Create a correct PG database according to PGDATABASE env value

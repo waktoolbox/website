@@ -1,10 +1,12 @@
-import {DynamoDb} from "../db/db-helper";
+import {DbHelper} from "../db/pg-helper";
 
 export class Account {
     id!: string;
     email!: string;
+    username!: string;
+    discriminator!: string;
 
     async save() {
-        return await DynamoDb.put("accounts", this);
+        return await DbHelper.saveAccount(this);
     }
 }
