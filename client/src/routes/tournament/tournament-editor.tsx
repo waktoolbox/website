@@ -125,7 +125,7 @@ export default function TournamentEditor() {
                                    onChange={handleTournamentChange}/>
 
                         <Button variant="contained" color="success" onClick={commitBaseInformationChange}
-                                disabled={Object.keys(changes).length <= 0 || errors && errors.length > 0}>{t('send')}</Button>
+                                disabled={Object.keys(changes).length <= 0 || (errors && errors.length > 0)}>{t('send')}</Button>
 
                         {
                             errors && errors.length > 0 && errors.map((error: string) => (

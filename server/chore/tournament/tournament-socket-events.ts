@@ -32,7 +32,8 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                 .catch(_ => socket.emit('error', 'tournament.cant.create'));
         }
 
-        DbHelper.getTournament(id)
+
+        DbHelper.getTournament(id) // TODO use a specific request to check only admins matching
             .then(tournament => {
                 if (!tournament || !tournament.admins || !tournament.admins.includes(socket.data.user)) return socket.emit('error', 'tournament.cant.save');
 

@@ -19,7 +19,7 @@ export default function Tournament() {
 
     return (
         <div>
-            {JSON.stringify(tournament)}
+            {JSON.stringify(tournament) && t('todo')}
         </div>
     )
 }
