@@ -14,6 +14,14 @@ class DbWrapper {
         this.isInit = true;
     }
 
+    rawQuery(query: string, params: any[]) {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(query, params)
+                .then(result => resolve(result))
+                .catch(error => reject(error));
+        })
+    }
+
     saveAccount(account: Account) {
         return new Promise((resolve, reject) => {
             this.pool?.query(`

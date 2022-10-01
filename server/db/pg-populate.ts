@@ -27,4 +27,7 @@ export const pgInitDb = `
     ) PRIMARY KEY,
         content JSONB
         );
+
+    ALTER TABLE tournaments
+        ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT false;
 `

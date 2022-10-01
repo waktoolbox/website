@@ -1,5 +1,6 @@
 {
   "connect": "Se connecter",
+  "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
   "disconnect": "Se déconnecter",
   "send": "Envoyer",
   "tournament": {
@@ -16,6 +17,14 @@
         "phases": "Phases",
         "users": "Utilisateurs"
       }
+    },
+    "home": {
+      "featured.title": "Tournois à l'honneur",
+      "featured.none": "Pas de tournoi à l'honneur",
+      "matches.title": "Matchs à venir",
+      "matches.none": "Pas de match planifié pour le moment",
+      "registrations.title": "Inscriptions en cours",
+      "registrations.none": "Pas d'inscriptions en cours"
     },
     "id": "Identifiant",
     "level": "Niveau",
