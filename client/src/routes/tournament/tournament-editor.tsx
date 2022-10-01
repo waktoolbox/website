@@ -49,7 +49,7 @@ export default function TournamentEditor() {
         } as TournamentDefinition, Date.now()));
     }
 
-    const handleTournamentDateChange = (field: string, newValue: number | null | undefined, ignored?: string | undefined) => {
+    const handleTournamentDateChange = (field: string, newValue: string | null | undefined, ignored?: string | undefined) => {
         setTournament({
             ...tournament,
             [field]: newValue || undefined

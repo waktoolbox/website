@@ -1,8 +1,8 @@
 export interface TournamentDefinition {
     id?: string;
     name: string;
-    startDate: number;
-    endDate: number;
+    startDate: string;
+    endDate: string;
     level: number;
     description: string;
     rewards: string;
@@ -48,16 +48,47 @@ export interface TournamentPhaseController<T extends TournamentTeamModel, M exte
 
 export interface TournamentTeamModel {
     id?: string;
-    matches: string[];
+    name: string;
+    server: "Pandora" | "Rubilax";
+    leader: string;
+    players: string[];
+    catchPhrase: string;
+    stats: TournamentStatsModel;
+}
+
+export interface TournamentStatsModel {
+    played: number;
+    victories: number;
+    turnByMatch: number;
+    statsByClass: TournamentStatsClassModel[];
+}
+
+export interface TournamentStatsClassModel {
+    id: number;
+    played: number;
+    banned: number;
+    victories: number;
+    killed: number;
+    death: number;
 }
 
 export interface TournamentMatchModel {
     id?: string;
+    date: string;
     done: boolean;
     teamA: string;
+    teamADraft: TournamentDraftResultModel;
     teamB: string;
+    teamBDraft: TournamentDraftResultModel;
+    map?: number;
+    referee?: string;
     winner?: string;
     round?: number;
+}
+
+export interface TournamentDraftResultModel {
+    pickedClasses: number[];
+    bannedClasses: number[];
 }
 
 export enum TournamentPhaseType {
