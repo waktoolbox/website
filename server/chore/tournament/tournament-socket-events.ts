@@ -17,6 +17,11 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
         const validationResult = validateTournamentDefinition(data as TournamentDefinition, Date.now());
         if (validationResult != undefined) return socket.emit('error', 'tournament.cant.save');
 
+        if (data.id && data.id !== id) {
+            console.warn(`User ${socket.data.user} tried to inject some crap on tournament ${id} with data id ${data.id}`)
+            return;
+        }
+
         if (!id) {
             const tournament = {
                 ...data
@@ -33,19 +38,19 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
         }
 
 
-        DbHelper.getTournament(id) // TODO use a specific request to check only admins matching
-            .then(tournament => {
-                if (!tournament || !tournament.admins || !tournament.admins.includes(socket.data.user)) return socket.emit('error', 'tournament.cant.save');
-
-                DbHelper.saveTournament(tournament)
+        DbHelper.isTournamentAdmin(id, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return socket.emit('error', 'tournament.cant.save');
+                DbHelper.saveTournament(data)
                     .then(_ => {
                         callback(true);
                         socket.emit('success', 'tournament.saved')
                     })
                     .catch(_ => socket.emit('error', 'tournament.cant.save'));
-            }).catch(error => {
-            socket.emit('error', 'tournament.cant.save')
-        });
+            })
+            .catch(error => {
+                socket.emit('error', 'tournament.cant.save')
+            });
 
     });
 }

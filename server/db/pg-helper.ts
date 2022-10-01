@@ -58,6 +58,21 @@ class DbWrapper {
                 .catch(error => reject(error));
         });
     }
+
+    isTournamentAdmin(id: string, user: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT COUNT(*)
+                              FROM tournaments
+                              WHERE id = $1
+                                AND content -> ('admins') ? $2;`,
+                [id, user])
+                .then(result => {
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count > 0)
+                })
+                .catch(error => reject(error));
+        });
+
+    }
 }
 
 export const DbHelper = new DbWrapper();

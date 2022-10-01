@@ -66,7 +66,7 @@ export default function TournamentEditor() {
     }
 
     const commitBaseInformationChange = () => {
-        socket.emit("tournament::setBaseInformation", tournament?.id || undefined, changes, (result: TournamentDefinition) => {
+        socket.emit("tournament::setBaseInformation", tournament?.id || undefined, {...tournament, ...changes}, (result: TournamentDefinition) => {
             if (result) {
                 setChanges({});
                 if (result.id) {
