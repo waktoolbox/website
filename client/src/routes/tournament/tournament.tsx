@@ -52,7 +52,7 @@ export default function Tournament() {
                                       hidden={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
                                     <Button>{t('tournament.display.results')}</Button>
                                 </Link>
-                                <Link to="/todo"
+                                <Link to={`/tournament/${tournament.id}/register`}
                                       hidden={Date.parse(tournament.startDate).toString() < Date.now().toString()}>
                                     <Button>{t('tournament.display.register')}</Button>
                                 </Link>

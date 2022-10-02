@@ -30,4 +30,16 @@ export const pgInitDb = `
 
     ALTER TABLE tournaments
         ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT false;
+
+    CREATE TABLE IF NOT EXISTS teams
+    (
+        id VARCHAR
+    (
+        50
+    ) PRIMARY KEY,
+        content JSONB,
+        createdAt TIMESTAMP NOT NULL DEFAULT now
+    (
+    )
+        );
 `

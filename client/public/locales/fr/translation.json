@@ -1,13 +1,17 @@
 {
   "connect": "Se connecter",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
+  "discord.discriminator": "# Discord",
+  "discord.pseudo": "Pseudo Discord",
   "disconnect": "Se déconnecter",
   "loading": "Chargement...",
   "send": "Envoyer",
   "tournament": {
     "cant": {
       "create": "Impossible de créer le tournoi",
-      "save": "Impossible de sauvegarder le tournoi"
+      "save.tournament": "Impossible de sauvegarder le tournoi",
+      "save.team": "Impossible d'enregistrer l'équipe",
+      "save.teamPlayerAlreadyRegistered": "Impossible d'enregistrer l'équipe : un membre a déjà validé validé sa participation dans une autre équipe"
     },
     "create": "Créer un tournoi",
     "description": "Description",
@@ -26,6 +30,18 @@
         "users": "Utilisateurs"
       }
     },
+    "errors": {
+      "badServer": "Serveur invalide",
+      "badStartDate": "Date de début invalide",
+      "badEndDate": "Date de fin invalide",
+      "badLevel": "Niveau invalide",
+      "missing.endDate": "Date de fin manquante",
+      "missing.level": "Niveau manquant",
+      "missing.name": "Nom manquant",
+      "missing.startDate": "Date de début manquante",
+      "teamNumber": "Nombre d'équipes invalide",
+      "teamTooBig": "L'équipe est trop grande"
+    },
     "fromTo": "Du {{from}} au {{to}}",
     "home": {
       "featured.title": "Tournois à l'honneur",
@@ -41,11 +57,24 @@
     "not.found": "Tournoi introuvable",
     "rewards": "Récompenses",
     "rules": "Règles",
-    "saved": "Tournoi sauvegardé",
+    "saved.tournament": "Tournoi sauvegardé",
+    "saved.team": "Équipe sauvegardée",
     "startDate": "Date de début",
+    "team": {
+      "registration": {
+        "addPlayer": "Ajouter un joueur",
+        "catchPhrase": "Phrase d'accroche",
+        "title": "Inscription d'une équipe",
+        "name": "Nom de l'équipe",
+        "players": "Joueurs",
+        "register": "S'inscrire",
+        "server": "Serveur"
+      }
+    },
     "teams": "Équipes",
     "teamNumber": "Nombre d'équipes",
     "teamSize": "Taille d'équipe",
-    "title": "Tournoi"
+    "title": "Tournoi",
+    "verify": "Vérifier"
   }
 }

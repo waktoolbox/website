@@ -1,6 +1,7 @@
 import {Server, Socket} from "socket.io";
 import {verifyToken} from "../oauth/token";
 import {registerLoggedInTournamentEvents, registerTournamentEvents} from "../chore/tournament/tournament-socket-events";
+import {registerAccountEvents} from "./account-socket-events";
 
 class Manager {
     private io?: Server;
@@ -26,6 +27,7 @@ class Manager {
 }
 
 function registerEvents(socket: Socket) {
+    registerAccountEvents(socket);
     registerTournamentEvents(socket);
 }
 

@@ -1,7 +1,7 @@
-import pg from 'pg';
+import pg, {QueryResult} from 'pg';
 import {pgInitDb} from "./pg-populate";
 import {Account} from "../account/account";
-import {TournamentDefinition} from "../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../common/tournament/tournament-models";
 
 class DbWrapper {
     private pool?: pg.Pool;
@@ -14,7 +14,7 @@ class DbWrapper {
         this.isInit = true;
     }
 
-    rawQuery(query: string, params: any[]) {
+    rawQuery(query: string, params: any[]): Promise<QueryResult> {
         return new Promise((resolve, reject) => {
             this.pool?.query(query, params)
                 .then(result => resolve(result))
@@ -79,7 +79,64 @@ class DbWrapper {
                 })
                 .catch(error => reject(error));
         });
+    }
 
+    saveTeam(team: TournamentTeamModel): Promise<string | undefined> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`INSERT INTO teams (id, content)
+                              VALUES ($1, $2)
+                              ON CONFLICT (id) DO UPDATE
+                                  SET content = $2
+                              RETURNING id;`, [team.id, JSON.stringify(team)])
+                .then(result => {
+                    if (result.rowCount <= 0) return reject(undefined);
+                    resolve(result.rows[0].id)
+                })
+                .catch(error => reject(error));
+        });
+    }
+
+    isTeamLeader(id: string, tournament: string, user: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT COUNT(*)
+                              FROM teams
+                              WHERE id = $1
+                                AND content ->> ('tournament') = $2
+                                AND content ->> ('leader') = $3;`,
+                [id, tournament, user])
+                .then(result => {
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count > 0)
+                })
+                .catch(error => reject(error));
+        });
+    }
+
+    checkTeamPlayersValidityForRegistration(tournament: string, users: string[]): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT COUNT(*)
+                              FROM teams
+                              WHERE content ->> ('tournament') = $1
+                                AND content -> ('validatedPlayers') ?| $2;`,
+                [tournament, users])
+                .then(result => {
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count <= 0)
+                })
+                .catch(error => reject(error));
+        });
+    }
+
+    checkTeamChangeInValidatedForRegistration(id: string, users: string[]): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT COUNT(*)
+                              FROM teams
+                              WHERE id = $1
+                                AND content -> ('validatedPlayers') ?& $2;`,
+                [id, users])
+                .then(result => {
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count <= 0)
+                })
+                .catch(error => reject(error));
+        });
     }
 }
 

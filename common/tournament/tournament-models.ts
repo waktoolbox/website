@@ -48,12 +48,14 @@ export interface TournamentPhaseController<T extends TournamentTeamModel, M exte
 
 export interface TournamentTeamModel {
     id?: string;
+    tournament: string;
     name: string;
-    server: "Pandora" | "Rubilax";
+    server: string;
     leader: string;
     players: string[];
+    validatedPlayers: string[];
     catchPhrase: string;
-    stats: TournamentStatsModel;
+    stats?: TournamentStatsModel;
 }
 
 export interface TournamentStatsModel {
@@ -74,12 +76,12 @@ export interface TournamentStatsClassModel {
 
 export interface TournamentMatchModel {
     id?: string;
-    date: string;
+    date?: string;
     done: boolean;
     teamA: string;
-    teamADraft: TournamentDraftResultModel;
+    teamADraft?: TournamentDraftResultModel;
     teamB: string;
-    teamBDraft: TournamentDraftResultModel;
+    teamBDraft?: TournamentDraftResultModel;
     map?: number;
     referee?: string;
     winner?: string;
