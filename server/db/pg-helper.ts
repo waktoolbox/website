@@ -53,16 +53,20 @@ class DbWrapper {
         });
     }
 
-    getTournamentAndTeams(id: string): Promise<TournamentDefinition | undefined> {
+    getTournamentAndTeams(id: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.pool?.query(`SELECT t.content                                             as tournament,
-                                     json_agg(json_build_object('id', te.content -> ('id'), 'name',
-                                                                te.content -> ('name'), 'server',
-                                                                te.content -> ('server'))) as teams
-                              FROM tournaments t
-                                       LEFT JOIN teams te on t.id = te.content ->> ('tournament')
-                              WHERE t.id = $1
-                              GROUP BY t.id;`
+            this.pool?.query(`WITH ti AS (SELECT (t.content ->> ('teamNumber'))::int as size, t.content as cont
+                                          FROM tournaments t
+                                          WHERE t.id = $1)
+                              SELECT (SELECT cont from ti) as tournament, json_agg(re.ts) as teams
+                              FROM (SELECT json_build_object('id', te.content -> ('id'), 'name',
+                                                             te.content -> ('name'), 'server',
+                                                             te.content -> ('server')) AS ts,
+                                           te.content ->> ('tournament')               as tid
+                                    FROM teams te
+                                    WHERE te.content ->> ('tournament') = $1
+                                    LIMIT (SELECT size FROM ti)) as re
+                              GROUP BY re.tid;;`
                 , [id])
                 .then(result => {
                     if (result.rows.length <= 0) return reject(undefined);
@@ -100,6 +104,17 @@ class DbWrapper {
         });
     }
 
+    getTournamentTeams(id: string): Promise<TournamentTeamModel[] | undefined> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT content
+                              FROM teams
+                              WHERE content ->> ('tournament') = $1
+                              ORDER BY createdAt;`, [id])
+                .then(result => resolve(result.rows))
+                .catch(error => reject(error));
+        });
+    }
+
     saveTeam(team: TournamentTeamModel): Promise<string | undefined> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`INSERT INTO teams (id, content)
@@ -115,11 +130,38 @@ class DbWrapper {
         });
     }
 
+    getTeam(id: string): Promise<TournamentTeamModel | undefined> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT content
+                              FROM teams
+                              WHERE id = $1
+                              LIMIT 1;`, [id])
+                .then(result => {
+                    if (result.rows.length <= 0) return reject(undefined);
+                    resolve(result.rows[0].content as TournamentTeamModel);
+                })
+                .catch(error => reject(error));
+        });
+    }
+
     deleteTeam(id: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`DELETE
                               FROM teams
                               WHERE id = $1;`, [id])
+                .then(result => {
+                    resolve(result.rowCount > 0)
+                })
+                .catch(error => reject(false));
+        });
+    }
+
+    deleteTeamFromTournament(id: string, tournamentId: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`DELETE
+                              FROM teams
+                              WHERE id = $1
+                                AND content ->> ('tournament') = $2;`, [id, tournamentId])
                 .then(result => {
                     resolve(result.rowCount > 0)
                 })

@@ -1,23 +1,45 @@
-import {useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {ChangeEvent, SyntheticEvent, useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
 import Box from "@mui/material/Box";
-import {Button, Tab, Tabs, TextField, Typography} from "@mui/material";
+import {
+    Button,
+    Tab,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Tabs,
+    TextField,
+    Typography
+} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
-import {TournamentDefinition} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
 import {validateTournamentDefinition} from "../../utils/tournament-validator";
 
 export default function TournamentEditor() {
     const {id} = useParams();
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
+    const navigate = useNavigate();
 
-    const [tournament, setTournament] = useState<TournamentDefinition>();
+    const [tournament, setTournament] = useState<TournamentDefinition>({
+        id: "",
+        name: "",
+        level: 230,
+        description: "",
+        rewards: "",
+        rules: "",
+        teamNumber: 10,
+        teamSize: ""
+    } as TournamentDefinition);
     const [changes, setChanges] = useState<any>({})
     const [errors, setErrors] = useState<any>([])
     const [tab, setTab] = useState(0);
+    const [teams, setTeams] = useState<TournamentTeamModel[]>()
 
     useEffect(() => {
         if (id) {
@@ -31,6 +53,10 @@ export default function TournamentEditor() {
 
     const handleTabChange = (event: SyntheticEvent, newValue: number) => {
         setTab(newValue);
+        switch (newValue) {
+            case 3:
+                return onTeamsOpen();
+        }
     };
 
     const handleTournamentChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -67,13 +93,20 @@ export default function TournamentEditor() {
 
     const commitBaseInformationChange = () => {
         socket.emit("tournament::setBaseInformation", tournament?.id || undefined, {...tournament, ...changes}, (result: TournamentDefinition) => {
-            if (result) {
-                setChanges({});
-                if (result.id) {
-                    setTournament(result);
-                }
+            if (result && result.id) {
+                navigate(`/edit-tournament/${result.id}`)
             }
         });
+    }
+
+    const onTeamsOpen = () => {
+        socket.emit('tournament::admin:getAllTeams', tournament?.id, (t: any[]) => {
+            setTeams(t.map((te: any) => te.content));
+        });
+    }
+
+    const deleteTeam = (id: string) => {
+        socket.emit('tournament::admin::deleteTeam', tournament?.id, id, () => onTeamsOpen())
     }
 
     return (
@@ -83,6 +116,7 @@ export default function TournamentEditor() {
                     <Tab label={t('tournament.editor.information.general')}/>
                     <Tab label={t('tournament.editor.information.phases')}/>
                     <Tab label={t('tournament.editor.information.users')}/>
+                    <Tab label={t('tournament.editor.information.teams')}/>
                 </Tabs>
             </Box>
             <div
@@ -156,6 +190,49 @@ export default function TournamentEditor() {
                 {tab === 2 && (
                     <Box sx={{p: 3}}>
                         <Typography>TODO users</Typography>
+                    </Box>
+                )}
+            </div>
+            <div
+                role="tabpanel"
+                hidden={tab !== 3}
+                id={`simple-tabpanel-3`}
+                aria-labelledby={`simple-tab-3`}
+            >
+                {tab === 3 && (
+                    <Box sx={{p: 3}}>
+                        <TableContainer>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>#</TableCell>
+                                    <TableCell>{t('tournament.name')}</TableCell>
+                                    <TableCell>{t('tournament.team.registration.server')}</TableCell>
+                                    <TableCell>{t('tournament.editor.validatedPlayersDesc')}</TableCell>
+                                    <TableCell>{t('tournament.team.registration.catchPhrase')}</TableCell>
+                                    <TableCell>{t('actions')}</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {teams && teams.length > 0 && teams.map((team: TournamentTeamModel, index: number) => (
+                                    <TableRow key={team.id} sx={{'&:last-child td, &:last-child th': {border: 0}}}>
+                                        <TableCell>{index}.</TableCell>
+                                        <TableCell>{team.name}</TableCell>
+                                        <TableCell>{team.server}</TableCell>
+                                        <TableCell>{t('tournament.editor.validatedPlayers', {
+                                            x: team.validatedPlayers.length,
+                                            y: team?.players.length
+                                        })}</TableCell>
+                                        <TableCell>{team.catchPhrase}</TableCell>
+                                        <TableCell>
+                                            <Link
+                                                to={`/tournament/${tournament.id}/team/${team.id}`}>{t('tournament.editor.teamPage')}</Link>
+                                            <Button color="error"
+                                                    onClick={() => deleteTeam(team.id as string)}>{t('delete')}</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </TableContainer>
                     </Box>
                 )}
             </div>

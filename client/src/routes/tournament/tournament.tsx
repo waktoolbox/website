@@ -71,6 +71,10 @@ export default function Tournament() {
                                       hidden={!myTeam}>
                                     <Button>{t('tournament.display.manageMyTeam')}</Button>
                                 </Link>
+                                <Link to={`/edit-tournament/${tournament.id}`}
+                                      hidden={!tournament.admins.includes(localStorage.getItem('discordId') || "")}>
+                                    <Button>{t('tournament.administrate')}</Button>
+                                </Link>
                             </Grid>
                             <Grid container sx={{mt: 2}}>
                                 <Grid item md={6} xs={12}>

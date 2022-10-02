@@ -11,6 +11,11 @@ export function registerTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+    socket.on('tournament::getTeam', (id, callback) => {
+        DbHelper.getTeam(id)
+            .then(result => callback(result))
+            .catch(_ => socket?.emit('error', 'tournament.team.not.found'));
+    });
     socket.on('tournament::getWithTeams', (id, callback) => {
         DbHelper.getTournamentAndTeams(id)
             .then(result => callback(result))
@@ -139,5 +144,27 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
 
             })
             .catch(_ => callback(false))
+    })
+
+    socket.on('tournament::admin:getAllTeams', (id, callback) => {
+        DbHelper.isTournamentAdmin(id, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback([])
+                DbHelper.getTournamentTeams(id)
+                    .then(result => callback(result))
+                    .catch((_) => callback([]))
+            })
+            .catch((_) => callback([]))
+    })
+
+    socket.on('tournament::admin::deleteTeam', (tournamentId, id, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.deleteTeamFromTournament(id, tournamentId)
+                    .then(result => callback(result))
+                    .catch((_) => callback(false))
+            })
+            .catch((_) => callback(false))
     })
 }

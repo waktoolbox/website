@@ -1,4 +1,5 @@
 {
+  "actions": "Actions",
   "connect": "Se connecter",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
   "delete": "Supprimer",
@@ -9,6 +10,7 @@
   "modify": "Modifier",
   "send": "Envoyer",
   "tournament": {
+    "administrate": "Administrer",
     "cant": {
       "create": "Impossible de créer le tournoi",
       "save.tournament": "Impossible de sauvegarder le tournoi",
@@ -32,8 +34,13 @@
       "information": {
         "general": "Informations générales",
         "phases": "Phases",
+        "teams": "Équipes",
         "users": "Utilisateurs"
-      }
+      },
+      "registrationDate": "Date d'inscription",
+      "teamPage": "Page",
+      "validatedPlayers": "{{x}}/{{y}}",
+      "validatedPlayersDesc": "Joueurs validés"
     },
     "errors": {
       "badServer": "Serveur invalide",
@@ -68,6 +75,7 @@
     "saved.team": "Équipe sauvegardée",
     "startDate": "Date de début",
     "team": {
+      "not.found": "Impossible de trouver l'équipe",
       "registration": {
         "addPlayer": "Ajouter un joueur",
         "catchPhrase": "Phrase d'accroche",
