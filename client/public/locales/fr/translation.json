@@ -1,6 +1,7 @@
 {
   "connect": "Se connecter",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
+  "delete": "Supprimer",
   "discord.discriminator": "# Discord",
   "discord.pseudo": "Pseudo Discord",
   "disconnect": "Se déconnecter",

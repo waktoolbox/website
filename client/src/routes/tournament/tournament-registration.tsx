@@ -134,6 +134,12 @@ export default function TournamentRegistration() {
         });
     }
 
+    const deleteTeam = () => {
+        socket.emit('tournament::deleteMyTeam', id, teamId, (success: boolean) => {
+            if (success) navigate(`/tournament/${id}`);
+        })
+    }
+
     return (
         <Stack spacing={1}>
             <Typography variant="h4">{t('tournament.team.registration.title')}</Typography>
@@ -167,6 +173,9 @@ export default function TournamentRegistration() {
 
             <Button onClick={registerTeam}
                     disabled={(errors && errors.length > 0) || !team.name}>{t(teamId ? "modify" : "tournament.team.registration.register")}</Button>
+            {teamId &&
+                <Button color="error" onClick={deleteTeam}>{t('delete')}</Button>
+            }
             {errors && errors.length > 0 && errors.map(error => (
                 <Typography key={error}>{t(error)}</Typography>
             ))}

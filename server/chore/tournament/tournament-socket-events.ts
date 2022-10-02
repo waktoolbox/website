@@ -124,4 +124,15 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(error => callback(undefined));
     })
+
+    socket.on('tournament::deleteMyTeam', (tournamentId, teamId, callback) => {
+        DbHelper.isTeamLeader(teamId, tournamentId, socket.data.user)
+            .then(_ => {
+                DbHelper.deleteTeam(teamId)
+                    .then(_ => callback(true))
+                    .catch(_ => callback(false))
+
+            })
+            .catch(_ => callback(false))
+    })
 }

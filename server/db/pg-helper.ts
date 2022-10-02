@@ -96,6 +96,18 @@ class DbWrapper {
         });
     }
 
+    deleteTeam(id: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`DELETE
+                              FROM teams
+                              WHERE id = $1;`, [id])
+                .then(result => {
+                    resolve(result.rowCount > 0)
+                })
+                .catch(error => reject(false));
+        });
+    }
+
     getValidatedTeamForPlayer(tournamentId: string, user: string): Promise<TournamentTeamModel> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT *
