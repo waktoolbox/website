@@ -96,6 +96,22 @@ class DbWrapper {
         });
     }
 
+    getValidatedTeamForPlayer(tournamentId: string, user: string): Promise<TournamentTeamModel> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT *
+                              FROM teams
+                              WHERE content ->> ('tournament') = $1
+                                AND content -> ('validatedPlayers') ? $2
+                              LIMIT 1;`
+                , [tournamentId, user])
+                .then(result => {
+                    if (result.rowCount <= 0) return reject(false);
+                    resolve(result.rows[0].content)
+                })
+                .catch(error => reject(error));
+        });
+    }
+
     isTeamLeader(id: string, tournament: string, user: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT COUNT(*)
@@ -111,13 +127,14 @@ class DbWrapper {
         });
     }
 
-    checkTeamPlayersValidityForRegistration(tournament: string, users: string[]): Promise<boolean> {
+    checkTeamPlayersValidityForRegistration(tournament: string, users: string[], teamId: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT COUNT(*)
                               FROM teams
-                              WHERE content ->> ('tournament') = $1
+                              WHERE id != $3
+                                AND content ->> ('tournament') = $1
                                 AND content -> ('validatedPlayers') ?| $2;`,
-                [tournament, users])
+                [tournament, users, teamId])
                 .then(result => {
                     resolve(result.rows && result.rows.length > 0 && result.rows[0].count <= 0)
                 })
@@ -133,7 +150,7 @@ class DbWrapper {
                                 AND content -> ('validatedPlayers') ?& $2;`,
                 [id, users])
                 .then(result => {
-                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count <= 0)
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count > 0)
                 })
                 .catch(error => reject(error));
         });

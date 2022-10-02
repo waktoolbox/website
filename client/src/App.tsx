@@ -35,6 +35,7 @@ function App() {
                             <Route path="/edit-tournament/:id" element={<TournamentEditor/>}/>
                             <Route path="/tournament/:id" element={<TournamentView/>}/>
                             <Route path="/tournament/:id/register" element={<TournamentRegistration/>}/>
+                            <Route path="/tournament/:id/register/:teamId" element={<TournamentRegistration/>}/>
                             <Route path="/login" element={<Login/>}/>
                         </Routes>
                     </BrowserRouter>

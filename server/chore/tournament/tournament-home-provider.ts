@@ -8,7 +8,7 @@ export interface LightTournament {
 }
 
 export interface LightMatch {
-    // TODO
+    // TODO v1
 }
 
 export interface TournamentHome {
@@ -47,7 +47,7 @@ export const TournamentHomeProvider = new (class {
                 LIMIT 5
             `, []);
 
-            // TODO next matches
+            // TODO v1 next matches
             const matchesPromise = DbHelper.rawQuery("SELECT 1", []);
 
             const registrationPromise = DbHelper.rawQuery(`

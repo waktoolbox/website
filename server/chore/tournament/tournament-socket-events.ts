@@ -59,8 +59,12 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     });
 
     socket.on('tournament::registerTeam', (id, data, callback) => {
+        function reject() {
+            return socket.emit('error', 'tournament.cant.save.team');
+        }
+
         const validationResult = validateTournamentTeam(data as TournamentTeamModel);
-        if (validationResult != undefined) return socket.emit('error', 'tournament.cant.save.team');
+        if (validationResult != undefined) return reject();
 
         if (data.id && data.id !== id) {
             console.warn(`User ${socket.data.user} tried to inject some crap on team ${id} with data id ${data.id}`)
@@ -74,15 +78,18 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
 
         if (!id) {
             team.id = crypto.randomUUID()
+            team.leader = socket.data.user
             team.validatedPlayers = [team.leader]
+        } else {
+            if (team.leader !== socket.data.user) return reject();
+            if (!team.players || !team.players.includes(team.leader)) return reject();
         }
-        if (!team.leader) team.leader = socket.data.user;
 
+        // TODO v1 manage this properly for edition
         team.stats = undefined;
 
         const isTeamLeaderPromise = !id ? Promise.resolve(true) : DbHelper.isTeamLeader(id, team.tournament, socket.data.user);
-        const noDuplicateInTeam = DbHelper.checkTeamPlayersValidityForRegistration(team.tournament, team.players);
-        // TODO check this for edit
+        const noDuplicateInTeam = DbHelper.checkTeamPlayersValidityForRegistration(team.tournament, team.players, team.id as string);
         const noChangeInValidated = !id ? Promise.resolve(true) : DbHelper.checkTeamChangeInValidatedForRegistration(id, team.validatedPlayers);
 
         Promise.all([isTeamLeaderPromise, noDuplicateInTeam, noChangeInValidated])
@@ -91,9 +98,12 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                     if (!promises[1]) {
                         return socket.emit('error', 'tournament.cant.save.teamPlayerAlreadyRegistered');
                     }
-                    return socket.emit('error', 'tournament.cant.save.team');
+                    return reject();
                 }
 
+                if (id) {
+                    team.validatedPlayers = team.validatedPlayers.filter(p => team.players.includes(p));
+                }
 
                 DbHelper.saveTeam(team)
                     .then(result => {
@@ -104,8 +114,14 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             })
             .catch(error => {
                 console.error(error);
-                socket.emit('error', 'tournament.cant.save.team')
+                reject();
             });
 
     });
+
+    socket.on('tournament::getMyTeam', (tournamentId, callback) => {
+        DbHelper.getValidatedTeamForPlayer(tournamentId, socket.data.user)
+            .then(result => callback(result))
+            .catch(error => callback(undefined));
+    })
 }

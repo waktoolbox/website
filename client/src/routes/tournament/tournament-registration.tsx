@@ -5,7 +5,7 @@ import {TournamentTeamModel} from "../../../../common/tournament/tournament-mode
 import {PlayerPicker} from "../../components/player-picker";
 import {validateTournamentTeam} from "../../utils/tournament-validator";
 import {SocketContext} from "../../context/socket-context";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 interface RegistrationPlayer {
     id?: string,
@@ -16,11 +16,15 @@ interface RegistrationPlayer {
 }
 
 export default function TournamentRegistration() {
+    const navigate = useNavigate();
     const {t} = useTranslation();
     const {id, teamId} = useParams();
     const [pickedServer, setPickedServer] = useState('')
     const [team, setTeam] = useState<TournamentTeamModel>({
-        tournament: id
+        tournament: id,
+        catchPhrase: "",
+        name: "",
+        server: ""
     } as TournamentTeamModel);
     const [errors, setErrors] = useState<string[]>();
     const [players, setPlayers] = useState<RegistrationPlayer[]>([]);
@@ -28,16 +32,39 @@ export default function TournamentRegistration() {
 
     useEffect(() => {
         const me = localStorage.getItem("discordId");
-        socket.emit('account::findById', me, (account: any) => {
-            if (!account) return console.error("Unable to find local account --'");
-            setPlayers([{
-                id: me || "",
-                username: account.username,
-                discriminator: account.discriminator,
-                locked: true,
-                verified: true
-            }])
-        });
+        if (!teamId) {
+            socket.emit('account::findById', me, (account: any) => {
+                if (!account) return console.error("Unable to find local account --'");
+                setPlayers([{
+                    id: me || "",
+                    username: account.username,
+                    discriminator: account.discriminator,
+                    locked: true,
+                    verified: true
+                }])
+            });
+        } else {
+            socket.emit('tournament::getMyTeam', id, (myTeam: TournamentTeamModel) => {
+                setTeam(myTeam)
+                setPickedServer(servers.indexOf(myTeam.server) as any);
+
+                console.log(myTeam);
+                socket.emit('account::findByIds', myTeam.players, (results: any[]) => {
+                    if (!results) return;
+
+                    const sort = results.map(result => ({
+                        id: result?.id || "",
+                        username: result?.username,
+                        discriminator: result?.discriminator,
+                        locked: result.id === me,
+                        verified: result?.id !== undefined
+                    })).sort((a, b) => a.locked ? -1 : 0) as RegistrationPlayer[];
+
+                    console.log(sort)
+                    setPlayers(sort);
+                })
+            })
+        }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const servers = ["Pandora", "Rubilax"];
@@ -104,9 +131,8 @@ export default function TournamentRegistration() {
         const toSend = {...team}
         toSend.players = players.map(p => p.id) as string[];
 
-        socket.emit('tournament::registerTeam', undefined, toSend, (id: string) => {
-            // TODO success or not
-            console.log(id);
+        socket.emit('tournament::registerTeam', teamId, toSend, (teamId: string) => {
+            navigate(`/tournament/${id}/register/${teamId}`);
         });
     }
 
@@ -142,7 +168,7 @@ export default function TournamentRegistration() {
             </Box>
 
             <Button onClick={registerTeam}
-                    disabled={(errors && errors.length > 0) || !team.name}>{t("tournament.team.registration.register")}</Button>
+                    disabled={(errors && errors.length > 0) || !team.name}>{t(teamId ? "modify" : "tournament.team.registration.register")}</Button>
             {errors && errors.length > 0 && errors.map(error => (
                 <Typography key={error}>{t(error)}</Typography>
             ))}

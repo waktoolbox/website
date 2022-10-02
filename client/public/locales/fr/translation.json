@@ -5,6 +5,7 @@
   "discord.pseudo": "Pseudo Discord",
   "disconnect": "Se déconnecter",
   "loading": "Chargement...",
+  "modify": "Modifier",
   "send": "Envoyer",
   "tournament": {
     "cant": {
@@ -17,6 +18,8 @@
     "description": "Description",
     "display": {
       "level": "Niveau : {{lvl}}",
+      "manageMyTeam": "Modifier mon équipe",
+      "myTeam": "Mon équipe",
       "planning": "Planning",
       "register": "S'inscrire",
       "results": "Résultats",
@@ -74,7 +77,7 @@
     "teams": "Équipes",
     "teamNumber": "Nombre d'équipes",
     "teamSize": "Taille d'équipe",
-    "title": "Tournoi",
-    "verify": "Vérifier"
-  }
+    "title": "Tournoi"
+  },
+  "verify": "Vérifier"
 }

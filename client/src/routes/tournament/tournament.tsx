@@ -1,5 +1,5 @@
 import {useContext, useEffect, useState} from "react";
-import {TournamentDefinition} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
@@ -7,6 +7,7 @@ import {Button, Card, CardContent, Container, Divider, Grid, Stack, Typography} 
 
 export default function Tournament() {
     const [tournament, setTournament] = useState<TournamentDefinition>();
+    const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
     const {id} = useParams();
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -25,6 +26,10 @@ export default function Tournament() {
         socket.emit('tournament::get', id, ((t: TournamentDefinition) => {
             setTournament(t);
         }));
+
+        socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
+            setMyTeam(team)
+        })
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
@@ -53,8 +58,16 @@ export default function Tournament() {
                                     <Button>{t('tournament.display.results')}</Button>
                                 </Link>
                                 <Link to={`/tournament/${tournament.id}/register`}
-                                      hidden={Date.parse(tournament.startDate).toString() < Date.now().toString()}>
+                                      hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || myTeam != undefined}>
                                     <Button>{t('tournament.display.register')}</Button>
+                                </Link>
+                                <Link to={`/tournament/${tournament.id}/team/${myTeam?.id}`}
+                                      hidden={!myTeam}>
+                                    <Button>{t('tournament.display.myTeam')}</Button>
+                                </Link>
+                                <Link to={`/tournament/${tournament.id}/register/${myTeam?.id}`}
+                                      hidden={!myTeam}>
+                                    <Button>{t('tournament.display.manageMyTeam')}</Button>
                                 </Link>
                             </Grid>
                             <Grid container sx={{mt: 2}}>

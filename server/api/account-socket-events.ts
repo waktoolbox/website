@@ -25,4 +25,17 @@ export function registerAccountEvents(socket: Socket) {
                 callback(undefined);
             })
     })
+
+    socket.on('account::findByIds', (ids, callback) => {
+        if (!ids || ids.length > 100) return callback(undefined);
+        DbHelper.rawQuery(`SELECT id, username, discriminator
+                           FROM accounts
+                           WHERE id = ANY ($1)
+                           LIMIT $2`, [ids, ids.length])
+            .then(result => callback(result.rows.length > 0 ? result.rows : undefined))
+            .catch(error => {
+                console.error(error);
+                callback(undefined);
+            })
+    })
 }

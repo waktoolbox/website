@@ -28,7 +28,7 @@ app.get('/api/oauth/discord/redirect', async (req: Request, res: Response) => {
         res.redirect(301, process.env.LOGON_REDIRECTION + `?token=${token}` || "")
     }).catch(error => {
         console.error(error);
-        res.status(400).send(); // TODO manage bad OAuth
+        res.status(400).send(); // TODO v1 manage bad OAuth
     })
 })
 
