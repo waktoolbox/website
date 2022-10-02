@@ -60,7 +60,7 @@ class DbWrapper {
                                                                 te.content -> ('name'), 'server',
                                                                 te.content -> ('server'))) as teams
                               FROM tournaments t
-                                       JOIN teams te on t.id = te.content ->> ('tournament')
+                                       LEFT JOIN teams te on t.id = te.content ->> ('tournament')
                               WHERE t.id = $1
                               GROUP BY t.id;`
                 , [id])

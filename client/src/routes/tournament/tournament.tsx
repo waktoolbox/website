@@ -100,7 +100,7 @@ export default function Tournament() {
                                 <Grid item md={6} xs={12}>
                                     <Stack>
                                         <Typography variant="h6">{t('tournament.teams')}</Typography>
-                                        {teams && teams.map(team => (
+                                        {teams && teams.length > 0 && teams[0].id && teams.map(team => (
                                             <Link key={team.id} to={`/tournament/${id}/team/${team.id}`}>
                                                 <Grid container sx={{mb: 1}}>
                                                     <Grid item xs={6} xl={4}>
@@ -112,7 +112,7 @@ export default function Tournament() {
                                                 </Grid>
                                             </Link>
                                         ))}
-                                        {!teams &&
+                                        {(!teams || teams.length == 0 || !teams[0].id) &&
                                             <Typography>{t('tournament.display.noTeam')}</Typography>
                                         }
                                     </Stack>
