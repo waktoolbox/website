@@ -48,7 +48,6 @@ export default function TournamentRegistration() {
                 setTeam(myTeam)
                 setPickedServer(servers.indexOf(myTeam.server) as any);
 
-                console.log(myTeam);
                 socket.emit('account::findByIds', myTeam.players, (results: any[]) => {
                     if (!results) return;
 
@@ -60,7 +59,6 @@ export default function TournamentRegistration() {
                         verified: result?.id !== undefined
                     })).sort((a, b) => a.locked ? -1 : 0) as RegistrationPlayer[];
 
-                    console.log(sort)
                     setPlayers(sort);
                 })
             })
