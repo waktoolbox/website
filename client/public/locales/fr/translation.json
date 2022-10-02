@@ -1,5 +1,6 @@
 {
   "actions": "Actions",
+  "coming.soon": "Arrivera bientôt",
   "connect": "Se connecter",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
   "delete": "Supprimer",
@@ -20,11 +21,13 @@
     "create": "Créer un tournoi",
     "description": "Description",
     "display": {
+      "captain": "Capitaine",
       "level": "Niveau : {{lvl}}",
       "manageMyTeam": "Modifier mon équipe",
       "myTeam": "Mon équipe",
       "noTeam": "Pas d'équipes inscrites",
       "planning": "Planning",
+      "player": "Joueur",
       "register": "S'inscrire",
       "results": "Résultats",
       "teams": "{{qty}} équipes de taille {{size}}"
