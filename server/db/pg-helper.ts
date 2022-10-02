@@ -53,6 +53,25 @@ class DbWrapper {
         });
     }
 
+    getTournamentAndTeams(id: string): Promise<TournamentDefinition | undefined> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT t.content                                             as tournament,
+                                     json_agg(json_build_object('id', te.content -> ('id'), 'name',
+                                                                te.content -> ('name'), 'server',
+                                                                te.content -> ('server'))) as teams
+                              FROM tournaments t
+                                       JOIN teams te on t.id = te.content ->> ('tournament')
+                              WHERE t.id = $1
+                              GROUP BY t.id;`
+                , [id])
+                .then(result => {
+                    if (result.rows.length <= 0) return reject(undefined);
+                    resolve(result.rows[0] as any);
+                })
+                .catch(error => reject(error));
+        });
+    }
+
     saveTournament(tournament: TournamentDefinition) {
         return new Promise((resolve, reject) => {
             this.pool?.query(`INSERT INTO tournaments (id, content)

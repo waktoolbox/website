@@ -3,10 +3,11 @@ import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tour
 import {SocketContext} from "../../context/socket-context";
 import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import {Button, Card, CardContent, Container, Divider, Grid, Stack, Typography} from "@mui/material";
+import {Button, Card, CardContent, Divider, Grid, Stack, Typography} from "@mui/material";
 
 export default function Tournament() {
     const [tournament, setTournament] = useState<TournamentDefinition>();
+    const [teams, setTeams] = useState<TournamentTeamModel[]>();
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
     const {id} = useParams();
     const socket = useContext(SocketContext)
@@ -23,8 +24,9 @@ export default function Tournament() {
     }
 
     useEffect(() => {
-        socket.emit('tournament::get', id, ((t: TournamentDefinition) => {
-            setTournament(t);
+        socket.emit('tournament::getWithTeams', id, ((t: { tournament: TournamentDefinition, teams: TournamentTeamModel[] }) => {
+            setTournament(t.tournament);
+            setTeams(t.teams)
         }));
 
         socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
@@ -37,7 +39,7 @@ export default function Tournament() {
             <CardContent>
                 <Grid container width="100%">
                     {tournament &&
-                        <Container sx={{width: "100%"}}>
+                        <>
                             <Grid item md={12} display="flex" justifyContent="center" alignItems="center">
                                 <Stack>
                                     <Typography variant="h2">{tournament.name}</Typography>
@@ -98,11 +100,25 @@ export default function Tournament() {
                                 <Grid item md={6} xs={12}>
                                     <Stack>
                                         <Typography variant="h6">{t('tournament.teams')}</Typography>
-                                        TODO
+                                        {teams && teams.map(team => (
+                                            <Link key={team.id} to={`/tournament/${id}/team/${team.id}`}>
+                                                <Grid container sx={{mb: 1}}>
+                                                    <Grid item xs={6} xl={4}>
+                                                        {team.name}
+                                                    </Grid>
+                                                    <Grid item xs={6} xl={8}>
+                                                        {team.server}
+                                                    </Grid>
+                                                </Grid>
+                                            </Link>
+                                        ))}
+                                        {!teams &&
+                                            <Typography>{t('tournament.display.noTeam')}</Typography>
+                                        }
                                     </Stack>
                                 </Grid>
                             </Grid>
-                        </Container>
+                        </>
                     }
                     {!tournament &&
                         <Grid item>

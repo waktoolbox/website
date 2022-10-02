@@ -24,8 +24,10 @@ export function validateTournamentTeam(team: TournamentTeamModel): string[] | un
     const errors = [];
 
     if (!team.name || team.name.length <= 0) errors.push("tournament.errors.missing.name");
+    if (team.name && team.name.length > 25) errors.push("tournament.errors.too.big.name");
     if (team.players && team.players.length > 6) errors.push('tournament.errors.teamTooBig');
     if (!servers.includes(team.server)) errors.push("tournament.errors.badServer");
+    if (team.catchPhrase && team.catchPhrase.length > 75) errors.push("tournament.errors.too.big.catchPhrase");
 
     return errors.length <= 0 ? undefined : errors;
 }

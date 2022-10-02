@@ -21,6 +21,7 @@
       "level": "Niveau : {{lvl}}",
       "manageMyTeam": "Modifier mon équipe",
       "myTeam": "Mon équipe",
+      "noTeam": "Pas d'équipes inscrites",
       "planning": "Planning",
       "register": "S'inscrire",
       "results": "Résultats",
@@ -44,7 +45,9 @@
       "missing.name": "Nom manquant",
       "missing.startDate": "Date de début manquante",
       "teamNumber": "Nombre d'équipes invalide",
-      "teamTooBig": "L'équipe est trop grande"
+      "teamTooBig": "L'équipe est trop grande",
+      "too.big.catchPhrase": "La phrase d'accroche est trop longue",
+      "too.big.name": "Le nom est trop long"
     },
     "fromTo": "Du {{from}} au {{to}}",
     "home": {

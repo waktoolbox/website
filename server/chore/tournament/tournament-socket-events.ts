@@ -11,6 +11,11 @@ export function registerTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+    socket.on('tournament::getWithTeams', (id, callback) => {
+        DbHelper.getTournamentAndTeams(id)
+            .then(result => callback(result))
+            .catch(_ => socket?.emit('error', 'tournament.not.found'));
+    });
 
     socket.on('tournament::home', (callback) => {
         TournamentHomeProvider.getHome().then(home => callback(home)).catch(error => console.error(error));
