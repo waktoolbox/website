@@ -176,6 +176,9 @@ export default function TournamentRegistration() {
             {teamId &&
                 <Button color="error" onClick={deleteTeam}>{t('delete')}</Button>
             }
+            {teamId &&
+                <Typography>{t('tournament.team.registration.link', {link: `${window.location}/validate`})}</Typography>
+            }
             {errors && errors.length > 0 && errors.map(error => (
                 <Typography key={error}>{t(error)}</Typography>
             ))}

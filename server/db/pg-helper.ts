@@ -55,18 +55,22 @@ class DbWrapper {
 
     getTournamentAndTeams(id: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.pool?.query(`WITH ti AS (SELECT (t.content ->> ('teamNumber'))::int as size, t.content as cont
+            this.pool?.query(`WITH ti AS (SELECT (t.content ->> ('teamNumber'))::int as size,
+                                                 t.content as cont,
+                                                 t.id as id
                                           FROM tournaments t
                                           WHERE t.id = $1)
-                              SELECT (SELECT cont from ti) as tournament, json_agg(re.ts) as teams
-                              FROM (SELECT json_build_object('id', te.content -> ('id'), 'name',
+                              SELECT re.to as tournament, json_agg(re.ts) as teams
+                              FROM (SELECT t.cont                                      as to,
+                                           json_build_object('id', te.content -> ('id'), 'name',
                                                              te.content -> ('name'), 'server',
-                                                             te.content -> ('server')) AS ts,
+                                                             te.content -> ('server')) as ts,
                                            te.content ->> ('tournament')               as tid
-                                    FROM teams te
-                                    WHERE te.content ->> ('tournament') = $1
+                                    FROM (SELECT * FROM ti) as t
+                                             LEFT JOIN teams te ON t.id = te.content ->> ('tournament')
                                     LIMIT (SELECT size FROM ti)) as re
-                              GROUP BY re.tid;;`
+                                       LEFT JOIN ti ON ti.id = re.tid
+                              GROUP BY re.to, re.tid;`
                 , [id])
                 .then(result => {
                     if (result.rows.length <= 0) return reject(undefined);

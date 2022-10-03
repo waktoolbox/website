@@ -7,6 +7,7 @@
   "discord.discriminator": "# Discord",
   "discord.pseudo": "Pseudo Discord",
   "disconnect": "Se déconnecter",
+  "invalidate": "Invalider",
   "loading": "Chargement...",
   "modify": "Modifier",
   "send": "Envoyer",
@@ -82,11 +83,15 @@
       "registration": {
         "addPlayer": "Ajouter un joueur",
         "catchPhrase": "Phrase d'accroche",
-        "title": "Inscription d'une équipe",
+        "link": "Envoyez ce lien à votre équipe pour qu'ils valident leur inscription : {{link}}",
         "name": "Nom de l'équipe",
         "players": "Joueurs",
         "register": "S'inscrire",
-        "server": "Serveur"
+        "server": "Serveur",
+        "title": "Inscription d'une équipe",
+        "validation": {
+          "question": "Voulez-vous valider votre participation à cette équipe ?"
+        }
       }
     },
     "teams": "Équipes",
@@ -94,5 +99,6 @@
     "teamSize": "Taille d'équipe",
     "title": "Tournoi"
   },
+  "validate": "Valider",
   "verify": "Vérifier"
 }

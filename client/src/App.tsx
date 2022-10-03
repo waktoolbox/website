@@ -7,6 +7,7 @@ import Login from "./routes/login";
 import TournamentView from "./routes/tournament/tournament";
 import TournamentEditor from "./routes/tournament/tournament-editor";
 import TournamentRegistration from "./routes/tournament/tournament-registration";
+import TournamentRegistrationValidation from "./routes/tournament/tournament-registration-validation";
 import TournamentTeam from "./routes/tournament/tournament-team";
 import {socket, SocketContext} from "./context/socket-context";
 import {UserContextProvider} from "./context/user-context";
@@ -37,6 +38,8 @@ function App() {
                             <Route path="/tournament/:id" element={<TournamentView/>}/>
                             <Route path="/tournament/:id/register" element={<TournamentRegistration/>}/>
                             <Route path="/tournament/:id/register/:teamId" element={<TournamentRegistration/>}/>
+                            <Route path="/tournament/:id/register/:teamId/validate"
+                                   element={<TournamentRegistrationValidation/>}/>
                             <Route path="/tournament/:id/team/:teamId" element={<TournamentTeam/>}/>
                             <Route path="/login" element={<Login/>}/>
                         </Routes>

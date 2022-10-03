@@ -167,4 +167,27 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             })
             .catch((_) => callback(false))
     })
+
+    socket.on('tournament::validatePlayer', (teamId, callback) => {
+        DbHelper.rawQuery(`UPDATE teams
+                           SET content = jsonb_set(content, '{validatedPlayers}', content -> ('validatedPlayers') || $1)
+                           WHERE id = $2
+                             AND content -> ('players') ? $3
+                             AND NOT content -> ('validatedPlayers') ? $3`
+            , [JSON.stringify(socket.data.user), teamId, socket.data.user])
+            .then(result => callback(result.rowCount > 0))
+            .catch(error => callback(false))
+    })
+
+    socket.on('tournament::invalidatePlayer', (teamId, callback) => {
+        DbHelper.rawQuery(`UPDATE teams
+                           SET content = jsonb_set(content, '{validatedPlayers}',
+                                                   (content -> ('validatedPlayers')) - $1)
+                           WHERE id = $2
+                             AND content -> ('validatedPlayers') ? $1
+                             AND NOT content ->> ('leader') = $1`
+            , [socket.data.user, teamId])
+            .then(result => callback(result.rowCount > 0))
+            .catch(error => callback(false))
+    })
 }
