@@ -5,9 +5,11 @@ import {
     TournamentTeamModel
 } from "../../../common/tournament/tournament-models";
 import * as crypto from "crypto";
+// TODO sorry, lack of time
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";
 import {DbHelper} from "../../db/pg-helper";
-import {TournamentHomeProvider} from "./tournament-home-provider"; // TODO sorry, lack of time
+import {TournamentHomeProvider} from "./tournament-home-provider";
+import {DiscordBot} from "../../discord/bot";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
@@ -124,7 +126,11 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                 DbHelper.saveTeam(team)
                     .then(result => {
                         callback(result);
-                        socket.emit('success', 'tournament.saved.team')
+                        socket.emit('success', 'tournament.saved.team');
+
+                        if (!id) {
+                            team.players.forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join team ${team.name}. You can validate this here : ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
+                        }
                     })
                     .catch(_ => socket.emit('error', 'tournament.cant.save.team'));
             })

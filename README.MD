@@ -1,4 +1,5 @@
 # Env
+
 PORT: run port (default 8000)  
 CLIENT_ID: Discord OAuth client ID  
 CLIENT_SECRET: Discord OAuth client secret  
@@ -7,13 +8,16 @@ OAUTH_REDIRECTION: local redirection for OAuth
 LOGON_REDIRECTION: home for redirection after OAuth  
 CLIENT_FILE_LOCATION: path relative to working directory for client files root
 
+DISCORD_TOKEN: token for both auth  
+OWNER_DISCORD_UID: owner for notifications
+
 AWS_ACCESS_KEY: AWS access key, must have DynamoDB rights  
 AWS_SECRET_KEY: AWS secret key
 
-PGUSER: DB user
-PGHOST: DB host
-PGPASSWORD: DB pass
-PGDATABASE: DB database (...)
+PGUSER: DB user  
+PGHOST: DB host  
+PGPASSWORD: DB pass  
+PGDATABASE: DB database (...)  
 PGPORT: DB port
 
 # Quick note

@@ -7,6 +7,7 @@ import {doOAuth} from "./server/oauth/discord";
 import {Server} from 'socket.io';
 import {SocketManager} from "./server/api/socket-manager";
 import {DbHelper} from "./server/db/pg-helper";
+import {DiscordBot} from "./server/discord/bot";
 
 const app: Express = express();
 const server = http.createServer(app);
@@ -17,6 +18,7 @@ const __dirname = path.resolve();
 
 dotenv.config({path: path.join(__dirname, '.env')});
 await DbHelper.init();
+await DiscordBot.init();
 
 app.use(express.json());
 app.use(cors());
