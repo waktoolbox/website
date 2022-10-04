@@ -15,7 +15,7 @@ export interface TournamentDefinition {
 
     admins: string[];
     referees: string[];
-    streamers: Todo[];
+    streamers: TournamentStreamerModel[];
 }
 
 export interface TournamentPhaseDefinition {
@@ -98,5 +98,7 @@ export enum TournamentPhaseType {
     WAKFU_WARRIORS_ROUND_ROBIN
 }
 
-interface Todo {
+export interface TournamentStreamerModel {
+    id: string,
+    link: string
 }

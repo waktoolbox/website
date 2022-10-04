@@ -10,8 +10,9 @@ type UserData = { id?: string, username?: string, discriminator?: string, locked
 
 export function PlayerPicker({
                                  userData,
-                                 setUserData
-                             }: { userData: UserData; setUserData: (_: UserData | undefined) => any }) {
+                                 setUserData,
+                                 remove = true
+                             }: { userData: UserData, setUserData: (_: UserData | undefined) => any, remove?: boolean }) {
     const [localUserData, setLocalUserData] = useState({
         ...userData
     })
@@ -77,7 +78,7 @@ export function PlayerPicker({
                 <RadioButtonUncheckedIcon/>
             }
             <Button onClick={verifyPlayer}>{t('verify')}</Button>
-            {!localUserData.locked &&
+            {!localUserData.locked && remove &&
                 <Button onClick={removePlayer}><DeleteIcon/></Button>
             }
 
@@ -97,7 +98,7 @@ export function PlayerPicker({
                 }}>
                     <Stack direction="row">
                         {discriminators.map(d => (
-                            <Button onClick={() => pickDiscriminator(d)}>#{d.discriminator}</Button>
+                            <Button key={d.id} onClick={() => pickDiscriminator(d)}>#{d.discriminator}</Button>
                         ))}
                     </Stack>
                 </Box>

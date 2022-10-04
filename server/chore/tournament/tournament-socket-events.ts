@@ -1,5 +1,9 @@
 import {Socket} from "socket.io";
-import {TournamentDefinition, TournamentTeamModel} from "../../../common/tournament/tournament-models";
+import {
+    TournamentDefinition,
+    TournamentStreamerModel,
+    TournamentTeamModel
+} from "../../../common/tournament/tournament-models";
 import * as crypto from "crypto";
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";
 import {DbHelper} from "../../db/pg-helper";
@@ -44,6 +48,8 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             tournament.id = crypto.randomUUID();
             tournament.admins = [];
             tournament.admins.push(socket.data.user);
+            tournament.referees = [socket.data.user];
+            tournament.streamers = [];
             DbHelper.saveTournament(tournament)
                 .then(_ => {
                     callback(tournament);
@@ -189,5 +195,97 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             , [socket.data.user, teamId])
             .then(result => callback(result.rowCount > 0))
             .catch(error => callback(false))
+    })
+
+    socket.on('tournament::admin:addAdmin', (tournamentId, id, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.rawQuery(`UPDATE tournaments
+                                   SET content = jsonb_set(content, '{admins}', content -> ('admins') || $1)
+                                   WHERE id = $3
+                                     AND NOT content -> ('admins') ? $2`
+                    , [JSON.stringify(id), id, tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(error => callback(false))
+            })
+            .catch((_) => callback(false))
+    })
+
+    socket.on('tournament::admin:removeAdmin', (tournamentId, id, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.rawQuery(`UPDATE tournaments
+                                   SET content = jsonb_set(content, '{admins}',
+                                                           (content -> ('admins')) - $1)
+                                   WHERE id = $2
+                                     AND content -> ('admins') ? $1`
+                    , [id, tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(error => callback(false))
+            })
+            .catch((_) => callback(false))
+    })
+
+    socket.on('tournament::admin:addReferee', (tournamentId, id, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.rawQuery(`UPDATE tournaments
+                                   SET content = jsonb_set(content, '{referees}', content -> ('referees') || $1)
+                                   WHERE id = $3
+                                     AND NOT content -> ('referees') ? $2`
+                    , [JSON.stringify(id), id, tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(error => callback(false))
+            })
+            .catch((_) => callback(false))
+    })
+
+    socket.on('tournament::admin:removeReferee', (tournamentId, id, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.rawQuery(`UPDATE tournaments
+                                   SET content = jsonb_set(content, '{referees}',
+                                                           (content -> ('referees')) - $1)
+                                   WHERE id = $2
+                                     AND content -> ('referees') ? $1`
+                    , [id, tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(error => callback(false))
+            })
+            .catch((_) => callback(false))
+    })
+
+    socket.on('tournament::admin:addStreamer', (tournamentId, streamer: TournamentStreamerModel, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.rawQuery(`UPDATE tournaments
+                                   SET content = jsonb_set(content, '{streamers}', content -> ('streamers') || $1)
+                                   WHERE id = $2`
+                    , [JSON.stringify(streamer), tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(error => callback(false))
+            })
+            .catch((_) => callback(false))
+    })
+
+    socket.on('tournament::admin:removeStreamer', (tournamentId, id, index, callback) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                DbHelper.rawQuery(`UPDATE tournaments
+                                   SET content = jsonb_set(content, '{streamers}',
+                                                           (content -> ('streamers')) - $1::int)
+                                   WHERE id = $2
+                                     AND content -> ('streamers') -> $1::int ->> ('id') = $3`
+                    , [index, tournamentId, id])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(error => callback(false))
+            })
+            .catch((_) => callback(false))
     })
 }

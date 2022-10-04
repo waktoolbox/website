@@ -1,12 +1,13 @@
 import {Card, CardContent, Grid, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
-import {socket} from "../../context/socket-context";
+import {useContext, useEffect, useState} from "react";
+import {SocketContext} from "../../context/socket-context";
 import {useTranslation} from "react-i18next";
 import {Link} from "react-router-dom";
 
 export default function TournamentHome() {
     const [home, setHome] = useState<any>()
     const {t} = useTranslation();
+    const socket = useContext(SocketContext);
 
     function formatDate(rawDate: string): string {
         const parsed = Date.parse(rawDate);
@@ -67,7 +68,7 @@ export default function TournamentHome() {
                             </Link>
                         ))}
                         {(!home || !home.registration || home.registration.length <= 0) &&
-                            <Typography>{t('tournament.home.registration.none')}</Typography>
+                            <Typography>{t('tournament.home.registrations.none')}</Typography>
                         }
                     </CardContent>
                 </Card>

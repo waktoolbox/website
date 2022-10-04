@@ -12,7 +12,7 @@ import {useTranslation} from "react-i18next";
 import {Link, useNavigate} from "react-router-dom";
 import {KeyboardEvent, MouseEvent, useContext, useEffect, useState} from "react";
 import {UserContext} from "../context/user-context";
-import {socket} from "../context/socket-context";
+import {SocketContext} from "../context/socket-context";
 
 export default function Menu() {
     const [state, setState] = useState({
@@ -20,6 +20,7 @@ export default function Menu() {
     });
 
     const userContext = useContext(UserContext);
+    const socket = useContext(SocketContext);
     const navigate = useNavigate();
     const {t} = useTranslation();
 

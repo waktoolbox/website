@@ -1,6 +1,6 @@
 {
   "actions": "Actions",
-  "coming.soon": "Arrivera bientôt",
+  "coming.soon": "Arrivera prochainement",
   "connect": "Se connecter",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
   "delete": "Supprimer",
@@ -35,6 +35,8 @@
     },
     "endDate": "Date de fin",
     "editor": {
+      "addAdmin": "Ajouter un admin",
+      "addReferee": "Ajouter un arbitre",
       "information": {
         "general": "Informations générales",
         "phases": "Phases",
@@ -42,6 +44,8 @@
         "users": "Utilisateurs"
       },
       "registrationDate": "Date d'inscription",
+      "streamerLink": "Chaîne du streamer",
+      "streamerName": "Nom du streamer",
       "teamPage": "Page",
       "validatedPlayers": "{{x}}/{{y}}",
       "validatedPlayersDesc": "Joueurs validés"
