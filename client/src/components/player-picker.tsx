@@ -29,7 +29,7 @@ export function PlayerPicker({
     const verifyPlayer = () => {
         socket.emit('account::findByName', localUserData.username, (accounts: UserData[]) => {
             if (!accounts || accounts.length <= 0) return;
-            if (accounts.length == 1) {
+            if (accounts.length === 1) {
                 const data = {...localUserData};
                 data.verified = true;
                 setUserData(localUserData)

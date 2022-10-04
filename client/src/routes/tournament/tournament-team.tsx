@@ -7,7 +7,7 @@ import {TournamentTeamModel} from "../../../../common/tournament/tournament-mode
 
 export default function TournamentTeam() {
     const {t} = useTranslation();
-    const {id, teamId} = useParams();
+    const {teamId} = useParams();
     const [team, setTeam] = useState({
         name: "",
         server: "",
@@ -25,7 +25,7 @@ export default function TournamentTeam() {
                 setPlayers(players);
             });
         })
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <Card>

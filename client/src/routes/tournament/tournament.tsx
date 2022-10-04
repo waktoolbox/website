@@ -60,7 +60,7 @@ export default function Tournament() {
                                     <Button>{t('tournament.display.results')}</Button>
                                 </Link>
                                 <Link to={`/tournament/${tournament.id}/register`}
-                                      hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || myTeam != undefined}>
+                                      hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || myTeam !== undefined}>
                                     <Button>{t('tournament.display.register')}</Button>
                                 </Link>
                                 <Link to={`/tournament/${tournament.id}/team/${myTeam?.id}`}
@@ -116,7 +116,7 @@ export default function Tournament() {
                                                 </Grid>
                                             </Link>
                                         ))}
-                                        {(!teams || teams.length == 0 || !teams[0].id) &&
+                                        {(!teams || teams.length === 0 || !teams[0].id) &&
                                             <Typography>{t('tournament.display.noTeam')}</Typography>
                                         }
                                     </Stack>
