@@ -11,8 +11,8 @@ type UserData = { id?: string, username?: string, discriminator?: string, locked
 export function PlayerPicker({
                                  userData,
                                  setUserData,
-                                 remove = true
-                             }: { userData: UserData, setUserData: (_: UserData | undefined) => any, remove?: boolean }) {
+                                 remove = true, disabled = false
+                             }: { userData: UserData, setUserData: (_: UserData | undefined) => any, remove?: boolean, disabled?: boolean }) {
     const [localUserData, setLocalUserData] = useState({
         ...userData
     })
@@ -67,7 +67,7 @@ export function PlayerPicker({
     return (
         <Stack direction="row">
             <TextField id="username" label={t("discord.pseudo")} value={localUserData.username}
-                       disabled={localUserData.locked} onChange={handleChange}/>
+                       disabled={disabled || localUserData.locked} onChange={handleChange}/>
             <TextField id="discriminator" label={t("discord.discriminator")} value={localUserData.discriminator}
                        onChange={handleChange} disabled/>
 
@@ -77,9 +77,9 @@ export function PlayerPicker({
             {!localUserData.verified &&
                 <RadioButtonUncheckedIcon/>
             }
-            <Button onClick={verifyPlayer}>{t('verify')}</Button>
+            <Button disabled={disabled} onClick={verifyPlayer}>{t('verify')}</Button>
             {!localUserData.locked && remove &&
-                <Button onClick={removePlayer}><DeleteIcon/></Button>
+                <Button disabled={disabled} onClick={removePlayer}><DeleteIcon/></Button>
             }
 
             <Modal open={discriminators.length > 0}>

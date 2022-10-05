@@ -108,6 +108,20 @@ class DbWrapper {
         });
     }
 
+    isTournamentStarted(id: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT COUNT(*)
+                              FROM tournaments
+                              WHERE id = $1
+                                AND content ->> ('startDate') < $2;`,
+                [id, new Date().toISOString()])
+                .then(result => {
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count > 0)
+                })
+                .catch(error => reject(error));
+        });
+    }
+
     getTournamentTeams(id: string): Promise<TournamentTeamModel[] | undefined> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT content

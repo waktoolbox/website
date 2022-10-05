@@ -27,6 +27,9 @@ export function registerTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+    socket.on('tournament::isTournamentStarted', (id, callback) => {
+        DbHelper.isTournamentStarted(id).then(result => callback(result)).catch(_ => callback(true));
+    })
 
     socket.on('tournament::home', (callback) => {
         TournamentHomeProvider.getHome().then(home => callback(home)).catch(error => console.error(error));
@@ -106,39 +109,54 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
         // TODO v1 manage this properly for edition
         team.stats = undefined;
 
-        const isTeamLeaderPromise = !id ? Promise.resolve(true) : DbHelper.isTeamLeader(id, team.tournament, socket.data.user);
+        const isTournamentStartedPromise = DbHelper.isTournamentStarted(team.tournament);
         const noDuplicateInTeam = DbHelper.checkTeamPlayersValidityForRegistration(team.tournament, team.players, team.id as string);
-        const noChangeInValidated = !id ? Promise.resolve(true) : DbHelper.checkTeamChangeInValidatedForRegistration(id, team.validatedPlayers);
 
-        Promise.all([isTeamLeaderPromise, noDuplicateInTeam, noChangeInValidated])
+        Promise.all([noDuplicateInTeam, isTournamentStartedPromise])
             .then(promises => {
-                if (promises.filter(r => r).length != promises.length) {
-                    if (!promises[1]) {
-                        return socket.emit('error', 'tournament.cant.save.teamPlayerAlreadyRegistered');
-                    }
-                    return reject();
+                if (!promises[0]) {
+                    return socket.emit('error', 'tournament.cant.save.teamPlayerAlreadyRegistered');
                 }
+                const isTournamentStarted = promises[1];
 
-                if (id) {
-                    team.validatedPlayers = team.validatedPlayers.filter(p => team.players.includes(p));
-                }
+                if (isTournamentStarted && !id) return socket.emit('error', 'tournament.cant.save.tournamentAlreadyStarted');
 
-                DbHelper.saveTeam(team)
+                (!id ? Promise.resolve(undefined) : DbHelper.getTeam(id))
                     .then(result => {
-                        callback(result);
-                        socket.emit('success', 'tournament.saved.team');
+                        if (id) {
+                            if (!result) return reject();
+                            if (socket.data.user !== result.leader) return reject();
 
-                        if (!id) {
-                            team.players.filter(p => p !== team.leader).forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join team ${team.name}. You can validate this here : ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
+                            if (isTournamentStarted) {
+                                team.name = result.name;
+                                team.validatedPlayers = result.validatedPlayers;
+                                team.players = result.validatedPlayers;
+                                team.stats = result.stats
+                            }
+
+                            team.validatedPlayers = team.validatedPlayers.filter(p => team.players.includes(p));
                         }
+
+                        DbHelper.saveTeam(team)
+                            .then(result => {
+                                callback(result);
+                                socket.emit('success', 'tournament.saved.team');
+
+                                if (!id) {
+                                    team.players.filter(p => p !== team.leader).forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join team ${team.name}. You can validate this here : ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
+                                }
+                            })
+                            .catch(_ => socket.emit('error', 'tournament.cant.save.team'));
                     })
-                    .catch(_ => socket.emit('error', 'tournament.cant.save.team'));
+                    .catch(error => {
+                        console.error(error);
+                        reject();
+                    })
             })
             .catch(error => {
                 console.error(error);
-                reject();
+                reject()
             });
-
     });
 
     socket.on('tournament::getMyTeam', (tournamentId, callback) => {

@@ -28,6 +28,7 @@ export default function TournamentRegistration() {
     } as TournamentTeamModel);
     const [errors, setErrors] = useState<string[]>();
     const [players, setPlayers] = useState<RegistrationPlayer[]>([]);
+    const [isStarted, setIsStarted] = useState(true);
     const socket = useContext(SocketContext);
 
     useEffect(() => {
@@ -63,6 +64,8 @@ export default function TournamentRegistration() {
                 })
             })
         }
+
+        socket.emit('tournament::isTournamentStarted', id, (result: boolean) => setIsStarted(result))
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const servers = ["Pandora", "Rubilax"];
@@ -143,7 +146,7 @@ export default function TournamentRegistration() {
     return (
         <Stack spacing={1}>
             <Typography variant="h4">{t('tournament.team.registration.title')}</Typography>
-            <TextField label={t('tournament.team.registration.name')} id="name" value={team.name}
+            <TextField label={t('tournament.team.registration.name')} id="name" value={team.name} disabled={isStarted}
                        onChange={handleChange}/>
             <Select
                 value={pickedServer}
@@ -165,10 +168,10 @@ export default function TournamentRegistration() {
                 <Typography variant="h6">{t('tournament.team.registration.players')}</Typography>
 
                 {players && players.map((player, index) => (
-                    <PlayerPicker key={index} userData={player}
+                    <PlayerPicker key={index} userData={player} disabled={isStarted}
                                   setUserData={(data) => handlerPlayerChange(index, data)}/>
                 ))}
-                <Button onClick={addPlayer}>{t('tournament.team.registration.addPlayer')}</Button>
+                <Button disabled={isStarted} onClick={addPlayer}>{t('tournament.team.registration.addPlayer')}</Button>
             </Box>
 
             <Button onClick={registerTeam}

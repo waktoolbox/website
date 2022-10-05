@@ -8,9 +8,8 @@ import TournamentTeam from "./routes/tournament/tournament-team";
 import TournamentEditor from "./routes/tournament/tournament-editor";
 import TournamentRegistration from "./routes/tournament/tournament-registration";
 import TournamentRegistrationValidation from "./routes/tournament/tournament-registration-validation";
-import React, {useContext} from "react";
+import React from "react";
 import jwtDecode from "jwt-decode";
-import {UserContext} from "./context/user-context";
 
 export function Home() {
     const params = new URLSearchParams(window.location.search);
@@ -21,7 +20,6 @@ export function Home() {
         window.location.replace(window.location.origin);
     }
 
-    const userContext = useContext(UserContext)
     return (
         <BrowserRouter>
             <Menu/>

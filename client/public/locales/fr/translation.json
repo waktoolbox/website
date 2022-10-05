@@ -17,7 +17,8 @@
       "create": "Impossible de créer le tournoi",
       "save.tournament": "Impossible de sauvegarder le tournoi",
       "save.team": "Impossible d'enregistrer l'équipe",
-      "save.teamPlayerAlreadyRegistered": "Impossible d'enregistrer l'équipe : un membre a déjà validé validé sa participation dans une autre équipe"
+      "save.teamPlayerAlreadyRegistered": "Impossible d'enregistrer l'équipe : un membre a déjà validé validé sa participation dans une autre équipe",
+      "save.tournamentAlreadyStarted": "Impossible d'enregistrer l'équipe : le tournoi a déjà commencé"
     },
     "create": "Créer un tournoi",
     "description": "Description",
