@@ -34,6 +34,7 @@ export interface TournamentPhaseData<T extends TournamentTeamModel, M extends To
 }
 
 export interface TournamentRoundDefinition {
+    round: number;
     bo: number;
 }
 
@@ -95,7 +96,8 @@ export interface TournamentDraftResultModel {
 
 export enum TournamentPhaseType {
     NONE,
-    WAKFU_WARRIORS_ROUND_ROBIN
+    WAKFU_WARRIORS_ROUND_ROBIN,
+    WAKFU_WARRIORS_BRACKET_TOURNAMENT
 }
 
 export interface TournamentStreamerModel {
