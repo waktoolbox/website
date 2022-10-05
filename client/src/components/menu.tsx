@@ -1,4 +1,4 @@
-import {AppBar, Box, Button, Container, IconButton, Toolbar, Typography} from "@mui/material";
+import {AppBar, Box, Button, Container, Divider, Grid, IconButton, Toolbar, Typography} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -10,7 +10,7 @@ import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import LanguagePicker from "./language-picker";
 import {useTranslation} from "react-i18next";
 import {Link, useNavigate} from "react-router-dom";
-import {KeyboardEvent, MouseEvent, useContext, useEffect, useState} from "react";
+import React, {KeyboardEvent, MouseEvent, useContext, useEffect, useState} from "react";
 import {UserContext} from "../context/user-context";
 import {SocketContext} from "../context/socket-context";
 
@@ -87,9 +87,9 @@ export default function Menu() {
                 </Box>
             </SwipeableDrawer>
 
-            <AppBar position="static">
-                <Container maxWidth="xl" sx={{pr: 1}}>
-                    <Toolbar disableGutters sx={{justifyContent: 'space-between'}}>
+            <AppBar position="static" sx={{boxShadow: 3}}>
+                <Container maxWidth="xl">
+                    <Toolbar variant="dense" disableGutters>
                         <IconButton
                             size="large"
                             edge="start"
@@ -100,23 +100,31 @@ export default function Menu() {
                         >
                             <MenuIcon/>
                         </IconButton>
-                        <Link to="/">
-                            <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                                Waktool
-                            </Typography>
-                        </Link>
-                        {!userContext.userState.connected &&
-                            <Link to="/login">
-                                <Button color="inherit">{t('connect')}</Button>
+                        <div style={{flexGrow: 1, justifyContent: 'center', alignItems: 'center', marginTop: '8px'}}>
+                            <Link to="/">
+                                <img src={`/logo.png`} alt={'logo'}/>
                             </Link>
-                        }
-                        {userContext.userState.connected &&
-                            <Button color="inherit" onClick={disconnect}>{t('disconnect')}</Button>
-                        }
-                        <div/>
-                        <Box sx={{justifyContent: "flex-end"}}>
+                        </div>
+
+                        <Grid container justifyContent="flex-end">
+                            {!userContext.userState.connected &&
+                                <Link to="/login">
+                                    <Button sx={{
+                                        borderColor: '#00ead1 !important',
+                                        color: '#fefffa'
+                                    }}>{t('connect')}</Button>
+                                </Link>
+                            }
+                            {userContext.userState.connected &&
+                                <Button sx={{
+                                    borderColor: '#00ead1 !important',
+                                    color: '#fefffa'
+                                }} variant="outlined" onClick={disconnect}>{t('disconnect')}</Button>
+                            }
+                            <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
                             <LanguagePicker/>
-                        </Box>
+                        </Grid>
+
                     </Toolbar>
                 </Container>
             </AppBar>
