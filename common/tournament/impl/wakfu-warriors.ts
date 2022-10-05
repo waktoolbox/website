@@ -5,6 +5,9 @@ export interface WakfuWarriorsPhaseOneData extends TournamentPhaseData<WakfuWarr
     teamPool: WakfuWarriorsTeamPool[]
 }
 
+export interface WakfuWarriorsPhaseTwoData extends TournamentPhaseData<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel> {
+}
+
 export interface WakfuWarriorsTeamModel extends TournamentTeamModel {
     winInPhaseOne: number;
 }

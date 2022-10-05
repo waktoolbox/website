@@ -6,6 +6,7 @@ import {
 import {
     WakfuWarriorsMatchModel,
     WakfuWarriorsPhaseOneData,
+    WakfuWarriorsPhaseTwoData,
     WakfuWarriorsTeamModel
 } from "../../../../common/tournament/impl/wakfu-warriors";
 
@@ -85,6 +86,35 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
             currentRound: 0,
             matches: [],
             teamPool: []
+        }
+    }
+}
+
+export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel, WakfuWarriorsPhaseTwoData> {
+    data: WakfuWarriorsPhaseTwoData;
+    definition: TournamentPhaseDefinition;
+
+    constructor(definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseTwoData) {
+        this.definition = definition;
+        this.data = data;
+    }
+
+    getQualifiedTeams(): TournamentTeamModel[] {
+        return [];
+    }
+
+    mustGoToNextPhase(): boolean {
+        return false;
+    }
+
+    prepareRound(): void {
+    }
+
+    static getBaseData(): WakfuWarriorsPhaseTwoData {
+        return {
+            teams: [],
+            currentRound: 0,
+            matches: []
         }
     }
 }
