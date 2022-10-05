@@ -13,6 +13,7 @@ export interface LightMatch {
 
 export interface TournamentHome {
     featuredTournaments: LightTournament[];
+    tournaments: LightTournament[];
     nextMatches: LightMatch[];
     registration: LightTournament[];
 }
@@ -47,6 +48,18 @@ export const TournamentHomeProvider = new (class {
                 LIMIT 5
             `, []);
 
+            const notFeaturedPromise = DbHelper.rawQuery(`
+                SELECT id,
+                       content -> ('name')      as name,
+                       content -> ('startDate') as startDate,
+                       content -> ('endDate')   as endDate
+                FROM tournaments
+                WHERE featured = false
+                  AND content ->> ('startDate') < $1
+                  AND content ->> ('endDate') > $1
+                ORDER BY content -> ('startDate')
+            `, [new Date().toISOString()]);
+
             // TODO v1 next matches
             const matchesPromise = DbHelper.rawQuery("SELECT 1", []);
 
@@ -60,12 +73,13 @@ export const TournamentHomeProvider = new (class {
                 ORDER BY content -> ('startDate')
             `, [new Date().toISOString()])
 
-            Promise.all([featuredPromise, matchesPromise, registrationPromise])
+            Promise.all([featuredPromise, notFeaturedPromise, matchesPromise, registrationPromise])
                 .then((results: any[]) => {
                     this.cachedHome = {
                         featuredTournaments: [...results[0].rows],
-                        nextMatches: [...results[1].rows],
-                        registration: [...results[2].rows],
+                        tournaments: [...results[1].rows],
+                        nextMatches: [...results[2].rows],
+                        registration: [...results[3].rows],
                     }
                     resolve();
                 })

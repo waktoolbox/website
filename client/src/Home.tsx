@@ -1,6 +1,6 @@
 import Menu from "./components/menu";
 import MySnackbar from "./components/snackbar";
-import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import TournamentHome from "./routes/tournament/tournament-home";
 import Login from "./routes/login";
 import TournamentView from "./routes/tournament/tournament";
@@ -33,19 +33,14 @@ export function Home() {
                 <Route path="/tournament/:id" element={<TournamentView/>}/>
                 <Route path="/tournament/:id/team/:teamId" element={<TournamentTeam/>}/>
 
-                <Route path="/edit-tournament" element={userContext?.userState?.connected ? <TournamentEditor/> :
-                    <Navigate replace to={"/login"}/>}/>
-                <Route path="/edit-tournament/:id" element={userContext?.userState?.connected ? <TournamentEditor/> :
-                    <Navigate replace to={"/login"}/>}/>
+                <Route path="/edit-tournament" element={<TournamentEditor/>}/>
+                <Route path="/edit-tournament/:id" element={<TournamentEditor/>}/>
                 <Route path="/tournament/:id/register"
-                       element={userContext?.userState?.connected ? <TournamentRegistration/> :
-                           <Navigate replace to={"/login"}/>}/>
+                       element={<TournamentRegistration/>}/>
                 <Route path="/tournament/:id/register/:teamId"
-                       element={userContext?.userState?.connected ? <TournamentRegistration/> :
-                           <Navigate replace to={"/login"}/>}/>
+                       element={<TournamentRegistration/>}/>
                 <Route path="/tournament/:id/register/:teamId/validate"
-                       element={userContext?.userState?.connected ? <TournamentRegistrationValidation/> :
-                           <Navigate replace to={"/login"}/>}/>
+                       element={<TournamentRegistrationValidation/>}/>
             </Routes>
         </BrowserRouter>
     )

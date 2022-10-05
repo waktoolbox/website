@@ -362,7 +362,7 @@ export default function TournamentEditor() {
                             <TableBody>
                                 {teams && teams.length > 0 && teams.map((team: TournamentTeamModel, index: number) => (
                                     <TableRow key={team.id} sx={{'&:last-child td, &:last-child th': {border: 0}}}>
-                                        <TableCell>{index}.</TableCell>
+                                        <TableCell>{index + 1}.</TableCell>
                                         <TableCell>{team.name}</TableCell>
                                         <TableCell>{team.server}</TableCell>
                                         <TableCell>{t('tournament.editor.validatedPlayers', {

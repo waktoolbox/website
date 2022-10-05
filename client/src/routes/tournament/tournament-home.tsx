@@ -39,6 +39,15 @@ export default function TournamentHome() {
                         {(!home || !home.featuredTournaments || home.featuredTournaments.length <= 0) &&
                             <Typography>{t('tournament.home.featured.none')}</Typography>
                         }
+                        {home && home.tournaments && home.tournaments.length > 0 && (
+                            <Typography sx={{mt: 2, mb: 2}}
+                                        variant="h5">{t('tournament.home.tournaments.title')}</Typography>
+                        )}
+                        {home && home.tournaments && home.tournaments.length > 0 && home.tournaments.map((tournaments: any) => (
+                            <Link key={tournaments.id} to={`/tournament/${tournaments.id}`}>
+                                <Typography>{tournaments.name + " - " + formatDate(tournaments.startdate) + " -> " + formatDate(tournaments.enddate)}</Typography>
+                            </Link>
+                        ))}
                     </CardContent>
                 </Card>
             </Grid>

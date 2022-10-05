@@ -72,7 +72,8 @@
       "matches.title": "Matchs à venir",
       "matches.none": "Pas de match planifié pour le moment",
       "registrations.title": "Inscriptions en cours",
-      "registrations.none": "Pas d'inscriptions en cours"
+      "registrations.none": "Pas d'inscriptions en cours",
+      "tournaments.title": "Tournois en cours"
     },
     "id": "Identifiant",
     "level": "Niveau",

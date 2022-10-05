@@ -26,7 +26,7 @@ export default function Menu() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (token) {
+        if (token && !userContext?.userState?.connected) {
             socket.emit('authenticate', token, (connected: boolean) => {
                 userContext.dispatch({type: "setConnected", payload: connected});
             });
