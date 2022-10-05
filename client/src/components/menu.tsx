@@ -35,6 +35,7 @@ export default function Menu() {
 
     const disconnect = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('discordId');
         userContext.dispatch({type: "setConnected", payload: false});
         socket.disconnect();
         navigate('/');

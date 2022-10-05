@@ -25,6 +25,7 @@
       "captain": "Capitaine",
       "level": "Niveau : {{lvl}}",
       "manageMyTeam": "Modifier mon équipe",
+      "manageMyRegistration": "Modifier mon inscription",
       "myTeam": "Mon équipe",
       "noTeam": "Pas d'équipes inscrites",
       "planning": "Planning",

@@ -9,6 +9,7 @@ export default function Tournament() {
     const [tournament, setTournament] = useState<TournamentDefinition>();
     const [teams, setTeams] = useState<TournamentTeamModel[]>();
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
+    const [me] = useState(localStorage.getItem("discordId"))
     const {id} = useParams();
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -60,7 +61,7 @@ export default function Tournament() {
                                     <Button>{t('tournament.display.results')}</Button>
                                 </Link>
                                 <Link to={`/tournament/${tournament.id}/register`}
-                                      hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || myTeam !== undefined}>
+                                      hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || (myTeam && myTeam.id !== undefined)}>
                                     <Button>{t('tournament.display.register')}</Button>
                                 </Link>
                                 <Link to={`/tournament/${tournament.id}/team/${myTeam?.id}`}
@@ -68,8 +69,12 @@ export default function Tournament() {
                                     <Button>{t('tournament.display.myTeam')}</Button>
                                 </Link>
                                 <Link to={`/tournament/${tournament.id}/register/${myTeam?.id}`}
-                                      hidden={!myTeam}>
+                                      hidden={!myTeam || myTeam.leader !== me}>
                                     <Button>{t('tournament.display.manageMyTeam')}</Button>
+                                </Link>
+                                <Link to={`/tournament/${tournament.id}/register/${myTeam?.id}/validate`}
+                                      hidden={!myTeam || myTeam.leader === me}>
+                                    <Button>{t('tournament.display.manageMyRegistration')}</Button>
                                 </Link>
                                 <Link to={`/edit-tournament/${tournament.id}`}
                                       hidden={!tournament.admins.includes(localStorage.getItem('discordId') || "")}>
