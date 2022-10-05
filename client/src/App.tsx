@@ -47,17 +47,6 @@ function App() {
                         borderColor: '#284e51'
                     }),
                 },
-            },
-
-            MuiSelect: {
-                variants: [
-                    {
-                        props: {variant: 'languagePicker'},
-                        style: {
-                            padding: '0px'
-                        }
-                    }
-                ]
             }
         }
     })
