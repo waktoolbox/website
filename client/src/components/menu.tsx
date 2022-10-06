@@ -1,10 +1,7 @@
-import {AppBar, Box, Button, Container, Divider, Grid, IconButton, Toolbar, Typography} from "@mui/material";
+import {AppBar, Box, Button, Container, Divider, Grid, IconButton, Stack, Toolbar} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import {AdUnitsTwoTone} from "@mui/icons-material";
 import ListItemText from "@mui/material/ListItemText";
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import LanguagePicker from "./language-picker";
@@ -70,18 +67,33 @@ export default function Menu() {
                     onClick={toggleDrawer(false)}
                     onKeyDown={toggleDrawer(false)}
                 >
-                    <Typography variant={"h3"}>{t('tournament.title')}</Typography>
+                    <img style={{padding: "40px 20px 5px 30px"}} src={`/logo.png`} alt={'logo'}/>
+                    <Divider sx={{ml: '30px', mr: '60px', mb: '50px'}} variant="middle" flexItem/>
                     <List>
-                        <Link to={"edit-tournament"}>
-                            <ListItem key="tournament.create">
-                                <ListItemButton>
-                                    <ListItemIcon>
-                                        <AdUnitsTwoTone/>
-                                    </ListItemIcon>
-                                    <ListItemText primary={t('tournament.create')}/>
-                                </ListItemButton>
-                            </ListItem>
-                        </Link>
+                        <ListItem key="participations">
+                            <Stack>
+                                <ListItemText primary={t('holdings')}/>
+                                <List>
+                                    <ListItem key="participations.myTeams"
+                                              sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
+                                        <ListItemText primary={t('coming.soon')}/>
+                                    </ListItem>
+                                </List>
+                            </Stack>
+                        </ListItem>
+
+                        <ListItem key="tournament.tools">
+                            <Stack>
+                                <ListItemText primary={t('tournament.tools')}/>
+                                <List>
+                                    <ListItem key="participations.myTeams"
+                                              sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
+                                        {/*TODO setup tournament creation*/}
+                                        <ListItemText primary={t('tournament.create') + " - " + t('coming.soon')}/>
+                                    </ListItem>
+                                </List>
+                            </Stack>
+                        </ListItem>
                     </List>
                     {/*<Divider/>*/}
                 </Box>

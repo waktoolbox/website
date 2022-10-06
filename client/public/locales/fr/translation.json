@@ -7,6 +7,7 @@
   "discord.discriminator": "# Discord",
   "discord.pseudo": "Pseudo Discord",
   "disconnect": "Déconnexion",
+  "holdings": "Participations",
   "invalidate": "Invalider",
   "loading": "Chargement...",
   "modify": "Modifier",
@@ -104,6 +105,7 @@
     "teams": "Équipes",
     "teamNumber": "Nombre d'équipes",
     "teamSize": "Taille d'équipe",
+    "tools": "Outils",
     "title": "Tournoi"
   },
   "validate": "Valider",
