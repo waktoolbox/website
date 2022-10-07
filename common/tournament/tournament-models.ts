@@ -1,6 +1,8 @@
 export interface TournamentDefinition {
     id?: string;
     name: string;
+    logo: string;
+    server: string;
     startDate: string;
     endDate: string;
     level: number;

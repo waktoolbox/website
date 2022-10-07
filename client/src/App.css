@@ -1,12 +1,44 @@
 body {
   background: #213a41;
+  color: #fefffa;
 }
 
 .App {
   text-align: center;
+  height: 100%;
+  width: 100%;
+  display: table;
+  margin: 0;
+}
+
+footer {
+  display: table-row;
+  height: 30px;
 }
 
 a {
   color: inherit;
   text-decoration: inherit;
+}
+
+h3 {
+  text-transform: uppercase;
+}
+
+h5 {
+  color: #8299a1;
+}
+
+.firstWord {
+  color: #fefffa;
+}
+
+.homeParallax {
+  background-attachment: fixed;
+  background-position: top;
+  background-repeat: no-repeat;
+}
+
+.blueWord {
+  color: #03c8be;
 }

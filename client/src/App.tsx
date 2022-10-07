@@ -4,8 +4,11 @@ import {socket, SocketContext} from "./context/socket-context";
 import {UserContextProvider} from "./context/user-context";
 import {Home} from "./Home";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
+import {Typography} from "@mui/material";
+import {useTranslation} from "react-i18next";
 
 function App() {
+    const {t} = useTranslation();
     // @ts-ignore
     const theme = createTheme({
         palette: {
@@ -18,7 +21,32 @@ function App() {
             }
         },
 
+        typography: {
+            fontFamily: [
+                '-apple-system',
+                'BlinkMacSystemFont',
+                'Arial',
+                'sans-serif',
+                '"Apple Color Emoji"',
+                '"Segoe UI Emoji"',
+                '"Segoe UI Symbol"',].join(',')
+        },
+
         components: {
+            MuiAppBar: {
+                styleOverrides: {
+                    root: ({ownerState}) => ({
+                        backgroundColor: '#213a41'
+                    }),
+                },
+            },
+            MuiButton: {
+                styleOverrides: {
+                    root: ({ownerState}) => ({
+                        backgroundColor: '#4a7cb1'
+                    }),
+                },
+            },
             MuiCard: {
                 styleOverrides: {
                     root: ({ownerState}) => ({
@@ -60,6 +88,11 @@ function App() {
                     </SocketContext.Provider>
                 </UserContextProvider>
             </ThemeProvider>
+
+            <footer>
+                <Typography
+                    sx={{mt: 2, backgroundColor: "#152429", fontSize: '0.8rem'}}>{t('waktool.wakfu')}</Typography>
+            </footer>
         </div>
     );
 }

@@ -24,8 +24,11 @@
     "create": "Créer un tournoi",
     "description": "Description",
     "display": {
+      "allTournaments": "Tous les tournois",
+      "allRegistrations": "Toutes les inscriptions",
       "captain": "Capitaine",
       "level": "Niveau : {{lvl}}",
+      "levelAndServer": "Niv. {{level}} / {{server}}",
       "manageMyTeam": "Modifier mon équipe",
       "manageMyRegistration": "Modifier mon inscription",
       "myTeam": "Mon équipe",
@@ -67,20 +70,21 @@
       "too.big.catchPhrase": "La phrase d'accroche est trop longue",
       "too.big.name": "Le nom est trop long"
     },
-    "fromTo": "Du {{from}} au {{to}}",
+    "fromTo": "Du {{from, datetime}} au {{to, datetime}}",
     "home": {
-      "featured.title": "Tournois à l'honneur",
-      "featured.none": "Pas de tournoi à l'honneur",
-      "matches.title": "Matchs à venir",
+      "featured.title": "à l'honneur",
+      "matches.title": "à venir",
       "matches.none": "Pas de match planifié pour le moment",
-      "registrations.title": "Inscriptions en cours",
-      "registrations.none": "Pas d'inscriptions en cours",
-      "tournaments.title": "Tournois en cours"
+      "registrations.title": "en cours",
+      "tournaments.title": "en cours",
+      "waktool": "Planifier & simplifier la gestion de vos tournois sur "
     },
     "id": "Identifiant",
     "level": "Niveau",
+    "matches": "Matchs",
     "name": "Nom",
     "not.found": "Tournoi introuvable",
+    "registrations": "Inscriptions",
     "rewards": "Récompenses",
     "rules": "Règles",
     "saved.tournament": "Tournoi sauvegardé",
@@ -106,8 +110,12 @@
     "teamNumber": "Nombre d'équipes",
     "teamSize": "Taille d'équipe",
     "tools": "Outils",
-    "title": "Tournoi"
+    "title": "Tournoi",
+    "titles": "Tournois"
   },
   "validate": "Valider",
-  "verify": "Vérifier"
+  "verify": "Vérifier",
+  "waktool": {
+    "wakfu": "Wakfu est un MMORPG édité par Ankama Studio. Tous droits réservés.\nLe site internet “Waktool” est un fansite communautaire non-officiel du MMORPG Wakfu sans aucun lien avec Ankama.\nAttention ! Ne communiquez jamais vos identifiants de jeu."
+  }
 }

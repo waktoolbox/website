@@ -10,8 +10,10 @@ import TournamentRegistration from "./routes/tournament/tournament-registration"
 import TournamentRegistrationValidation from "./routes/tournament/tournament-registration-validation";
 import React from "react";
 import jwtDecode from "jwt-decode";
+import {useTranslation} from "react-i18next";
 
 export function Home() {
+    const {t} = useTranslation();
     const params = new URLSearchParams(window.location.search);
     const pathToken = params.get('token');
     if (pathToken) {
@@ -24,7 +26,6 @@ export function Home() {
         <BrowserRouter>
             <Menu/>
             <MySnackbar/>
-
             <Routes>
                 <Route path="/" element={<TournamentHome/>}/>
                 <Route path="/login" element={<Login/>}/>

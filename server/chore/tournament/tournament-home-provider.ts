@@ -3,6 +3,9 @@ import {DbHelper} from "../../db/pg-helper";
 export interface LightTournament {
     id: string;
     name: string;
+    logo: string;
+    server: string;
+    level: string;
     startDate: string;
     endDate: string;
 }
@@ -12,7 +15,7 @@ export interface LightMatch {
 }
 
 export interface TournamentHome {
-    featuredTournaments: LightTournament[];
+    featuredTournament: LightTournament;
     tournaments: LightTournament[];
     nextMatches: LightMatch[];
     registration: LightTournament[];
@@ -40,17 +43,24 @@ export const TournamentHomeProvider = new (class {
             const featuredPromise = DbHelper.rawQuery(`
                 SELECT id,
                        content -> ('name')      as name,
+                       content -> ('logo')      as logo,
+                       content -> ('server')    as server,
+                       content -> ('level')     as level,
                        content -> ('startDate') as startDate,
                        content -> ('endDate')   as endDate
                 FROM tournaments
                 WHERE featured = true
+                  AND content ->> ('endDate') > $1
                 ORDER BY content -> ('startDate')
-                LIMIT 5
-            `, []);
+                LIMIT 1
+            `, [new Date().toISOString()]);
 
             const notFeaturedPromise = DbHelper.rawQuery(`
                 SELECT id,
                        content -> ('name')      as name,
+                       content -> ('logo')      as logo,
+                       content -> ('server')    as server,
+                       content -> ('level')     as level,
                        content -> ('startDate') as startDate,
                        content -> ('endDate')   as endDate
                 FROM tournaments
@@ -58,6 +68,7 @@ export const TournamentHomeProvider = new (class {
                   AND content ->> ('startDate') < $1
                   AND content ->> ('endDate') > $1
                 ORDER BY content -> ('startDate')
+                LIMIT 4
             `, [new Date().toISOString()]);
 
             // TODO v1 next matches
@@ -66,6 +77,9 @@ export const TournamentHomeProvider = new (class {
             const registrationPromise = DbHelper.rawQuery(`
                 SELECT id,
                        content -> ('name')      as name,
+                       content -> ('logo')      as logo,
+                       content -> ('server')    as server,
+                       content -> ('level')     as level,
                        content -> ('startDate') as startDate,
                        content -> ('endDate')   as endDate
                 FROM tournaments
@@ -76,7 +90,7 @@ export const TournamentHomeProvider = new (class {
             Promise.all([featuredPromise, notFeaturedPromise, matchesPromise, registrationPromise])
                 .then((results: any[]) => {
                     this.cachedHome = {
-                        featuredTournaments: [...results[0].rows],
+                        featuredTournament: results[0] && results[0].rows ? results[0].rows[0] : undefined,
                         tournaments: [...results[1].rows],
                         nextMatches: [...results[2].rows],
                         registration: [...results[3].rows],

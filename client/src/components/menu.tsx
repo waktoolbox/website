@@ -1,4 +1,6 @@
 import {AppBar, Box, Button, Container, Divider, Grid, IconButton, Stack, Toolbar} from "@mui/material";
+import PersonIcon from '@mui/icons-material/Person';
+import PersonIconOutlined from '@mui/icons-material/PersonOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -123,15 +125,23 @@ export default function Menu() {
                                 <Link to="/login">
                                     <Button sx={{
                                         borderColor: '#00ead1 !important',
-                                        color: '#fefffa'
-                                    }}>{t('connect')}</Button>
+                                        color: '#fefffa',
+                                        backgroundColor: '#213a41'
+                                    }} variant="outlined">
+                                        <PersonIcon sx={{ml: -1, mr: 1, color: '#07c6b6'}}/>
+                                        {t('connect')}
+                                    </Button>
                                 </Link>
                             }
                             {userContext.userState.connected &&
                                 <Button sx={{
                                     borderColor: '#00ead1 !important',
-                                    color: '#fefffa'
-                                }} variant="outlined" onClick={disconnect}>{t('disconnect')}</Button>
+                                    color: '#fefffa',
+                                    backgroundColor: '#213a41'
+                                }} variant="outlined" onClick={disconnect}>
+                                    <PersonIconOutlined sx={{ml: -1, mr: 1, color: '#07c6b6'}}/>
+                                    {t('disconnect')}
+                                </Button>
                             }
                             <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
                             <LanguagePicker/>
