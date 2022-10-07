@@ -72,12 +72,12 @@
     },
     "fromTo": "Du {{from, datetime}} au {{to, datetime}}",
     "home": {
-      "featured.title": "à l'honneur",
-      "matches.title": "à venir",
+      "featured.title": "<span>Tournoi</span> à l'honneur",
+      "matches.title": "<span>Matchs</span> à venir",
       "matches.none": "Pas de match planifié pour le moment",
-      "registrations.title": "en cours",
-      "tournaments.title": "en cours",
-      "waktool": "Planifier & simplifier la gestion de vos tournois sur "
+      "registrations.title": "<span>Inscriptions</span> en cours",
+      "tournaments.title": "<span>Tournois</span> en cours",
+      "waktool": "Planifier & simplifier la gestion de vos tournois sur <span>Wakfu</span>"
     },
     "id": "Identifiant",
     "level": "Niveau",

@@ -1,7 +1,7 @@
 import {Box, Button, Card, CardContent, Grid, Typography} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
-import {useTranslation} from "react-i18next";
+import {Trans, useTranslation} from "react-i18next";
 import TournamentCardView from "../../components/tournament/tournament-card-view";
 
 export default function TournamentHome() {
@@ -23,22 +23,22 @@ export default function TournamentHome() {
         cra: {
             position: "relative",
             top: "16px",
-            left: "-300px"
+            left: "-400px"
         },
         xelor: {
             position: "relative",
             top: "-70px",
-            left: "260px",
+            left: "160px",
         },
         portalTop: {
             position: "relative",
             top: "-310px",
-            left: "-740px",
+            left: "-840px",
         },
         portalBottom: {
             position: "relative",
             top: "-170px",
-            left: "-400px",
+            left: "-500px",
         }
     }
 
@@ -59,19 +59,21 @@ export default function TournamentHome() {
                 <img src="/home/portal_bottom.png" style={homeParallax.portalBottom as React.CSSProperties}
                      alt="Portal bottom"/>
 
-                <Box sx={{position: "absolute", top: "100px", left: `${windowWidth - 700}px`} as React.CSSProperties}>
+                <Box sx={{position: "absolute", top: "200px", left: `${windowWidth - 800}px`} as React.CSSProperties}>
                     <Typography variant="h3" style={{
                         width: "600px",
                         wordWrap: "break-word",
                         textAlign: "left"
-                    }}><b>{t('tournament.home.waktool')}<span className="blueWord">Wakfu</span></b></Typography>
+                    }}><b><Trans i18nKey="tournament.home.waktool"
+                                 components={{span: <span className="blueWord"/>}}/></b></Typography>
                 </Box>
             </Grid>
 
             <Grid container spacing={2} alignItems="flex" sx={{width: '85%', margin: 'auto'}}>
                 <Grid item xl={4} xs={12}>
-                    <Typography sx={{mb: 2}} variant="h5"><span
-                        className="firstWord">{t('tournament.title')}</span> {t('tournament.home.featured.title')}
+                    <Typography sx={{mb: 2}} variant="h5">
+                        <Trans i18nKey="tournament.home.featured.title"
+                               components={{span: <span className="firstWord"/>}}/>
                     </Typography>
                     {home && home.featuredTournament && (
                         <TournamentCardView tournament={home.featuredTournament} width={400} height={500}
@@ -89,8 +91,9 @@ export default function TournamentHome() {
                     )}
                 </Grid>
                 <Grid item xl={8} xs={12}>
-                    <Typography sx={{mb: 2}} variant="h5"><span
-                        className="firstWord">{t('tournament.titles')}</span> {t('tournament.home.tournaments.title')}
+                    <Typography sx={{mb: 2}} variant="h5">
+                        <Trans i18nKey="tournament.home.tournaments.title"
+                               components={{span: <span className="firstWord"/>}}/>
                     </Typography>
                     <Grid container spacing={2}>
                         {home && home.tournaments && home.tournaments.length > 0 && home.tournaments.map((tournament: any) => (
@@ -118,8 +121,9 @@ export default function TournamentHome() {
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography sx={{mb: 2}} variant="h5"><span
-                        className="firstWord">{t('tournament.registrations')}</span> {t('tournament.home.registrations.title')}
+                    <Typography sx={{mb: 2}} variant="h5">
+                        <Trans i18nKey="tournament.home.registrations.title"
+                               components={{span: <span className="firstWord"/>}}/>
                     </Typography>
 
                     <Grid container spacing={2}>
@@ -149,8 +153,9 @@ export default function TournamentHome() {
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography variant="h5"><span
-                        className="firstWord">{t('tournament.matches')}</span> {t('tournament.home.matches.title')}
+                    <Typography variant="h5">
+                        <Trans i18nKey="tournament.home.matches.title"
+                               components={{span: <span className="firstWord"/>}}/>
                     </Typography>
                     <Card sx={{m: 1, backgroundColor: "#152429"}}>
                         <CardContent>
