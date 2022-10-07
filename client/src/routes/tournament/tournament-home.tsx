@@ -79,6 +79,8 @@ export default function TournamentHome() {
                     )}
                     {(!home || !home.featuredTournament) && (
                         <Card sx={{
+                            mr: "auto",
+                            ml: "auto",
                             height: '500px',
                             width: '400px',
                             borderRadius: "8px",
