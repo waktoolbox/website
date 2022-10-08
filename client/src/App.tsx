@@ -4,7 +4,7 @@ import {socket, SocketContext} from "./context/socket-context";
 import {UserContextProvider} from "./context/user-context";
 import {Home} from "./Home";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
-import {Typography} from "@mui/material";
+import {Divider, Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 
 function App() {
@@ -99,9 +99,14 @@ function App() {
                 </UserContextProvider>
             </ThemeProvider>
 
-            <footer>
+            <footer style={{backgroundColor: "#0d1518"}}>
+                <img style={{marginTop: 16}} src="/logo.png" alt="logo"/>
+                <Divider sx={{width: "166px", bgcolor: "rgba(132,136,137,0.3)", margin: "8px auto 8px auto !important"}}
+                         variant="middle"/>
                 <Typography
-                    sx={{mt: 2, backgroundColor: "#152429", fontSize: '0.8rem'}}>{t('waktool.wakfu')}</Typography>
+                    sx={{color: "#368488", fontSize: '0.8rem'}}>{t('waktool.wakfu')}</Typography>
+                <Typography
+                    sx={{mb: '3px', fontSize: '0.8rem'}}>{t('waktool.login')}</Typography>
             </footer>
         </div>
     );

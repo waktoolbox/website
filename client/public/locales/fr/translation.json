@@ -127,6 +127,7 @@
   "validate": "Valider",
   "verify": "Vérifier",
   "waktool": {
-    "wakfu": "Wakfu est un MMORPG édité par Ankama Studio. Tous droits réservés.\nLe site internet “Waktool” est un fansite communautaire non-officiel du MMORPG Wakfu sans aucun lien avec Ankama.\nAttention ! Ne communiquez jamais vos identifiants de jeu."
+    "wakfu": "Wakfu est un MMORPG édité par Ankama Studio. Tous droits réservés.\nLe site internet “Waktool” est un fansite communautaire non-officiel du MMORPG Wakfu sans aucun lien avec Ankama.\n",
+    "login": "Attention ! Ne communiquez jamais vos identifiants de jeu."
   }
 }
