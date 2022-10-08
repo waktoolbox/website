@@ -99,6 +99,7 @@
     "startDate": "Date de début",
     "team": {
       "goTo": "Voir l'équipe",
+      "members": "Membres",
       "not.found": "Impossible de trouver l'équipe",
       "participating": "<span>Équipes</span> participantes",
       "registration": {

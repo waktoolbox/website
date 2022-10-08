@@ -4,6 +4,7 @@ import Diversity3Icon from '@mui/icons-material/Diversity3';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import CheckIcon from '@mui/icons-material/Check';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
 import {SocketContext} from "../../context/socket-context";
@@ -13,7 +14,8 @@ import {Button, Card, CardContent, Divider, Grid, Stack, Typography} from "@mui/
 
 enum Tabs {
     HOME,
-    TEAMS
+    TEAMS,
+    SINGLE_TEAM
 }
 
 const MenuButtonsStyle = {
@@ -29,13 +31,15 @@ const ActiveMenuButtonsStyle = {
 }
 
 export default function Tournament() {
+    const {id, targetTab, teamId} = useParams();
+    const [localTeamId, setLocalTeamId] = useState<string>(teamId as string);
     const [tournament, setTournament] = useState<TournamentDefinition>();
     const [accounts, setAccounts] = useState(new Map<string, any>());
     const [teams, setTeams] = useState<any[]>();
+    const [team, setTeam] = useState<TournamentTeamModel>();
     const [tab, setTab] = useState(Tabs.HOME)
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
     const [me] = useState(localStorage.getItem("discordId"))
-    const {id} = useParams();
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
 
@@ -53,6 +57,8 @@ export default function Tournament() {
         socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
             setMyTeam(team)
         })
+
+        if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const changeTab = (newTab: Tabs) => {
@@ -60,6 +66,9 @@ export default function Tournament() {
         switch (newTab) {
             case Tabs.TEAMS:
                 loadTeams();
+                break;
+            case Tabs.SINGLE_TEAM:
+                loadTeam();
                 break;
         }
         setTab(newTab)
@@ -70,6 +79,18 @@ export default function Tournament() {
             if (!teams) return setTeams([]);
             setTeams(teams);
         })
+    }
+
+    const loadTeam = (tid?: string, goToTab?: boolean) => {
+        if (goToTab) setTab(Tabs.SINGLE_TEAM);
+        socket.emit('tournament::getTeam', tid || localTeamId, (team: TournamentTeamModel) => {
+            setTeam(team);
+        })
+    }
+
+    const goToTeam = (tid: string) => {
+        setLocalTeamId(tid);
+        loadTeam(tid, true)
     }
 
     return (
@@ -116,19 +137,23 @@ export default function Tournament() {
                         </Grid>
                         <Grid item xs={12} md={10} xl={8} sx={{backgroundColor: "#1f333a", pb: 4}}>
                             <Stack direction="row" sx={{ml: 2, mt: 2}}>
-                                <Button variant="text"
-                                        style={{...MenuButtonsStyle, ...(tab === Tabs.HOME ? ActiveMenuButtonsStyle : {})}}
-                                        onClick={() => changeTab(Tabs.HOME)}>
-                                    <BookmarksIcon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
-                                    {t('tournament.display.information')}
-                                </Button>
+                                <Link to={`/tournament/${id}`}>
+                                    <Button variant="text"
+                                            style={{...MenuButtonsStyle, ...(tab === Tabs.HOME ? ActiveMenuButtonsStyle : {})}}
+                                            onClick={() => changeTab(Tabs.HOME)}>
+                                        <BookmarksIcon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
+                                        {t('tournament.display.information')}
+                                    </Button>
+                                </Link>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
-                                <Button variant="text"
-                                        style={{...MenuButtonsStyle, ...(tab === Tabs.TEAMS ? ActiveMenuButtonsStyle : {})}}
-                                        onClick={() => changeTab(Tabs.TEAMS)}>
-                                    <Diversity3Icon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
-                                    {t('tournament.display.teamsButton')}
-                                </Button>
+                                <Link to={`/tournament/${id}/tab/1`}>
+                                    <Button variant="text"
+                                            style={{...MenuButtonsStyle, ...(tab === Tabs.TEAMS ? ActiveMenuButtonsStyle : {})}}
+                                            onClick={() => changeTab(Tabs.TEAMS)}>
+                                        <Diversity3Icon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
+                                        {t('tournament.display.teamsButton')}
+                                    </Button>
+                                </Link>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
                                 <Button variant="text" style={MenuButtonsStyle}
                                         disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
@@ -151,7 +176,6 @@ export default function Tournament() {
                                 </Link>
                             </Stack>
                             <Divider sx={{ml: 3, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
-
 
                             {tab === Tabs.HOME &&
                                 <Grid container>
@@ -179,20 +203,21 @@ export default function Tournament() {
                                     <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>
                                         <Stack spacing={2}>
                                             <Link to={`/tournament/${tournament.id}/register`}
-                                                  hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || (myTeam && myTeam.id !== undefined)}>
+                                                  hidden={Date.parse(tournament.startDate).toString() < Date.now().toString() || (myTeam && myTeam.id !== undefined) || !me}>
                                                 <Button sx={{
                                                     width: "100%",
                                                     pt: 1,
                                                     pb: 1
                                                 }}>{t('tournament.display.register')}</Button>
                                             </Link>
-                                            <Link to={`/tournament/${tournament.id}/team/${myTeam?.id}`}
+                                            <Link to={`/tournament/${tournament.id}/tab/2/team/${myTeam?.id}`}
                                                   hidden={!myTeam}>
                                                 <Button sx={{
                                                     width: "100%",
                                                     pt: 1,
                                                     pb: 1
-                                                }}>{t('tournament.display.myTeam')}</Button>
+                                                }}
+                                                        onClick={() => goToTeam(myTeam?.id || "")}>{t('tournament.display.myTeam')}</Button>
                                             </Link>
                                             <Link to={`/tournament/${tournament.id}/register/${myTeam?.id}`}
                                                   hidden={!myTeam || myTeam.leader !== me}>
@@ -264,13 +289,9 @@ export default function Tournament() {
                                                     <Typography display="inline" sx={{verticalAlign: "1px"}}><span
                                                         className="blueWord">{team.content.server}</span></Typography>
                                                     <Divider sx={{
-                                                        ml: 2,
-                                                        mr: 2,
-                                                        mt: 0,
-                                                        mb: 0,
+                                                        ml: 2, mr: 2, mt: 0, mb: 0,
                                                         display: "inline",
-                                                        pt: 1,
-                                                        pb: 1
+                                                        pt: 1, pb: 1
                                                     }}
                                                              orientation="vertical" variant="middle" flexItem/>
                                                     <Typography display="inline" sx={{mr: 2}}><EmojiEventsIcon sx={{
@@ -286,11 +307,101 @@ export default function Tournament() {
                                                             mb: '3px'
                                                         }}/>{t('tournament.nbMatchesPlayed', {nb: 0})}</Typography>
 
-                                                    {/*TODO v1 : bind */}
-                                                    <Button sx={{float: "right"}}>{t('tournament.team.goTo')}</Button>
+                                                    <Link to={`/tournament/${id}/tab/2/team/${team.content.id}`}>
+                                                        <Button sx={{float: "right"}}
+                                                                onClick={() => goToTeam(team.content.id)}>{t('tournament.team.goTo')}</Button>
+                                                    </Link>
                                                 </CardContent>
                                             </Card>
                                         ))}
+                                    </Grid>
+                                </Grid>
+                            }
+
+                            {tab === Tabs.SINGLE_TEAM && team &&
+                                <Grid container>
+                                    <Grid item lg={8} xs={12} sx={{textAlign: "start", pl: 4}}>
+                                        <Grid container>
+                                            <Grid item xs={12}>
+                                                <Typography variant="h4" sx={{
+                                                    wordWrap: "break-word",
+                                                    mt: 5
+                                                }}><b>{team.name}</b></Typography>
+                                                <Typography variant="h5" sx={{
+                                                    wordWrap: "break-word",
+                                                    mt: 1
+                                                }}>{team.catchPhrase}</Typography>
+                                                <Typography sx={{
+                                                    mt: 2, mb: 3,
+                                                    borderRadius: 2, backgroundColor: "#017d7f",
+                                                    width: "120px", height: "40px",
+                                                    pl: 2, pr: 2,
+                                                    display: "flex", flexDirection: "column", justifyContent: "center",
+                                                    fontSize: "0.8rem", textTransform: "uppercase", textAlign: "center"
+                                                }}>{team.server}</Typography>
+
+                                                <Divider sx={{ml: 3, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
+
+                                                <Typography variant="h5"><Trans i18nKey="tournament.home.matches.title"
+                                                                                components={{
+                                                                                    span: <span className="firstWord"/>
+                                                                                }}/></Typography>
+
+                                                {/*TODO v2*/}
+                                                <Typography sx={{mt: 2}}>{t('coming.soon')}</Typography>
+
+                                                <Divider sx={{ml: 3, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
+
+                                                <Typography variant="h5"
+                                                            sx={{color: "#fefffa"}}>{t('tournament.display.results')}</Typography>
+
+                                                {/*TODO v2*/}
+                                                <Typography sx={{mt: 2}}>{t('coming.soon')}</Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>
+                                        <Stack spacing={2}>
+                                            <Card>
+                                                <CardContent
+                                                    sx={{backgroundColor: '#213943', textAlign: "start", pl: 3}}>
+                                                    {/*TODO v2 stats*/}
+                                                    <Typography sx={{color: "#8299a1", mr: 2}}><ListAltIcon
+                                                        sx={{
+                                                            verticalAlign: "middle",
+                                                            mr: 1,
+                                                            mb: '3px'
+                                                        }}/>{t('tournament.nbMatchesPlayed', {nb: 0})}</Typography>
+                                                    <Typography sx={{mr: 2, color: "#07c6b6"}}>
+                                                        <EmojiEventsIcon sx={{
+                                                            verticalAlign: "middle",
+                                                            mr: 1,
+                                                            mb: '3px'
+                                                        }}/>{t('tournament.nbVictories', {nb: 0})}</Typography>
+                                                </CardContent>
+                                            </Card>
+                                            <Card>
+                                                <CardContent
+                                                    sx={{backgroundColor: '#213943', textAlign: "start", pl: 3}}>
+                                                    <Typography variant="h4" sx={{
+                                                        textAlign: "start",
+                                                        mb: 1
+                                                    }}>{t('tournament.team.members')}</Typography>
+                                                    {team.players.map(player => (
+                                                        <Typography sx={{color: "#8299a1"}}>
+                                                            {[accounts.get(player)].map(a => !a ? "" : a.username + "#" + a.discriminator)}
+                                                            {team?.validatedPlayers.includes(player) &&
+                                                                <CheckIcon sx={{
+                                                                    color: "#006400",
+                                                                    ml: 1,
+                                                                    verticalAlign: "-5px"
+                                                                }}/>
+                                                            }
+                                                        </Typography>
+                                                    ))}
+                                                </CardContent>
+                                            </Card>
+                                        </Stack>
                                     </Grid>
                                 </Grid>
                             }
