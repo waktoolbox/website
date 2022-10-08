@@ -223,30 +223,28 @@ export default function TournamentRegistration() {
                         </CardContent>
                     </Card>
 
-                    <div>
-
-                    </div>
-
                     <Button onClick={registerTeam}
                             sx={{
-                                mt: 2, backgroundColor: "#4a7cb1", color: "#fefdff", maxWidth: "680px", width: "100%",
+                                mt: 2, backgroundColor: "#006400", color: "#fefdff", maxWidth: "680px", width: "100%",
                                 '&.Mui-disabled': {
                                     backgroundColor: "rgba(74,124,177,0.2)",
                                     color: '#fefdff'
                                 }
                             }}
-                            disabled={(errors && errors.length > 0) || !team.name}>{t(teamId ? "modify" : "tournament.team.registration.register")}</Button>
+                            disabled={(errors && errors.length > 0) || !team.name}>{t(teamId ? "modify" : "tournament.team.registration.register")}
+                    </Button>
+                    <br/>
                     {teamId &&
-                        <Button color="error" onClick={deleteTeam}>{t('delete')}</Button>
+                        <Button sx={{mt: 2, maxWidth: "680px", width: "100%", backgroundColor: "#4a7cb1"}}
+                                onClick={() => navigator.clipboard.writeText(`${window.location}/validate`)}>{t('tournament.team.registration.copyValidationLink')}</Button>
                     }
-                </Grid>
-                <Grid xs={12}>
-
+                    <br/>
+                    {teamId &&
+                        <Button sx={{mt: 2, maxWidth: "680px", width: "100%"}} color="error"
+                                onClick={deleteTeam}>{t('delete')}</Button>
+                    }
                 </Grid>
                 <Grid xs={12} sx={{mt: 1}}>
-                    {teamId &&
-                        <Typography>{t('tournament.team.registration.link', {link: `${window.location}/validate`})}</Typography>
-                    }
                     {errors && errors.length > 0 && errors.map(error => (
                         <Typography key={error}>{t(error)}</Typography>
                     ))}

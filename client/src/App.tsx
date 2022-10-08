@@ -43,7 +43,7 @@ function App() {
             MuiButton: {
                 styleOverrides: {
                     root: ({ownerState}) => ({
-                        backgroundColor: '#4a7cb1',
+                        backgroundColor: (ownerState.color !== "error" ? '#4a7cb1' : "#8B0000"),
                         color: '#fefffa'
                     }),
                 },
