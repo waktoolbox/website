@@ -56,8 +56,8 @@ class DbWrapper {
     getTournamentAndTeams(id: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`WITH ti AS (SELECT (t.content ->> ('teamNumber'))::int as size,
-                                                 t.content as cont,
-                                                 t.id as id
+                                                 t.content                           as cont,
+                                                 t.id                                as id
                                           FROM tournaments t
                                           WHERE t.id = $1)
                               SELECT re.to as tournament, json_agg(re.ts) as teams
@@ -131,6 +131,21 @@ class DbWrapper {
                 .then(result => resolve(result.rows))
                 .catch(error => reject(error));
         });
+    }
+
+    getTournamentTeamsWithLimit(id: string): Promise<TournamentTeamModel[]> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT content
+                              FROM teams
+                              WHERE content ->> ('tournament') = $1
+                              ORDER BY createdAt
+                              LIMIT 64`, [id])
+                .then(result => {
+                    if (result.rows.length <= 0) return reject(undefined);
+                    resolve(result.rows as TournamentTeamModel[]);
+                })
+                .catch(error => reject(error));
+        })
     }
 
     saveTeam(team: TournamentTeamModel): Promise<string | undefined> {

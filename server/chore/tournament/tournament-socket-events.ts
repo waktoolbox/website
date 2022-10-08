@@ -22,8 +22,8 @@ export function registerTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.team.not.found'));
     });
-    socket.on('tournament::getWithTeams', (id, callback) => {
-        DbHelper.getTournamentAndTeams(id)
+    socket.on('tournament::getTournamentTeamsWithLimit', (id, callback) => {
+        DbHelper.getTournamentTeamsWithLimit(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });

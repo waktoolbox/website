@@ -14,6 +14,7 @@
   "send": "Envoyer",
   "tournament": {
     "administrate": "Administrer",
+    "admins": "Organisateurs",
     "cant": {
       "create": "Impossible de créer le tournoi",
       "save.tournament": "Impossible de sauvegarder le tournoi",
@@ -27,6 +28,7 @@
       "allTournaments": "Tous les tournois",
       "allRegistrations": "Toutes les inscriptions",
       "captain": "Capitaine",
+      "information": "Informations",
       "level": "Niveau : {{lvl}}",
       "levelAndServer": "Niv. {{level}} / {{server}}",
       "manageMyTeam": "Modifier mon équipe",
@@ -37,7 +39,8 @@
       "player": "Joueur",
       "register": "S'inscrire",
       "results": "Résultats",
-      "teams": "{{qty}} équipes de taille {{size}}"
+      "teams": "{{qty}} équipes de taille {{size}}",
+      "teamsButton": "Équipes"
     },
     "endDate": "Date de fin",
     "editor": {
@@ -83,7 +86,10 @@
     "level": "Niveau",
     "matches": "Matchs",
     "name": "Nom",
+    "nbVictories": "{{nb}} Victoires",
+    "nbMatchesPlayed": "{{nb}} Matchs joués",
     "not.found": "Tournoi introuvable",
+    "referees": "Arbitres",
     "registrations": "Inscriptions",
     "rewards": "Récompenses",
     "rules": "Règles",
@@ -91,7 +97,9 @@
     "saved.team": "Équipe sauvegardée",
     "startDate": "Date de début",
     "team": {
+      "goTo": "Voir l'équipe",
       "not.found": "Impossible de trouver l'équipe",
+      "participating": "<span>Équipes</span> participantes",
       "registration": {
         "addPlayer": "Ajouter un joueur",
         "addPlayerToTeam": "<span>Joueurs</span> de l'équipe :",
