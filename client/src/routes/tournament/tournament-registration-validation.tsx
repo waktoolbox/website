@@ -54,7 +54,7 @@ export default function TournamentRegistrationValidation() {
     }
 
     return (
-        <Stack spacing={1}>
+        <Stack spacing={1} sx={{width: "fit-content", margin: "auto", mt: 2}} justifyContent="center">
             <Typography variant="h4">{t('tournament.team.registration.validation.question')}</Typography>
             <Typography variant="h5">{team.name}</Typography>
             {team && team.players && team.players.map((playerId: string) => (
@@ -63,9 +63,11 @@ export default function TournamentRegistrationValidation() {
             ))}
 
             <Button onClick={validateMe} color="success" variant="contained"
+                    sx={{width: "50%", margin: "8px auto !important"}}
                     disabled={team.validatedPlayers && team.validatedPlayers.includes(me)}
                     hidden={!me || me.length <= 0}>{t("validate")}</Button>
             <Button onClick={invalidateMe} color="error" variant="contained"
+                    sx={{width: "50%", margin: "8px auto !important"}}
                     disabled={team && ((team.validatedPlayers && !team.validatedPlayers.includes(me)) || team.leader === me)}
                     hidden={!me || me.length <= 0}>{t("invalidate")}</Button>
         </Stack>
