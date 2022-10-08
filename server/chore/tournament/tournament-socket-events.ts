@@ -141,13 +141,11 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                         }
 
                         DbHelper.saveTeam(team)
-                            .then(result => {
-                                callback(result);
+                            .then(saveResult => {
+                                callback(saveResult);
                                 socket.emit('success', 'tournament.saved.team');
 
-                                if (!id) {
-                                    team.players.filter(p => p !== team.leader).forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join team ${team.name}. You can validate this here : ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
-                                }
+                                team.players.filter(p => p !== team.leader && (result ? !result.players.includes(p) : true)).forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join team ${team.name}. You can validate this here : ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
                             })
                             .catch(_ => socket.emit('error', 'tournament.cant.save.team'));
                     })

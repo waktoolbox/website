@@ -204,7 +204,7 @@ export default function TournamentRegistration() {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid xs={12} sx={{width: 'fit-content', mt: 3}}>
+                <Grid item xs={12} sx={{width: 'fit-content', mt: 3}}>
                     <Card sx={{width: 'fit-content', margin: "auto"}}>
                         <CardContent>
                             <Typography variant="h6" sx={{textAlign: 'left', mb: 2}}><Trans
@@ -244,7 +244,7 @@ export default function TournamentRegistration() {
                                 onClick={deleteTeam}>{t('delete')}</Button>
                     }
                 </Grid>
-                <Grid xs={12} sx={{mt: 1}}>
+                <Grid item xs={12} sx={{mt: 1}}>
                     {errors && errors.length > 0 && errors.map(error => (
                         <Typography key={error}>{t(error)}</Typography>
                     ))}

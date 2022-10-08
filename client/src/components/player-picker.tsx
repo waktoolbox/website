@@ -31,8 +31,10 @@ export function PlayerPicker({
             if (!accounts || accounts.length <= 0) return;
             if (accounts.length === 1) {
                 const data = {...localUserData};
+                data.id = accounts[0].id
+                data.discriminator = accounts[0].discriminator
                 data.verified = true;
-                setUserData(localUserData)
+                setUserData(data)
                 return;
             }
 
