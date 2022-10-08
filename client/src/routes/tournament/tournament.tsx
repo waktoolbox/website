@@ -117,16 +117,16 @@ export default function Tournament() {
                         <Grid item xs={12} md={10} xl={8} sx={{backgroundColor: "#1f333a", pb: 4}}>
                             <Stack direction="row" sx={{ml: 2, mt: 2}}>
                                 <Button variant="text"
-                                        style={{...MenuButtonsStyle, ...(tab == Tabs.HOME ? ActiveMenuButtonsStyle : {})}}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.HOME ? ActiveMenuButtonsStyle : {})}}
                                         onClick={() => changeTab(Tabs.HOME)}>
-                                    <BookmarksIcon sx={{color: (tab == Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
+                                    <BookmarksIcon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
                                     {t('tournament.display.information')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
                                 <Button variant="text"
-                                        style={{...MenuButtonsStyle, ...(tab == Tabs.TEAMS ? ActiveMenuButtonsStyle : {})}}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.TEAMS ? ActiveMenuButtonsStyle : {})}}
                                         onClick={() => changeTab(Tabs.TEAMS)}>
-                                    <Diversity3Icon sx={{color: (tab == Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
+                                    <Diversity3Icon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
                                     {t('tournament.display.teamsButton')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
@@ -152,7 +152,8 @@ export default function Tournament() {
                             </Stack>
                             <Divider sx={{ml: 3, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
 
-                            {tab == Tabs.HOME &&
+
+                            {tab === Tabs.HOME &&
                                 <Grid container>
                                     <Grid item lg={8} xs={12} sx={{textAlign: "start", pl: 4}}>
                                         <Stack>
@@ -240,7 +241,7 @@ export default function Tournament() {
                                 </Grid>
                             }
 
-                            {tab == Tabs.TEAMS &&
+                            {tab === Tabs.TEAMS &&
                                 <Grid container justifyContent="center">
                                     <Grid item xs={12}>
                                         <Typography variant="h4" sx={{textTransform: "uppercase", mt: 2, mb: 3}}>
