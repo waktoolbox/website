@@ -47,6 +47,9 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
         }
 
         if (!id) {
+            // TODO when creation opens to public : remove this
+            return socket.emit('info', 'tournament.creationComingLater')
+
             const tournament = {
                 ...data
             } as TournamentDefinition

@@ -22,7 +22,8 @@
       "save.teamPlayerAlreadyRegistered": "Impossible d'enregistrer l'équipe : un membre a déjà validé validé sa participation dans une autre équipe",
       "save.tournamentAlreadyStarted": "Impossible d'enregistrer l'équipe : le tournoi a déjà commencé"
     },
-    "create": "Créer un tournoi",
+    "create": "Gestion de tournoi",
+    "creationComingLater": "La création de tournoi est désactivée pour l'instant  </3",
     "description": "Description",
     "display": {
       "allTournaments": "Tous les tournois",
