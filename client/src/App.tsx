@@ -43,7 +43,8 @@ function App() {
             MuiButton: {
                 styleOverrides: {
                     root: ({ownerState}) => ({
-                        backgroundColor: '#4a7cb1'
+                        backgroundColor: '#4a7cb1',
+                        color: '#fefffa'
                     }),
                 },
             },
@@ -68,11 +69,20 @@ function App() {
                     }),
                 },
             },
-
             MuiDivider: {
                 styleOverrides: {
                     root: ({ownerState}) => ({
                         borderColor: '#284e51'
+                    }),
+                },
+            },
+
+            MuiTextField: {
+                styleOverrides: {
+                    root: ({ownerState}) => ({
+                        label: {
+                            color: '#546b73'
+                        }
                     }),
                 },
             }

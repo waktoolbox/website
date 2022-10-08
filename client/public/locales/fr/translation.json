@@ -94,13 +94,15 @@
       "not.found": "Impossible de trouver l'équipe",
       "registration": {
         "addPlayer": "Ajouter un joueur",
+        "addPlayerToTeam": "<span>Joueurs</span> de l'équipe :",
         "catchPhrase": "Phrase d'accroche",
         "link": "Envoyez ce lien à votre équipe pour qu'ils valident leur inscription : {{link}}",
         "name": "Nom de l'équipe",
         "players": "Joueurs",
         "register": "S'inscrire",
         "server": "Serveur",
-        "title": "Inscription d'une équipe",
+        "title": "Inscription d'une <span>équipe</span>",
+        "subtitle": "Informations d'<span>équipe</span> :",
         "validation": {
           "question": "Voulez-vous valider votre participation à cette équipe ?"
         }

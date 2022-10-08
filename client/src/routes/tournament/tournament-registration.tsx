@@ -1,5 +1,5 @@
-import {Box, Button, MenuItem, Select, Stack, TextField, Typography} from "@mui/material";
-import {useTranslation} from "react-i18next";
+import {Button, Card, CardContent, Grid, MenuItem, Stack, TextField, Typography} from "@mui/material";
+import {Trans, useTranslation} from "react-i18next";
 import React, {ChangeEvent, useContext, useEffect, useState} from "react";
 import {TournamentTeamModel} from "../../../../common/tournament/tournament-models";
 import {PlayerPicker} from "../../components/player-picker";
@@ -144,47 +144,115 @@ export default function TournamentRegistration() {
     }
 
     return (
-        <Stack spacing={1}>
-            <Typography variant="h4">{t('tournament.team.registration.title')}</Typography>
-            <TextField label={t('tournament.team.registration.name')} id="name" value={team.name} disabled={isStarted}
-                       onChange={handleChange}/>
-            <Select
-                value={pickedServer}
-                label={t('tournament.team.registration.server')}
-            >
-                {Object.keys(servers).map((server) => (
-                    <MenuItem
-                        key={server}
-                        onClick={() => setServer(server)}
-                        value={server}
-                    >
-                        {servers[server as any]}
-                    </MenuItem>
-                ))}
-            </Select>
-            <TextField label={t('tournament.team.registration.catchPhrase')} id="catchPhrase" value={team.catchPhrase}
-                       onChange={handleChange}/>
-            <Box>
-                <Typography variant="h6">{t('tournament.team.registration.players')}</Typography>
+        <Grid container>
+            <Grid item xs={12} sx={{
+                backgroundColor: '#162834',
+                height: '150px',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+            }}>
+                <Typography variant="h3"><Trans i18nKey="tournament.team.registration.title"
+                                                components={{span: <span className="blueWord"/>}}/></Typography>
+            </Grid>
+            <Grid container sx={{margin: 'auto'}}>
+                <Grid item md={5} sx={{mt: 3, pr: 2, justifyContent: "flex-end"}} display={{xs: 'none', md: 'flex'}}>
+                    <img src="/images/osamodas_registration.jpg" alt="Osamodas"/>
+                </Grid>
+                <Grid item xs={12} md={7} sx={{height: '100%', mt: 3, textAlign: "left"}}>
+                    <Typography variant="h4" sx={{mb: 2, ml: 3}}><Trans i18nKey="tournament.team.registration.subtitle"
+                                                                        components={{
+                                                                            span: <span className="blueWord"/>
+                                                                        }}/></Typography>
 
-                {players && players.map((player, index) => (
-                    <PlayerPicker key={index} userData={player} disabled={isStarted}
-                                  setUserData={(data) => handlerPlayerChange(index, data)}/>
-                ))}
-                <Button disabled={isStarted} onClick={addPlayer}>{t('tournament.team.registration.addPlayer')}</Button>
-            </Box>
+                    <Grid container>
+                        <Grid xs={12}>
+                            <TextField sx={{width: '600px', m: 1}} label={t('tournament.team.registration.name')}
+                                       id="name"
+                                       value={team.name} disabled={isStarted}
+                                       onChange={handleChange}/>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                sx={{width: '600px', m: 1}}
+                                value={pickedServer}
+                                label={t('tournament.team.registration.server')}
+                                select
+                            >
+                                {Object.keys(servers).map((server) => (
+                                    <MenuItem sx={{
+                                        backgroundColor: '#213a41',
+                                        ':hover': {
+                                            backgroundColor: '#1f333a'
+                                        },
+                                        '&.Mui-selected': {backgroundColor: '#1f333a', fontWeight: 'bold'},
+                                        '&.Mui-selected:hover': {backgroundColor: '#1f333a'}
+                                    }}
+                                              key={server}
+                                              onClick={() => setServer(server)}
+                                              value={server}
+                                    >
+                                        {servers[server as any]}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid xs={12}>
+                            <TextField sx={{width: '600px', m: 1}} label={t('tournament.team.registration.catchPhrase')}
+                                       id="catchPhrase" value={team.catchPhrase}
+                                       onChange={handleChange}/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid xs={12} sx={{width: 'fit-content', mt: 3}}>
+                    <Card sx={{width: 'fit-content', margin: "auto"}}>
+                        <CardContent>
+                            <Typography variant="h6" sx={{textAlign: 'left', mb: 2}}><Trans
+                                i18nKey="tournament.team.registration.addPlayerToTeam"
+                                components={{span: <span className="blueWord"/>}}/></Typography>
 
-            <Button onClick={registerTeam}
-                    disabled={(errors && errors.length > 0) || !team.name}>{t(teamId ? "modify" : "tournament.team.registration.register")}</Button>
-            {teamId &&
-                <Button color="error" onClick={deleteTeam}>{t('delete')}</Button>
-            }
-            {teamId &&
-                <Typography>{t('tournament.team.registration.link', {link: `${window.location}/validate`})}</Typography>
-            }
-            {errors && errors.length > 0 && errors.map(error => (
-                <Typography key={error}>{t(error)}</Typography>
-            ))}
-        </Stack>
+                            <Stack spacing={1}>
+                                {players && players.map((player, index) => (
+                                    <PlayerPicker key={index} userData={player} disabled={isStarted}
+                                                  setUserData={(data) => handlerPlayerChange(index, data)}/>
+
+                                ))}
+                            </Stack>
+                            <Button disabled={isStarted} sx={{mt: 2, width: "100%", backgroundColor: "#017d7f"}}
+                                    onClick={addPlayer}>{t('tournament.team.registration.addPlayer')}</Button>
+                        </CardContent>
+                    </Card>
+
+                    <div>
+
+                    </div>
+
+                    <Button onClick={registerTeam}
+                            sx={{
+                                mt: 2, backgroundColor: "#4a7cb1", color: "#fefdff", maxWidth: "680px", width: "100%",
+                                '&.Mui-disabled': {
+                                    backgroundColor: "rgba(74,124,177,0.2)",
+                                    color: '#fefdff'
+                                }
+                            }}
+                            disabled={(errors && errors.length > 0) || !team.name}>{t(teamId ? "modify" : "tournament.team.registration.register")}</Button>
+                    {teamId &&
+                        <Button color="error" onClick={deleteTeam}>{t('delete')}</Button>
+                    }
+                </Grid>
+                <Grid xs={12}>
+
+                </Grid>
+                <Grid xs={12} sx={{mt: 1}}>
+                    {teamId &&
+                        <Typography>{t('tournament.team.registration.link', {link: `${window.location}/validate`})}</Typography>
+                    }
+                    {errors && errors.length > 0 && errors.map(error => (
+                        <Typography key={error}>{t(error)}</Typography>
+                    ))}
+                </Grid>
+            </Grid>
+
+        </Grid>
     )
 }

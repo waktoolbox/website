@@ -23,6 +23,11 @@ export default function LanguagePicker() {
                 value={language}
                 label={languages[i18n.resolvedLanguage].nativeName}
                 input={<StyledSelectInput/>}
+                sx={{
+                    '.MuiSvgIcon-root ': {
+                        fill: "#325664 !important",
+                    }
+                }}
                 MenuProps={MenuProps}
             >
                 {Object.keys(languages).map((lng) => (

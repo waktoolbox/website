@@ -1,4 +1,4 @@
-import {Box, Button, Modal, Stack, TextField} from "@mui/material";
+import {Box, Button, Grid, Modal, Stack, TextField} from "@mui/material";
 import {ChangeEvent, useContext, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -65,22 +65,37 @@ export function PlayerPicker({
     }
 
     return (
-        <Stack direction="row">
-            <TextField id="username" label={t("discord.pseudo")} value={localUserData.username}
-                       disabled={disabled || localUserData.locked} onChange={handleChange}/>
-            <TextField id="discriminator" label={t("discord.discriminator")} value={localUserData.discriminator}
-                       onChange={handleChange} disabled/>
+        <Grid container>
+            <Grid item xs={5}>
+                <TextField id="username" label={t("discord.pseudo")} value={localUserData.username}
+                           disabled={disabled || localUserData.locked} onChange={handleChange}/>
+            </Grid>
+            <Grid item xs={2}>
+                <TextField id="discriminator" label={t("discord.discriminator")} value={localUserData.discriminator}
+                           onChange={handleChange} disabled/>
+            </Grid>
+            <Grid item xs={2}>
+                <Button sx={{ml: 1, height: "100%", backgroundColor: "#546b73"}} disabled={disabled}
+                        onClick={verifyPlayer}>{t('verify')}</Button>
+            </Grid>
+            <Grid item xs={1}>
+                {localUserData.verified &&
+                    <CheckCircleIcon sx={{height: "100%", fontSize: 40, color: "#057b7f"}}/>
+                }
+                {!localUserData.verified &&
+                    <RadioButtonUncheckedIcon sx={{height: "100%", fontSize: 40}}/>
+                }
+            </Grid>
+            <Grid item xs={1} sx={{ml: 1}}>
+                <Button sx={{
+                    height: "100%", backgroundColor: "darkRed",
+                    '&.Mui-disabled': {
+                        backgroundColor: 'rgba(139,0,0,0.2)'
+                    }
+                }} disabled={disabled || localUserData.locked || !remove} color="error"
+                        onClick={removePlayer}><DeleteIcon/></Button>
+            </Grid>
 
-            {localUserData.verified &&
-                <CheckCircleIcon/>
-            }
-            {!localUserData.verified &&
-                <RadioButtonUncheckedIcon/>
-            }
-            <Button disabled={disabled} onClick={verifyPlayer}>{t('verify')}</Button>
-            {!localUserData.locked && remove &&
-                <Button disabled={disabled} onClick={removePlayer}><DeleteIcon/></Button>
-            }
 
             <Modal open={discriminators.length > 0}>
                 <Box sx={{
@@ -89,7 +104,6 @@ export function PlayerPicker({
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
                     width: 400,
-                    bgcolor: 'background.paper',
                     border: '2px solid #000',
                     boxShadow: 24,
                     pt: 2,
@@ -103,6 +117,6 @@ export function PlayerPicker({
                     </Stack>
                 </Box>
             </Modal>
-        </Stack>
+        </Grid>
     )
 }
