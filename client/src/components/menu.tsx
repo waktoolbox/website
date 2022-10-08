@@ -122,7 +122,7 @@ export default function Menu() {
 
                         <Grid container justifyContent="flex-end">
                             {!userContext.userState.connected &&
-                                <Link to="/login">
+                                <a href={process.env.REACT_APP_DISCORD_OAUTH_URL}>
                                     <Button sx={{
                                         borderColor: '#00ead1 !important',
                                         color: '#fefffa',
@@ -131,7 +131,7 @@ export default function Menu() {
                                         <PersonIcon sx={{ml: -1, mr: 1, color: '#07c6b6'}}/>
                                         {t('connect')}
                                     </Button>
-                                </Link>
+                                </a>
                             }
                             {userContext.userState.connected &&
                                 <Button sx={{
