@@ -355,7 +355,7 @@ export default function TournamentEditor() {
                                         <TableCell>{team.catchPhrase}</TableCell>
                                         <TableCell>
                                             <Link
-                                                to={`/tournament/${tournament.id}/team/${team.id}`}>{t('tournament.editor.teamPage')}</Link>
+                                                to={`/tournament/${tournament.id}/tab/2/team/${team.id}`}>{t('tournament.editor.teamPage')}</Link>
                                             <Button color="error"
                                                     onClick={() => deleteTeam(team.id as string)}>{t('delete')}</Button>
                                         </TableCell>
