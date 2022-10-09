@@ -17,7 +17,7 @@ export interface TournamentDefinition {
 
     admins: string[];
     referees: string[];
-    streamers: TournamentStreamerModel[];
+    streamers: string[];
 }
 
 export interface TournamentPhaseDefinition {
@@ -101,9 +101,4 @@ export enum TournamentPhaseType {
     NONE,
     WAKFU_WARRIORS_ROUND_ROBIN,
     WAKFU_WARRIORS_BRACKET_TOURNAMENT
-}
-
-export interface TournamentStreamerModel {
-    id: string,
-    link: string
 }

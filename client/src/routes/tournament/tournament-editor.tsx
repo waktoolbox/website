@@ -19,11 +19,7 @@ import {
 import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
-import {
-    TournamentDefinition,
-    TournamentStreamerModel,
-    TournamentTeamModel
-} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
 import {validateTournamentDefinition} from "../../utils/tournament-validator";
 import {PlayerPicker} from "../../components/player-picker";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -56,8 +52,7 @@ export default function TournamentEditor() {
         username: "",
         discriminator: "",
         locked: false,
-        verified: false,
-        link: ""
+        verified: false
     });
 
     useEffect(() => {
@@ -121,7 +116,7 @@ export default function TournamentEditor() {
     }
 
     const onUsersOpen = () => {
-        socket.emit('account::findByIds', [...tournament.admins, ...tournament.referees, ...tournament.streamers.map(s => s.id)], (t: any[]) => {
+        socket.emit('account::findByIds', [...tournament.admins, ...tournament.referees, ...tournament.streamers], (t: any[]) => {
             setAccounts(t);
         });
     }
@@ -179,7 +174,7 @@ export default function TournamentEditor() {
     }
 
     const removeStreamer = (index: number) => {
-        socket.emit('tournament::admin:removeStreamer', tournament.id, tournament.streamers[index].id, index, (success: boolean) => {
+        socket.emit('tournament::admin:removeStreamer', tournament.id, tournament.streamers[index], (success: boolean) => {
             if (success) setTournament({
                 ...tournament,
                 streamers: tournament.streamers.filter((a, i) => index !== i)
@@ -195,16 +190,13 @@ export default function TournamentEditor() {
     }
 
     const handleNewStreamer = (data: any) => {
-        socket.emit('tournament::admin:addStreamer', tournament.id, {
-            id: data.id,
-            link: newStreamer.link
-        }, (success: boolean) => {
+        socket.emit('tournament::admin:addStreamer', tournament.id, data.id, (success: boolean) => {
             if (!success) return;
             setTournament({
                 ...tournament,
-                streamers: [...tournament.streamers, {id: data.id, link: newStreamer.link}]
+                streamers: [...tournament.streamers, data.id]
             })
-            setNewStreamer({username: "", discriminator: "", locked: false, verified: false, link: ""})
+            setNewStreamer({username: "", discriminator: "", locked: false, verified: false})
         })
     }
 
@@ -324,14 +316,12 @@ export default function TournamentEditor() {
                             <Grid item xs={6} md={4}>
                                 <Typography variant="h6">Streamers</Typography>
                                 <Stack direction="row">
-                                    <TextField id="link" label={t('tournament.editor.streamerLink')}
-                                               value={newStreamer.link} onChange={handleStreamerChange}/>
                                     <PlayerPicker userData={newStreamer}
                                                   setUserData={handleNewStreamer} remove={false}/>
                                 </Stack>
-                                {accounts && tournament && tournament.streamers && tournament.streamers.map((streamer: TournamentStreamerModel, index: number) => (
-                                    <Stack key={streamer.id} direction="row">
-                                        <Typography>{[accounts.find(p => streamer.id === p.id)].map(a => a.username + "#" + a.discriminator) + " - " + streamer.link}</Typography>
+                                {accounts && tournament && tournament.streamers && tournament.streamers.map((streamer: string, index: number) => (
+                                    <Stack key={streamer} direction="row">
+                                        <Typography>{[accounts.find(p => streamer === p.id)].map(a => a.username + "#" + a.discriminator)}</Typography>
                                         <Button onClick={() => removeStreamer(index)}><DeleteIcon/></Button>
                                     </Stack>
                                 ))}

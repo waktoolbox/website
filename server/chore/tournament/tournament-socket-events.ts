@@ -1,9 +1,5 @@
 import {Socket} from "socket.io";
-import {
-    TournamentDefinition,
-    TournamentStreamerModel,
-    TournamentTeamModel
-} from "../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../../common/tournament/tournament-models";
 import * as crypto from "crypto";
 // TODO sorry, lack of time
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";
@@ -301,32 +297,33 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             .catch((_) => callback(false))
     })
 
-    socket.on('tournament::admin:addStreamer', (tournamentId, streamer: TournamentStreamerModel, callback) => {
+    socket.on('tournament::admin:addStreamer', (tournamentId, streamer, callback) => {
         if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
                 DbHelper.rawQuery(`UPDATE tournaments
                                    SET content = jsonb_set(content, '{streamers}', content -> ('streamers') || $1)
-                                   WHERE id = $2`
-                    , [JSON.stringify(streamer), tournamentId])
+                                   WHERE id = $3
+                                     AND NOT content -> ('streamers') ? $2`
+                    , [JSON.stringify(streamer), streamer, tournamentId])
                     .then(result => callback(result.rowCount > 0))
                     .catch(error => callback(false))
             })
             .catch((_) => callback(false))
     })
 
-    socket.on('tournament::admin:removeStreamer', (tournamentId, id, index, callback) => {
+    socket.on('tournament::admin:removeStreamer', (tournamentId, id, callback) => {
         if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
                 DbHelper.rawQuery(`UPDATE tournaments
                                    SET content = jsonb_set(content, '{streamers}',
-                                                           (content -> ('streamers')) - $1::int)
+                                                           (content -> ('streamers')) - $1)
                                    WHERE id = $2
-                                     AND content -> ('streamers') -> $1::int ->> ('id') = $3`
-                    , [index, tournamentId, id])
+                                     AND content -> ('streamers') ? $1`
+                    , [id, tournamentId])
                     .then(result => callback(result.rowCount > 0))
                     .catch(error => callback(false))
             })

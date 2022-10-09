@@ -57,7 +57,6 @@ export function registerAccountLoggedInEvents(socket: Socket) {
     });
 
     socket.on("account::updateMyAccount", (ankamaName, ankamaDiscriminator, twitchUrl) => {
-        console.log(arguments)
         DbHelper.rawQuery(`UPDATE accounts
                            SET "ankamaName" = $2,
                                "ankamaDiscriminator" = $3,
