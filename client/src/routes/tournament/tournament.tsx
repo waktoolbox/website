@@ -30,6 +30,8 @@ const ActiveMenuButtonsStyle = {
     color: '#017d7f'
 }
 
+const accountPersistence = new Map<string, any>();
+
 export default function Tournament() {
     const {id, targetTab, teamId} = useParams();
     const [localTeamId, setLocalTeamId] = useState<string>(teamId as string);
@@ -50,19 +52,17 @@ export default function Tournament() {
                 return;
             }
 
-            setTournament(tournament);
-
-            socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
-                setMyTeam(team);
-                const toGatherAccounts = [...tournament.admins, ...tournament.referees, ...(team ? team.players : [])]
-
-                socket.emit('account::findByIds', toGatherAccounts, (accs: any[]) => {
-                    const newAccounts = new Map<string, any>(accounts);
-                    accs.forEach(acc => newAccounts.set(acc.id, acc))
-                    setAccounts(newAccounts)
-                })
+            socket.emit('account::findByIds', [...tournament.admins, ...tournament.referees], (accs: any[]) => {
+                accs.forEach(acc => accountPersistence.set(acc.id, acc))
+                setAccounts(accountPersistence)
+                setTournament(tournament);
             })
+
         });
+
+        socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
+            setMyTeam(team);
+        })
 
         if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -93,9 +93,8 @@ export default function Tournament() {
             if (!team) return;
 
             socket.emit('account::findByIds', team.players, (accs: any[]) => {
-                const newAccounts = new Map<string, any>(accounts);
-                accs.forEach(acc => newAccounts.set(acc.id, acc))
-                setAccounts(newAccounts)
+                accs.forEach(acc => accountPersistence.set(acc.id, acc))
+                setAccounts(accountPersistence)
                 setTeam(team);
             })
         })
@@ -199,10 +198,8 @@ export default function Tournament() {
                                                 color: '#8299a1',
                                                 mb: 2
                                             }}>{t('tournament.description')}</Typography>
-                                            <Typography sx={{mb: 2}}>
-                                                <Typography sx={{mb: 2, whiteSpace: "pre-line"}}>
-                                                    {t('tmp.description')}
-                                                </Typography>
+                                            <Typography sx={{mb: 2, whiteSpace: "pre-line"}}>
+                                                {t('tmp.description')}
                                             </Typography>
 
                                             <Divider sx={{ml: -1, pr: 10, mt: 2, mb: 2}} variant="middle" flexItem/>
