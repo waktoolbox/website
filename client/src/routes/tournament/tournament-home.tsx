@@ -134,7 +134,7 @@ export default function TournamentHome() {
                                                     overriddenLink={`/tournament/${registration.id}/register`}/>
                             </Grid>
                         ))}
-                        {Array.from({length: !home || !home.tournaments ? 4 : Math.max(0, 6 - home.tournaments.length)}).map(index => (
+                        {Array.from({length: !home || !home.registration ? 4 : Math.max(0, 6 - home.registration.length)}).map(index => (
                             <Grid key={index as string} item xs={6} lg={2}>
                                 <Card sx={{
                                     mr: "auto",
