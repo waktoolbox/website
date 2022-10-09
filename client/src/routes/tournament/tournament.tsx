@@ -8,7 +8,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
 import {SocketContext} from "../../context/socket-context";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
 
@@ -44,6 +44,7 @@ export default function Tournament() {
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         socket.emit('tournament::get', id, (tournament: TournamentDefinition) => {
@@ -70,7 +71,11 @@ export default function Tournament() {
     const changeTab = (newTab: Tabs) => {
         if (tab === newTab) return;
         switch (newTab) {
+            case Tabs.HOME:
+                navigate(`/tournament/${id}`);
+                break;
             case Tabs.TEAMS:
+                navigate(`/tournament/${id}/tab/1`);
                 loadTeams();
                 break;
             case Tabs.SINGLE_TEAM:
@@ -150,23 +155,21 @@ export default function Tournament() {
                         </Grid>
                         <Grid item xs={12} md={10} xl={8} sx={{backgroundColor: "#1f333a", pb: 4}}>
                             <Stack direction={{xs: 'column', lg: 'row'}} sx={{ml: 2, mt: 2}}>
-                                <Link to={`/tournament/${id}`}>
-                                    <Button variant="text"
-                                            style={{...MenuButtonsStyle, ...(tab === Tabs.HOME ? ActiveMenuButtonsStyle : {})}}
-                                            onClick={() => changeTab(Tabs.HOME)}>
-                                        <BookmarksIcon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
-                                        {t('tournament.display.information')}
-                                    </Button>
-                                </Link>
+                                <Button variant="text"
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.HOME ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.HOME)}>
+                                    <BookmarksIcon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
+                                    {t('tournament.display.information')}
+                                </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
-                                <Link to={`/tournament/${id}/tab/1`}>
-                                    <Button variant="text"
-                                            style={{...MenuButtonsStyle, ...(tab === Tabs.TEAMS ? ActiveMenuButtonsStyle : {})}}
-                                            onClick={() => changeTab(Tabs.TEAMS)}>
-                                        <Diversity3Icon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
-                                        {t('tournament.display.teamsButton')}
-                                    </Button>
-                                </Link>
+                                {/*TODO later option on tournament to enable link before tournament start*/}
+                                <Button variant="text"
+                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.TEAMS ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.TEAMS)}>
+                                    <Diversity3Icon sx={{color: (tab === Tabs.HOME ? "017d7f" : "8299a1"), mr: 1}}/>
+                                    {t('tournament.display.teamsButton')}
+                                </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
                                 <Button variant="text" style={MenuButtonsStyle}
                                         disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
