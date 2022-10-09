@@ -56,6 +56,12 @@ export default function Tournament() {
 
         socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
             setMyTeam(team)
+
+            socket.emit('account::findByIds', [team.players], (accs: any[]) => {
+                const newAccounts = new Map<string, any>(accounts);
+                accs.forEach(acc => newAccounts.set(acc.id, acc))
+                setAccounts(newAccounts)
+            })
         })
 
         if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
@@ -85,6 +91,12 @@ export default function Tournament() {
         if (goToTab) setTab(Tabs.SINGLE_TEAM);
         socket.emit('tournament::getTeam', tid || localTeamId, (team: TournamentTeamModel) => {
             setTeam(team);
+
+            socket.emit('account::findByIds', [team.players], (accs: any[]) => {
+                const newAccounts = new Map<string, any>(accounts);
+                accs.forEach(acc => newAccounts.set(acc.id, acc))
+                setAccounts(newAccounts)
+            })
         })
     }
 

@@ -131,7 +131,7 @@ export default function TournamentHome() {
                             <Grid key={registration} item xs={6} lg={2}>
                                 <TournamentCardView tournament={registration} height={300} width={200} logoHeight={150}
                                                     overriddenLevelAndServerMt={-3} overriddenLevelAndServer={30}
-                                                    overriddenLink={`/tournament/${registration.id}/register`}/>
+                                                    overriddenLink={`/tournament/${registration.id}`}/>
                             </Grid>
                         ))}
                         {Array.from({length: !home || !home.registration ? 4 : Math.max(0, 6 - home.registration.length)}).map(index => (
