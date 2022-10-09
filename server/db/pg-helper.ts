@@ -141,7 +141,7 @@ class DbWrapper {
                               ORDER BY createdAt
                               LIMIT 64`, [id])
                 .then(result => {
-                    if (result.rows.length <= 0) return reject(undefined);
+                    if (result.rows.length <= 0) return resolve([]);
                     resolve(result.rows as TournamentTeamModel[]);
                 })
                 .catch(error => reject(error));
