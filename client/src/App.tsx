@@ -106,7 +106,7 @@ function App() {
                 <Typography
                     sx={{color: "#368488", fontSize: '0.8rem'}}>{t('waktool.wakfu')}</Typography>
                 <Typography
-                    sx={{mb: '3px', fontSize: '0.8rem'}}>{t('waktool.login')}</Typography>
+                    sx={{mb: '16px', fontSize: '0.8rem'}}>{t('waktool.login')}</Typography>
             </footer>
         </div>
     );
