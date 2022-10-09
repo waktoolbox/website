@@ -166,7 +166,7 @@ export default function TournamentRegistration() {
                                                                         }}/></Typography>
 
                     <Grid container>
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <TextField sx={{width: '600px', m: 1}} label={t('tournament.team.registration.name')}
                                        id="name"
                                        value={team.name} disabled={isStarted}
@@ -197,7 +197,7 @@ export default function TournamentRegistration() {
                                 ))}
                             </TextField>
                         </Grid>
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <TextField sx={{width: '600px', m: 1}} label={t('tournament.team.registration.catchPhrase')}
                                        id="catchPhrase" value={team.catchPhrase}
                                        onChange={handleChange}/>

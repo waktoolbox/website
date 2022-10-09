@@ -97,7 +97,7 @@ export default function TournamentHome() {
                     </Typography>
                     <Grid container spacing={2}>
                         {home && home.tournaments && home.tournaments.length > 0 && home.tournaments.map((tournament: any) => (
-                            <Grid item xs={6} lg={3}>
+                            <Grid key={tournament} item xs={6} lg={3}>
                                 <TournamentCardView tournament={tournament} height={432} width={200} logoHeight={200}
                                                     overriddenLevelAndServerMt={-3} overriddenLevelAndServer={30}/>
                             </Grid>
@@ -128,7 +128,7 @@ export default function TournamentHome() {
 
                     <Grid container spacing={2}>
                         {home && home.registration && home.registration.length > 0 && home.registration.map((registration: any) => (
-                            <Grid item xs={6} lg={2}>
+                            <Grid key={registration} item xs={6} lg={2}>
                                 <TournamentCardView tournament={registration} height={300} width={200} logoHeight={150}
                                                     overriddenLevelAndServerMt={-3} overriddenLevelAndServer={30}
                                                     overriddenLink={`/tournament/${registration.id}/register`}/>
@@ -159,6 +159,7 @@ export default function TournamentHome() {
                     </Typography>
                     <Card sx={{m: 1, backgroundColor: "#152429"}}>
                         <CardContent>
+                            {/*TODO v2*/}
                             {home && home.matches && home.matches.length > 0 && home.matches.map((match: any) => (
                                 // <Link key={match.id} to={`/tournament/${featured.id}`}>
                                 //     <Typography>{featured.name + " - " + featured.startdate + " -> " + featured.enddate}</Typography>

@@ -10,7 +10,7 @@ import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tour
 import {SocketContext} from "../../context/socket-context";
 import {Link, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
-import {Button, Card, CardContent, Divider, Grid, Stack, Typography} from "@mui/material";
+import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
 
 enum Tabs {
     HOME,
@@ -185,19 +185,58 @@ export default function Tournament() {
                                                 color: '#8299a1',
                                                 mb: 2
                                             }}>{t('tournament.description')}</Typography>
-                                            <Typography sx={{mb: 2}}>TODO description</Typography>
+                                            <Typography sx={{mb: 2}}>
+                                                <Typography sx={{mb: 2, whiteSpace: "pre-line"}}>
+                                                    {t('tmp.description')}
+                                                </Typography>
+                                            </Typography>
+
                                             <Divider sx={{ml: -1, pr: 10, mt: 2, mb: 2}} variant="middle" flexItem/>
                                             <Typography variant="h5" sx={{
                                                 color: '#8299a1',
                                                 mb: 2
                                             }}>{t('tournament.rewards')}</Typography>
-                                            <Typography sx={{mb: 2}}>TODO rewards</Typography>
+                                            {/*TODO later real rewards here*/}
+                                            <Typography sx={{mb: 2, whiteSpace: "pre-line"}}>
+                                                {t('tmp.rewards')}
+                                            </Typography>
+
                                             <Divider sx={{ml: -1, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
                                             <Typography variant="h5" sx={{
                                                 color: '#8299a1',
                                                 mb: 2
                                             }}>{t('tournament.rules')}</Typography>
-                                            <Typography sx={{mb: 2}}>TODO rules</Typography>
+                                            {/*TODO later real rules here*/}
+                                            <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_en-us.pdf"
+                                               target="_blank">
+                                                <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
+                                                    <img src={`/flags/en.svg`} alt={`flag_en`}/>
+                                                </Icon>
+                                                <Typography display="inline">Rules</Typography>
+                                            </a>
+                                            <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-04/WAKFU_Warriors_2022_Reglement.pdf"
+                                               target="_blank">
+                                                <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
+                                                    <img src={`/flags/fr.svg`} alt={`flag_fr`}/>
+                                                </Icon>
+                                                <Typography display="inline">Règlement</Typography>
+                                            </a>
+                                            <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_pt-br.pdf"
+                                               target="_blank">
+                                                <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
+                                                    <img src={`/flags/pt.svg`} alt={`flag_pt`}/>
+                                                </Icon>
+                                                <Typography display="inline">Regulamento</Typography>
+                                            </a>
+                                            {/*<a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_pt-br.pdf" target="_blank">*/}
+                                            <div>
+                                                <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
+                                                    <img src={`/flags/es.svg`} alt={`flag_es`}/>
+                                                </Icon>
+                                                <Typography display="inline">La traducción del reglamento estará
+                                                    disponible próximamente.</Typography>
+                                            </div>
+                                            {/*</a>*/}
                                         </Stack>
                                     </Grid>
                                     <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>
@@ -243,8 +282,8 @@ export default function Tournament() {
                                                         mb: 1
                                                     }}>{t('tournament.admins')}</Typography>
                                                     {tournament.admins.map(admin => (
-                                                        <Typography
-                                                            sx={{color: "#8299a1"}}>{[accounts.get(admin)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
+                                                        <Typography key={admin}
+                                                                    sx={{color: "#8299a1"}}>{[accounts.get(admin)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
                                                     ))}
                                                 </CardContent>
                                             </Card>
@@ -256,8 +295,8 @@ export default function Tournament() {
                                                         mb: 1
                                                     }}>{t('tournament.referees')}</Typography>
                                                     {tournament.referees.map(referee => (
-                                                        <Typography
-                                                            sx={{color: "#8299a1"}}>{[accounts.get(referee)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
+                                                        <Typography key={referee}
+                                                                    sx={{color: "#8299a1"}}>{[accounts.get(referee)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
                                                     ))}
                                                 </CardContent>
                                             </Card>
@@ -276,7 +315,7 @@ export default function Tournament() {
                                     </Grid>
                                     <Grid item xs={12}>
                                         {teams && teams.length > 0 && teams.map(team => (
-                                            <Card sx={{
+                                            <Card key={team} sx={{
                                                 m: 3,
                                                 borderRadius: 4,
                                                 boxShadow: '5px 5px 15px 0px #000000',
@@ -388,7 +427,7 @@ export default function Tournament() {
                                                         mb: 1
                                                     }}>{t('tournament.team.members')}</Typography>
                                                     {team.players.map(player => (
-                                                        <Typography sx={{color: "#8299a1"}}>
+                                                        <Typography key={player} sx={{color: "#8299a1"}}>
                                                             {[accounts.get(player)].map(a => !a ? "" : a.username + "#" + a.discriminator)}
                                                             {team?.validatedPlayers.includes(player) &&
                                                                 <CheckIcon sx={{

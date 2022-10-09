@@ -90,7 +90,7 @@ export default function Menu() {
                                 <List>
                                     <ListItem key="participations.myTeams"
                                               sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
-                                        {/*TODO setup tournament creation*/}
+                                        {/*TODO later setup tournament creation*/}
                                         <ListItemText primary={t('tournament.create') + " - " + t('coming.soon')}/>
                                     </ListItem>
                                 </List>

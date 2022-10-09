@@ -1,7 +1,136 @@
 {
-  "connect": "Login",
+  "actions": "Actions",
+  "coming.soon": "Coming soon",
+  "connect": "Connect",
+  "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
+  "delete": "Delete",
+  "discord.discriminator": "# Discord",
+  "discord.pseudo": "Discord pseudo",
+  "disconnect": "Disconnect",
+  "holdings": "Holdings",
+  "invalidate": "Invalidate",
+  "loading": "Loading...",
+  "modify": "Modify",
+  "send": "Send",
   "tournament": {
-    "create": "Create a tournament",
-    "title": "Tournament"
+    "administrate": "Administrate",
+    "admins": "Organizers",
+    "cant": {
+      "create": "Unable to create tournament",
+      "save.tournament": "Unable to save tournament",
+      "save.team": "Unable to save team",
+      "save.teamPlayerAlreadyRegistered": "Unable to save team: a member already has validated his registration in another team",
+      "save.tournamentAlreadyStarted": "Unable to save team: tournament has started"
+    },
+    "create": "Tournament management",
+    "creationComingLater": "Tournament creation is disabled for now </3",
+    "description": "Description",
+    "display": {
+      "allTournaments": "All tournaments",
+      "allRegistrations": "All registrations",
+      "captain": "Captain",
+      "information": "Information",
+      "level": "Level: {{lvl}}",
+      "levelAndServer": "Lvl. {{level}} / {{server}}",
+      "manageMyTeam": "Edit my team",
+      "manageMyRegistration": "Edit my registration",
+      "myTeam": "My team",
+      "planning": "Planning",
+      "player": "Player",
+      "register": "Register",
+      "results": "Results",
+      "teamsButton": "Teams"
+    },
+    "endDate": "End date",
+    "editor": {
+      "addAdmin": "Add an admin",
+      "addReferee": "Add a referee",
+      "information": {
+        "general": "General information",
+        "phases": "Phases",
+        "teams": "Teams",
+        "users": "Users"
+      },
+      "registrationDate": "Registration date",
+      "streamerLink": "Streamer's channel",
+      "streamerName": "Streamer's name",
+      "teamPage": "Page",
+      "validatedPlayers": "{{x}}/{{y}}",
+      "validatedPlayersDesc": "Validated players"
+    },
+    "errors": {
+      "badServer": "Invalid server",
+      "badStartDate": "Invalid start date",
+      "badEndDate": "Invalid end date",
+      "badLevel": "Invalid level",
+      "missing.endDate": "Missing end date",
+      "missing.level": "Missing level",
+      "missing.name": "Missing name",
+      "missing.startDate": "Missing start date",
+      "teamNumber": "Missing teams number",
+      "teamTooBig": "Team is too big",
+      "too.big.catchPhrase": "Too long catch phrase",
+      "too.big.name": "Too big name"
+    },
+    "fromTo": "From {{from, datetime}} to {{to, datetime}}",
+    "home": {
+      "featured.title": "Featured <span>tournament</span>",
+      "matches.title": "Upcoming <span>matches</span>",
+      "matches.none": "No planned match for now",
+      "registrations.title": "<span>Registrations</span> in progress",
+      "tournaments.title": "<span>Tournaments</span> in progress",
+      "waktool": "Plane & simplify tournaments management on <span>Wakfu</span>"
+    },
+    "id": "Identifier",
+    "level": "Level",
+    "matches": "Matches",
+    "name": "Name",
+    "nbVictories": "{{nb}} Victories",
+    "nbMatchesPlayed": "{{nb}} Matches played",
+    "not.found": "Tournament not found",
+    "referees": "Referees",
+    "registrations": "Registrations",
+    "rewards": "Prizees",
+    "rules": "Rules",
+    "saved.tournament": "Tournament saved",
+    "saved.team": "Team saved",
+    "startDate": "Start date",
+    "team": {
+      "goTo": "Open team",
+      "members": "Members",
+      "not.found": "Unable to find team",
+      "participating": "Participating <span>teams</span>",
+      "registration": {
+        "addPlayer": "Add a player",
+        "addPlayerToTeam": "<span>Players</span> of team:",
+        "catchPhrase": "Catch phrase",
+        "copyValidationLink": "Copy validation link",
+        "name": "Team name",
+        "players": "Players",
+        "register": "Register",
+        "server": "Server",
+        "title": "Register a <span>team</span>",
+        "subtitle": "<span>Team</span> information:",
+        "validation": {
+          "question": "Do you want to validate your registration to this team?"
+        }
+      }
+    },
+    "teams": "Teams",
+    "teamNumber": "Teams number",
+    "teamSize": "Team size",
+    "tools": "Tools",
+    "title": "Tournament",
+    "titles": "Tournaments"
+  },
+  "validate": "Validate",
+  "verify": "Verify",
+  "waktool": {
+    "wakfu": "Wakfu is a MMORPG published by Ankama Studio. All rights reserved.\nThe \"Waktool\" website is an unofficial community fansite of the MMORPG Wakfu without any link to Ankama.",
+    "login": "Please note! The entire Waktool team will never ask you for your login details."
+  },
+  "tmp": {
+    "description": "For this all-new edition, form teams of up to six players (private individuals) and get Build 230 ready for epic battles in a six-versus-six format on the beta server. The machines in Ecaflipus will provide equipment for level brackets 200–230, with white sockets for which everything needed for enchantment will be made available for free. Furthermore, if you're feeling all lone warrior, six-heroes mode will be available just for the occasion.\n\nAfter the qualifiers with four pools of sixteen teams, the result will be a tree of thirty-two teams where the best players in the inter-server PvP battles will compete!",
+    "rewards": "Third Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- a special title,\n- a Bronze Trophy decoration,\n- and a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, - and Justice Knight packs – along with a 1-month booster).\n\nSecond Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- a special title,\n- a Silver Trophy decoration,\n- a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and - Justice Knight packs – along with a 1-month booster),\n- and an extra 1-month booster.\n\nFirst Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- an all-new cosmetic aura,\n- a special title,\n- a Gold Trophy decoration,\n- a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and Justice Knight packs – along with a 1-month booster),\n- and an extra 2-month booster."
   }
 }

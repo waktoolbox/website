@@ -37,7 +37,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
                 .map(id => teamsMap.get(id))
                 .filter(t => t?.winInPhaseOne || 0 >= 2);
             if (!teams) {
-                // TODO v1 what do we do if there is no teams
+                // TODO v2 what do we do if there is no teams
                 return;
             }
 
