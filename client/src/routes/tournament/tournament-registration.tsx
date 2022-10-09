@@ -157,9 +157,10 @@ export default function TournamentRegistration() {
                 height: '150px',
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
+                textTransform: "uppercase"
             }}>
-                <Typography variant="h3"><Trans i18nKey="tournament.team.registration.title"
+                <Typography variant="h4"><Trans i18nKey="tournament.team.registration.title"
                                                 components={{span: <span className="blueWord"/>}}/></Typography>
             </Grid>
             <Grid container sx={{margin: 'auto'}}>

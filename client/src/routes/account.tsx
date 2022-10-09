@@ -49,9 +49,10 @@ export default function Account() {
                 height: '150px',
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
+                textTransform: "uppercase"
             }}>
-                <Typography variant="h3"><Trans i18nKey="account.title"
+                <Typography variant="h4"><Trans i18nKey="account.title"
                                                 components={{span: <span className="blueWord"/>}}/></Typography>
             </Grid>
 
