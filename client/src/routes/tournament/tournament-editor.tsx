@@ -182,13 +182,6 @@ export default function TournamentEditor() {
         })
     }
 
-    const handleStreamerChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setNewStreamer({
-            ...newStreamer,
-            [event.target.id]: event.target.value
-        })
-    }
-
     const handleNewStreamer = (data: any) => {
         socket.emit('tournament::admin:addStreamer', tournament.id, data.id, (success: boolean) => {
             if (!success) return;

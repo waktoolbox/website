@@ -209,21 +209,21 @@ export default function Tournament() {
                                             }}>{t('tournament.rules')}</Typography>
                                             {/*TODO later real rules here*/}
                                             <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_en-us.pdf"
-                                               target="_blank">
+                                               rel="noreferrer" target="_blank">
                                                 <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
                                                     <img src={`/flags/en.svg`} alt={`flag_en`}/>
                                                 </Icon>
                                                 <Typography display="inline">Rules</Typography>
                                             </a>
                                             <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-04/WAKFU_Warriors_2022_Reglement.pdf"
-                                               target="_blank">
+                                               rel="noreferrer" target="_blank">
                                                 <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
                                                     <img src={`/flags/fr.svg`} alt={`flag_fr`}/>
                                                 </Icon>
                                                 <Typography display="inline">Règlement</Typography>
                                             </a>
                                             <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_pt-br.pdf"
-                                               target="_blank">
+                                               rel="noreferrer" target="_blank">
                                                 <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
                                                     <img src={`/flags/pt.svg`} alt={`flag_pt`}/>
                                                 </Icon>
