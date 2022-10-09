@@ -1,4 +1,13 @@
 {
+  "account": {
+    "ankamaName": "Pseudo Ankama",
+    "ankamaDiscriminator": "# Ankama",
+    "menuItem": "Mon compte",
+    "unableToSave": "Impossible de sauvegarder les modifications du compte",
+    "saved": "Compte sauvegardé",
+    "title": "Gestion de <span>compte</span>",
+    "twitchUrl": "Chaîne Twitch"
+  },
   "actions": "Actions",
   "coming.soon": "Arrivera prochainement",
   "connect": "Connexion",
@@ -11,6 +20,7 @@
   "invalidate": "Invalider",
   "loading": "Chargement...",
   "modify": "Modifier",
+  "save": "Sauvegarder",
   "send": "Envoyer",
   "tournament": {
     "administrate": "Administrer",
@@ -79,7 +89,7 @@
       "matches.none": "Pas de match planifié pour le moment",
       "registrations.title": "<span>Inscriptions</span> en cours",
       "tournaments.title": "<span>Tournois</span> en cours",
-      "waktool": "Planifier & simplifier la gestion de vos tournois sur <span>Wakfu</span>"
+      "waktool": "Planifier & simplifier la gestion de tournois sur <span>Wakfu</span>"
     },
     "id": "Identifiant",
     "level": "Niveau",

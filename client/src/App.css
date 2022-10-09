@@ -21,6 +21,10 @@ a {
   text-decoration: inherit;
 }
 
+p {
+  word-wrap: break-word;
+}
+
 h3 {
   text-transform: uppercase;
 }

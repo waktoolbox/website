@@ -104,7 +104,8 @@ export default function Tournament() {
             {tournament &&
                 <div style={{width: "100%"}}>
                     <Grid item xs={12} sx={{width: "100%", backgroundColor: "#162834"}}>
-                        <img src={tournament.logo} alt="logo" style={{maxWidth: "1500px", height: "100%"}}/>
+                        <img src={tournament.logo} alt="logo"
+                             style={{maxWidth: "1268px", width: "100%", objectFit: "cover"}}/>
                     </Grid>
                     <Grid container justifyContent="center">
                         <Grid item xs={12} md={10} xl={8} sx={{backgroundColor: "#162329", display: "block"}}>
@@ -136,7 +137,7 @@ export default function Tournament() {
                             </Stack>
                         </Grid>
                         <Grid item xs={12} md={10} xl={8} sx={{backgroundColor: "#1f333a", pb: 4}}>
-                            <Stack direction="row" sx={{ml: 2, mt: 2}}>
+                            <Stack direction={{xs: 'column', lg: 'row'}} sx={{ml: 2, mt: 2}}>
                                 <Link to={`/tournament/${id}`}>
                                     <Button variant="text"
                                             style={{...MenuButtonsStyle, ...(tab === Tabs.HOME ? ActiveMenuButtonsStyle : {})}}

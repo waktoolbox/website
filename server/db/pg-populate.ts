@@ -19,6 +19,13 @@ export const pgInitDb = `
     ) NOT NULL
         );
 
+    ALTER TABLE accounts
+        ADD COLUMN IF NOT EXISTS "ankamaName" varchar (50);
+    ALTER TABLE accounts
+        ADD COLUMN IF NOT EXISTS "ankamaDiscriminator" varchar (5);
+    ALTER TABLE accounts
+        ADD COLUMN IF NOT EXISTS "twitchUrl" varchar (50);
+
     CREATE TABLE IF NOT EXISTS tournaments
     (
         id VARCHAR
@@ -42,4 +49,5 @@ export const pgInitDb = `
     (
     )
         );
+
 `

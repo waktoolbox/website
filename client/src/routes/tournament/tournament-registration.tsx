@@ -6,6 +6,7 @@ import {PlayerPicker} from "../../components/player-picker";
 import {validateTournamentTeam} from "../../utils/tournament-validator";
 import {SocketContext} from "../../context/socket-context";
 import {useNavigate, useParams} from "react-router-dom";
+import {UserContext} from "../../context/user-context";
 
 interface RegistrationPlayer {
     id?: string,
@@ -29,9 +30,15 @@ export default function TournamentRegistration() {
     const [errors, setErrors] = useState<string[]>();
     const [players, setPlayers] = useState<RegistrationPlayer[]>([]);
     const [isStarted, setIsStarted] = useState(true);
+    const userContext = useContext(UserContext);
     const socket = useContext(SocketContext);
 
+
     useEffect(() => {
+        if (!userContext.userState.connected) {
+            return navigate('/')
+        }
+
         const me = localStorage.getItem("discordId");
         if (!teamId) {
             socket.emit('account::findById', me, (account: any) => {
@@ -157,7 +164,7 @@ export default function TournamentRegistration() {
             </Grid>
             <Grid container sx={{margin: 'auto'}}>
                 <Grid item md={5} sx={{mt: 3, pr: 2, justifyContent: "flex-end"}} display={{xs: 'none', md: 'flex'}}>
-                    <img src="/images/osamodas_registration.jpg" alt="Osamodas"/>
+                    <img src="/images/osamodas_registration.png" alt="Osamodas"/>
                 </Grid>
                 <Grid item xs={12} md={7} sx={{height: '100%', mt: 3, textAlign: "left"}}>
                     <Typography variant="h4" sx={{mb: 2, ml: 3}}><Trans i18nKey="tournament.team.registration.subtitle"
@@ -225,7 +232,7 @@ export default function TournamentRegistration() {
 
                     <Button onClick={registerTeam}
                             sx={{
-                                mt: 2, backgroundColor: "#006400", color: "#fefdff", maxWidth: "680px", width: "100%",
+                                mt: 2, backgroundColor: "#4a7cb1", color: "#fefdff", maxWidth: "680px", width: "100%",
                                 '&.Mui-disabled': {
                                     backgroundColor: "rgba(74,124,177,0.2)",
                                     color: '#fefdff'

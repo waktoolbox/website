@@ -1,7 +1,7 @@
 import {Server, Socket} from "socket.io";
 import {verifyToken} from "../oauth/token";
 import {registerLoggedInTournamentEvents, registerTournamentEvents} from "../chore/tournament/tournament-socket-events";
-import {registerAccountEvents} from "./account-socket-events";
+import {registerAccountEvents, registerAccountLoggedInEvents} from "./account-socket-events";
 
 class Manager {
     private io?: Server;
@@ -33,6 +33,7 @@ function registerEvents(socket: Socket) {
 
 function registerLoggedInEvents(socket: Socket) {
     registerLoggedInTournamentEvents(socket);
+    registerAccountLoggedInEvents(socket);
 }
 
 export const SocketManager = new Manager();

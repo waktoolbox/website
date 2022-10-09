@@ -96,6 +96,13 @@ export default function Menu() {
                                 </List>
                             </Stack>
                         </ListItem>
+
+                        <ListItem key="account">
+                            <Link to="/account" hidden={!userContext.userState.connected}>
+                                <ListItemText primary={t('account.menuItem')}
+                                              sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}/>
+                            </Link>
+                        </ListItem>
                     </List>
                     {/*<Divider/>*/}
                 </Box>

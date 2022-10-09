@@ -1,16 +1,26 @@
 {
+  "account": {
+    "ankamaName": "Ankama nickname",
+    "ankamaDiscriminator": "# Ankama",
+    "menuItem": "My account",
+    "unableToSave": "Unable to save account modifications",
+    "saved": "Account saved",
+    "title": "<span>Account</span> management",
+    "twitchUrl": "Twitch URL"
+  },
   "actions": "Actions",
   "coming.soon": "Coming soon",
-  "connect": "Connect",
+  "connect": "Sign in",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
   "delete": "Delete",
   "discord.discriminator": "# Discord",
-  "discord.pseudo": "Discord pseudo",
-  "disconnect": "Disconnect",
-  "holdings": "Holdings",
+  "discord.pseudo": "Discord nickname",
+  "disconnect": "Log out",
+  "holdings": "Participation",
   "invalidate": "Invalidate",
   "loading": "Loading...",
   "modify": "Modify",
+  "save": "Save",
   "send": "Send",
   "tournament": {
     "administrate": "Administrate",
@@ -76,10 +86,10 @@
     "home": {
       "featured.title": "Featured <span>tournament</span>",
       "matches.title": "Upcoming <span>matches</span>",
-      "matches.none": "No planned match for now",
+      "matches.none": "No planned matches for now",
       "registrations.title": "<span>Registrations</span> in progress",
       "tournaments.title": "<span>Tournaments</span> in progress",
-      "waktool": "Plane & simplify tournaments management on <span>Wakfu</span>"
+      "waktool": "Plan & simplify your tourney management in <span>Wakfu</span>"
     },
     "id": "Identifier",
     "level": "Level",
@@ -102,7 +112,7 @@
       "participating": "Participating <span>teams</span>",
       "registration": {
         "addPlayer": "Add a player",
-        "addPlayerToTeam": "<span>Players</span> of team:",
+        "addPlayerToTeam": "Team <span>players</span>:",
         "catchPhrase": "Catch phrase",
         "copyValidationLink": "Copy validation link",
         "name": "Team name",
@@ -127,10 +137,10 @@
   "verify": "Verify",
   "waktool": {
     "wakfu": "Wakfu is a MMORPG published by Ankama Studio. All rights reserved.\nThe \"Waktool\" website is an unofficial community fansite of the MMORPG Wakfu without any link to Ankama.",
-    "login": "Please note! The entire Waktool team will never ask you for your login details."
+    "login": "Please note! The Waktool team will never ask your login details."
   },
   "tmp": {
     "description": "For this all-new edition, form teams of up to six players (private individuals) and get Build 230 ready for epic battles in a six-versus-six format on the beta server. The machines in Ecaflipus will provide equipment for level brackets 200–230, with white sockets for which everything needed for enchantment will be made available for free. Furthermore, if you're feeling all lone warrior, six-heroes mode will be available just for the occasion.\n\nAfter the qualifiers with four pools of sixteen teams, the result will be a tree of thirty-two teams where the best players in the inter-server PvP battles will compete!",
-    "rewards": "Third Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- a special title,\n- a Bronze Trophy decoration,\n- and a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, - and Justice Knight packs – along with a 1-month booster).\n\nSecond Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- a special title,\n- a Silver Trophy decoration,\n- a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and - Justice Knight packs – along with a 1-month booster),\n- and an extra 1-month booster.\n\nFirst Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- an all-new cosmetic aura,\n- a special title,\n- a Gold Trophy decoration,\n- a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and Justice Knight packs – along with a 1-month booster),\n- and an extra 2-month booster."
+    "rewards": "Third Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- a special title,\n- a Bronze Trophy decoration,\n- and a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and Justice Knight packs – along with a 1-month booster).\n\nSecond Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- a special title,\n- a Silver Trophy decoration,\n- a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and Justice Knight packs – along with a 1-month booster),\n- and an extra 1-month booster.\n\nFirst Place:\n- your choice of a PeeVeePee costume or a Buffalo Soldier costume,\n- an all-new cosmetic aura,\n- a special title,\n- a Gold Trophy decoration,\n- a \"Nora\" update pack (or another pack from the shop – excluding the Anathar, Magmog, and Justice Knight packs – along with a 1-month booster),\n- and an extra 2-month booster."
   }
 }

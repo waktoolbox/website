@@ -13,31 +13,37 @@ import {DiscordBot} from "../../discord/bot";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
+        if (!callback) return;
         DbHelper.getTournament(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
     socket.on('tournament::getTeam', (id, callback) => {
+        if (!callback) return;
         DbHelper.getTeam(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.team.not.found'));
     });
     socket.on('tournament::getTournamentTeamsWithLimit', (id, callback) => {
+        if (!callback) return;
         DbHelper.getTournamentTeamsWithLimit(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
     socket.on('tournament::isTournamentStarted', (id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentStarted(id).then(result => callback(result)).catch(_ => callback(true));
     })
 
     socket.on('tournament::home', (callback) => {
+        if (!callback) return;
         TournamentHomeProvider.getHome().then(home => callback(home)).catch(error => console.error(error));
     })
 }
 
 export function registerLoggedInTournamentEvents(socket: Socket) {
     socket.on('tournament::setBaseInformation', (id, data, callback) => {
+        if (!callback) return;
         const validationResult = validateTournamentDefinition(data as TournamentDefinition, Date.now());
         if (validationResult != undefined) return socket.emit('error', 'tournament.cant.save.tournament');
 
@@ -83,6 +89,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     });
 
     socket.on('tournament::registerTeam', (id, data, callback) => {
+        if (!callback) return;
         function reject() {
             return socket.emit('error', 'tournament.cant.save.team');
         }
@@ -145,7 +152,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                                 callback(saveResult);
                                 socket.emit('success', 'tournament.saved.team');
 
-                                team.players.filter(p => p !== team.leader && (result ? !result.players.includes(p) : true)).forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join team ${team.name}. You can validate this here : ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
+                                team.players.filter(p => p !== team.leader && (result ? !result.players.includes(p) : true)).forEach(player => DiscordBot.sendPrivateMessage(player, `You've been requested to join the team "${team.name}". You can validate it here: ${process.env.LOGON_REDIRECTION}/tournament/${team.tournament}/register/${team.id}/validate`))
                             })
                             .catch(_ => socket.emit('error', 'tournament.cant.save.team'));
                     })
@@ -161,12 +168,14 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     });
 
     socket.on('tournament::getMyTeam', (tournamentId, callback) => {
+        if (!callback) return;
         DbHelper.getValidatedTeamForPlayer(tournamentId, socket.data.user)
             .then(result => callback(result))
             .catch(error => callback(undefined));
     })
 
     socket.on('tournament::deleteMyTeam', (tournamentId, teamId, callback) => {
+        if (!callback) return;
         DbHelper.isTeamLeader(teamId, tournamentId, socket.data.user)
             .then(_ => {
                 DbHelper.deleteTeam(teamId)
@@ -178,6 +187,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:getAllTeams', (id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(id, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback([])
@@ -189,6 +199,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin::deleteTeam', (tournamentId, id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
@@ -200,6 +211,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::validatePlayer', (teamId, callback) => {
+        if (!callback) return;
         DbHelper.rawQuery(`UPDATE teams
                            SET content = jsonb_set(content, '{validatedPlayers}', content -> ('validatedPlayers') || $1)
                            WHERE id = $2
@@ -211,6 +223,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::invalidatePlayer', (teamId, callback) => {
+        if (!callback) return;
         DbHelper.rawQuery(`UPDATE teams
                            SET content = jsonb_set(content, '{validatedPlayers}',
                                                    (content -> ('validatedPlayers')) - $1)
@@ -223,6 +236,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:addAdmin', (tournamentId, id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
@@ -238,6 +252,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:removeAdmin', (tournamentId, id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
@@ -254,6 +269,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:addReferee', (tournamentId, id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
@@ -269,6 +285,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:removeReferee', (tournamentId, id, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
@@ -285,6 +302,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:addStreamer', (tournamentId, streamer: TournamentStreamerModel, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)
@@ -299,6 +317,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
     })
 
     socket.on('tournament::admin:removeStreamer', (tournamentId, id, index, callback) => {
+        if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
             .then(isAdmin => {
                 if (!isAdmin) return callback(false)

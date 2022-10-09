@@ -1,6 +1,7 @@
 import Menu from "./components/menu";
 import MySnackbar from "./components/snackbar";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Account from "./routes/account";
 import TournamentHome from "./routes/tournament/tournament-home";
 import TournamentView from "./routes/tournament/tournament";
 import TournamentEditor from "./routes/tournament/tournament-editor";
@@ -24,6 +25,9 @@ export function Home() {
             <MySnackbar/>
             <Routes>
                 <Route path="/" element={<TournamentHome/>}/>
+
+                <Route path="/account" element={<Account/>}/>
+
                 <Route path="/tournament/:id" element={<TournamentView/>}/>
                 <Route path="/tournament/:id/tab/:targetTab" element={<TournamentView/>}/>
                 <Route path="/tournament/:id/tab/:targetTab/team/:teamId" element={<TournamentView/>}/>
