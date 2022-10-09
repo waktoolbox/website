@@ -23,13 +23,13 @@ export interface TournamentHome {
 
 
 export const TournamentHomeProvider = new (class {
-    interval?: number;
+    interval?: NodeJS.Timer;
     cachedHome?: TournamentHome;
 
     getHome(): Promise<TournamentHome> {
         return new Promise(resolve => {
             if (!this.interval) {
-                setInterval(this.refreshHome, 5 * 60 * 1000);
+                this.interval = setInterval(this.refreshHome, 5 * 60 * 1000);
                 this.refreshHome().then(() => resolve(this.cachedHome as TournamentHome))
                 return;
             }
