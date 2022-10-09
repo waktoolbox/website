@@ -45,24 +45,24 @@ export default function Tournament() {
 
     useEffect(() => {
         socket.emit('tournament::get', id, (tournament: TournamentDefinition) => {
+            if (!tournament) {
+                console.error("Tournament not found");
+                return;
+            }
+
             setTournament(tournament);
 
-            socket.emit('account::findByIds', [...tournament.admins, ...tournament.referees], (accs: any[]) => {
-                const newAccounts = new Map<string, any>(accounts);
-                accs.forEach(acc => newAccounts.set(acc.id, acc))
-                setAccounts(newAccounts)
+            socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
+                setMyTeam(team);
+                const toGatherAccounts = [...tournament.admins, ...tournament.referees, ...(team ? team.players : [])]
+
+                socket.emit('account::findByIds', toGatherAccounts, (accs: any[]) => {
+                    const newAccounts = new Map<string, any>(accounts);
+                    accs.forEach(acc => newAccounts.set(acc.id, acc))
+                    setAccounts(newAccounts)
+                })
             })
         });
-
-        socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
-            setMyTeam(team)
-
-            socket.emit('account::findByIds', [team.players], (accs: any[]) => {
-                const newAccounts = new Map<string, any>(accounts);
-                accs.forEach(acc => newAccounts.set(acc.id, acc))
-                setAccounts(newAccounts)
-            })
-        })
 
         if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -90,12 +90,13 @@ export default function Tournament() {
     const loadTeam = (tid?: string, goToTab?: boolean) => {
         if (goToTab) setTab(Tabs.SINGLE_TEAM);
         socket.emit('tournament::getTeam', tid || localTeamId, (team: TournamentTeamModel) => {
-            setTeam(team);
+            if (!team) return;
 
-            socket.emit('account::findByIds', [team.players], (accs: any[]) => {
+            socket.emit('account::findByIds', team.players, (accs: any[]) => {
                 const newAccounts = new Map<string, any>(accounts);
                 accs.forEach(acc => newAccounts.set(acc.id, acc))
                 setAccounts(newAccounts)
+                setTeam(team);
             })
         })
     }
