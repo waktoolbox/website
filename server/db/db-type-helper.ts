@@ -3,7 +3,7 @@ import {TournamentPhaseData, TournamentTeamModel} from "../../common/tournament/
 export type DbTournamentData = {
     tournamentId: string;
     phase: number;
-    content: TournamentPhaseData<any, any>
+    content: TournamentPhaseData<any>
 }
 
 export type DbTeamWithContent = {

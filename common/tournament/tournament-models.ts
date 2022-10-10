@@ -29,9 +29,9 @@ export interface TournamentPhaseDefinition {
     poolNumber?: number;
 }
 
-export interface TournamentPhaseData<T extends TournamentPhaseTeamModel, M extends TournamentPhaseMatchModel> {
+export interface TournamentPhaseData<T extends TournamentPhaseTeamModel> {
     teams: T[];
-    matches: M[];
+    matches: string[];
     currentRound: number
 }
 
@@ -40,17 +40,20 @@ export interface TournamentRoundDefinition {
     bo: number;
 }
 
-export interface TournamentPhaseController<T extends TournamentPhaseTeamModel, M extends TournamentPhaseMatchModel, V extends TournamentPhaseData<T, M>> {
+export interface TournamentPhaseController<T extends TournamentPhaseTeamModel, V extends TournamentPhaseData<T>> {
     definition: TournamentPhaseDefinition;
     data: V;
 
     initTeams: (teams: string[]) => void;
-    initTeamsFromPreviousRound: <W extends TournamentPhaseTeamModel, X extends TournamentPhaseMatchModel, Y extends TournamentPhaseData<W, X>> (previousPhaseData: Y, qualifiedTeams: string[]) => void;
+    initTeamsFromPreviousRound: <W extends TournamentPhaseTeamModel, Y extends TournamentPhaseData<W>> (previousPhaseData: Y, qualifiedTeams: string[]) => void;
 
-    prepareRound: () => void;
-    mustGoToNextPhase: () => boolean;
-    mustGoToNextRound: () => boolean;
-    getQualifiedTeams: () => string[];
+    prepareRound(): Promise<boolean>;
+
+    mustGoToNextPhase(): Promise<boolean>;
+
+    mustGoToNextRound(): Promise<boolean>;
+
+    getQualifiedTeams(): string[];
 }
 
 export interface TournamentPhaseTeamModel {
@@ -85,13 +88,6 @@ export interface TournamentStatsClassModel {
     death: number;
 }
 
-export interface TournamentPhaseMatchModel {
-    id: string;
-    done: boolean;
-    teamA: string;
-    teamB: string;
-}
-
 // TODO v2
 export interface TournamentMatchModel {
     id?: string;
@@ -102,6 +98,7 @@ export interface TournamentMatchModel {
     referee?: string;
     winner?: string;
     round?: number;
+    tree?: number;
     rounds: TournamentMatchRoundModel[]
 }
 

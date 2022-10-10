@@ -11,11 +11,13 @@ import {
     WakfuWarriorsTeamModel
 } from "../../../../common/tournament/impl/wakfu-warriors";
 import * as crypto from "crypto";
+import {DbHelper} from "../../../db/pg-helper";
 
-export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel, WakfuWarriorsPhaseOneData> {
+export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsPhaseOneData> {
     tournament: TournamentDefinition;
     definition: TournamentPhaseDefinition;
     data: WakfuWarriorsPhaseOneData;
+    matches: WakfuWarriorsMatchModel[] = [];
 
     constructor(tournament: TournamentDefinition, definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseOneData) {
         this.tournament = tournament;
@@ -27,13 +29,14 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         return [...(this.data.teams.filter(t => t.winInPhaseOne >= 2).map(t => t.id) as string[])];
     }
 
-    mustGoToNextPhase(): boolean {
-        // TODO v2 migrate to a db request
-        return this.data.currentRound == 4 && this.data.matches.filter(m => !m.done).length == 0;
+    mustGoToNextPhase(): Promise<boolean> {
+        if (this.data.currentRound !== 4) return Promise.resolve(false);
+        return new Promise(resolve => this.allMatchesAreDoneForRound(3).then(res => resolve(res)))
     }
 
-    mustGoToNextRound(): boolean {
-        return false;
+    mustGoToNextRound(): Promise<boolean> {
+        if (this.data.currentRound > 3) return Promise.resolve(false);
+        return new Promise(resolve => this.allMatchesAreDoneForRound(this.data.currentRound - 1).then(res => resolve(res)))
     }
 
     initTeams(teams: string[]) {
@@ -49,65 +52,69 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         throw new Error("Can't init with previous data from phase 1")
     }
 
-    prepareRound() {
-        if (this.data.currentRound == 0) return this.preparePhase();
-
-        const teamsMap: Map<String, WakfuWarriorsTeamModel> = new Map()
-        this.data.teams.forEach(t => teamsMap.set(t.id || "", t));
-        const createdMatches = [];
-        for (const pool of this.data.teamPool) {
-            const index = this.data.teamPool.indexOf(pool);
-            const teams: (WakfuWarriorsTeamModel | undefined)[] = pool.teams
-                .map(id => teamsMap.get(id))
-                .filter(t => t?.winInPhaseOne || 0 < 2);
-            if (!teams) continue;
-
-            // noinspection JSAssignmentUsedAsCondition
-            for (let team: WakfuWarriorsTeamModel | undefined; team = teams.pop();) {
-                // tricky compute to identify sub-pool
-                const opponent = teams.find(t => t?.winInPhaseOne == team?.winInPhaseOne);
-
-                const uuid = crypto.randomUUID();
-                const match = {
-                    id: uuid,
-                    done: !opponent,
-                    teamA: team.id || "",
-                    teamB: opponent?.id || "",
-                    round: this.data.currentRound,
-                    pool: index
-                };
-                this.data.matches.push(match)
-                pool.matches.push(uuid);
-                createdMatches.push(match);
-            }
-        }
-
-        this.createMatches(createdMatches);
+    allMatchesAreDoneForRound(round: number): Promise<boolean> {
+        return new Promise(resolve => {
+            DbHelper.rawQuery(`SELECT COUNT(CASE WHEN content ->> ('done') = 'true' THEN 1 END) = COUNT(*) as done
+                               FROM matches
+                               WHERE "tournamentId" = $1
+                                 AND phase = $2
+                                 AND content ->> ('round') = $3`, [this.tournament.id, this.definition.phase, JSON.stringify(round)])
+                .then(result => resolve(result.rowCount <= 0 ? false : result.rows[0].done))
+                .catch(_ => resolve(false))
+        })
     }
 
-    createMatches(matches: WakfuWarriorsMatchModel[]) {
-        const dbMatches = matches.map(match => {
-            return {
-                id: match.id,
-                tournamentId: this.tournament.id,
-                phase: this.definition.phase,
+    prepareRound(): Promise<boolean> {
+        return new Promise(resolve => {
+            if (this.data.currentRound == 0) return this.preparePhase().then(result => resolve(result)).catch(_ => resolve(false));
 
-                content: {
-                    id: match.id,
-                    done: match.done,
-                    teamA: match.teamA,
-                    teamB: match.teamB,
-                    round: match.round,
-                    rounds: this.generateRoundForMatch()
+            const teamsMap: Map<String, WakfuWarriorsTeamModel> = new Map()
+            this.data.teams.forEach(t => teamsMap.set(t.id || "", t));
+            const createdMatches = [];
+            for (const pool of this.data.teamPool) {
+                const index = this.data.teamPool.indexOf(pool);
+                const teams: (WakfuWarriorsTeamModel | undefined)[] = pool.teams
+                    .map(id => teamsMap.get(id))
+                    .filter(t => t?.winInPhaseOne || 0 < 2);
+                if (!teams) continue;
+
+                const opponents = new Set();
+
+                // noinspection JSAssignmentUsedAsCondition
+                for (let team: WakfuWarriorsTeamModel | undefined; team = teams.pop();) {
+                    if (opponents.has(team.id)) continue;
+                    // tricky compute to identify sub-pool
+                    const opponent = teams.find(t => !opponents.has(t?.id) && t?.id !== team?.id && t?.winInPhaseOne == team?.winInPhaseOne);
+                    opponents.add(opponent?.id);
+
+                    const uuid = crypto.randomUUID();
+                    const match = {
+                        id: uuid,
+                        tournamentId: this.tournament.id,
+                        phase: this.definition.phase,
+                        content: {
+                            id: uuid,
+                            done: !opponent,
+                            teamA: team.id || "",
+                            teamB: opponent?.id || "",
+                            round: this.data.currentRound,
+                            pool: index,
+                            rounds: this.generateRoundForMatch()
+                        }
+                    };
+                    this.data.matches.push(uuid)
+                    pool.matches.push(uuid);
+                    createdMatches.push(match);
                 }
             }
-        });
 
-        // TODO v2
-        // const query = format(`INSERT INTO matches (id, "tournamentId", phase, content) VALUES %L`, dbMatches)
-        // DbHelper.rawQuery(query, [])
-        //     .then(result => console.log(result))
-        //     .catch(error => console.error("Error"))
+            DbHelper.rawQuery(`INSERT INTO matches (id, "tournamentId", phase, content)
+                               SELECT m.id, m."tournamentId", m.phase, m.content
+                               FROM jsonb_populate_recordset(NULL::matches, $1) AS m`,
+                [JSON.stringify(createdMatches)])
+                .then(result => resolve(true))
+                .catch(error => resolve(false))
+        })
     }
 
     generateRoundForMatch() {
@@ -122,7 +129,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         return result;
     }
 
-    preparePhase() {
+    preparePhase(): Promise<boolean> {
         const poolSize = this.definition.poolSize;
         const poolNumber = this.definition.poolNumber;
 
@@ -138,7 +145,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         }
 
         this.data.currentRound = 1;
-        this.prepareRound();
+        return this.prepareRound();
     }
 
     static getBaseData(): WakfuWarriorsPhaseOneData {
@@ -152,7 +159,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
 }
 
 // TODO v2
-export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel, WakfuWarriorsPhaseTwoData> {
+export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsPhaseTwoData> {
     data: WakfuWarriorsPhaseTwoData;
     definition: TournamentPhaseDefinition;
 
@@ -165,12 +172,12 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
         return [];
     }
 
-    mustGoToNextPhase(): boolean {
-        return false;
+    mustGoToNextPhase(): Promise<boolean> {
+        return Promise.resolve(false);
     }
 
-    mustGoToNextRound(): boolean {
-        return false;
+    mustGoToNextRound(): Promise<boolean> {
+        return Promise.resolve(false);
     }
 
     initTeams(teams: string[]) {
@@ -178,12 +185,12 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
     }
 
     // TODO later improve signature to avoid any here
-    initTeamsFromPreviousRound(previousPhaseData: TournamentPhaseData<any, any>, qualifiedTeams: string[]) {
+    initTeamsFromPreviousRound(previousPhaseData: TournamentPhaseData<any>, qualifiedTeams: string[]) {
         const previous = previousPhaseData as WakfuWarriorsPhaseOneData;
     }
 
-    prepareRound() {
-        return [];
+    prepareRound(): Promise<boolean> {
+        return new Promise((resolve, reject) => resolve(false));
     }
 
     static getBaseData(): WakfuWarriorsPhaseTwoData {
