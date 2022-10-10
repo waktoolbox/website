@@ -1,4 +1,4 @@
-import {TournamentMatchModel, TournamentPhaseData, TournamentTeamModel} from "../tournament-models";
+import {TournamentPhaseData, TournamentPhaseMatchModel, TournamentPhaseTeamModel,} from "../tournament-models";
 
 
 export interface WakfuWarriorsPhaseOneData extends TournamentPhaseData<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel> {
@@ -8,12 +8,12 @@ export interface WakfuWarriorsPhaseOneData extends TournamentPhaseData<WakfuWarr
 export interface WakfuWarriorsPhaseTwoData extends TournamentPhaseData<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel> {
 }
 
-export interface WakfuWarriorsTeamModel extends TournamentTeamModel {
+export interface WakfuWarriorsTeamModel extends TournamentPhaseTeamModel {
     winInPhaseOne: number;
 }
 
-export interface WakfuWarriorsMatchModel extends TournamentMatchModel {
-
+export interface WakfuWarriorsMatchModel extends TournamentPhaseMatchModel {
+    round: number;
 }
 
 export interface WakfuWarriorsTeamPool {

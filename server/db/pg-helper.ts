@@ -2,6 +2,7 @@ import pg, {QueryResult} from 'pg';
 import {pgInitDb} from "./pg-populate";
 import {Account} from "../account/account";
 import {TournamentDefinition, TournamentTeamModel} from "../../common/tournament/tournament-models";
+import {DbTeamWithContent, DbTournamentData} from "./db-type-helper";
 
 class DbWrapper {
     private pool?: pg.Pool;
@@ -38,6 +39,20 @@ class DbWrapper {
                 })
                 .catch(error => reject(error));
         })
+    }
+
+    getTournamentData(id: string, phase: number): Promise<DbTournamentData | undefined> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT *
+                              FROM tournaments_data
+                              WHERE "tournamentId" = $1
+                                AND phase = $2`, [id, phase])
+                .then(result => {
+                    if (result.rows.length <= 0) return reject(undefined);
+                    resolve(result.rows[0]);
+                })
+                .catch(error => reject(error));
+        });
     }
 
     getTournament(id: string): Promise<TournamentDefinition | undefined> {
@@ -133,7 +148,7 @@ class DbWrapper {
         });
     }
 
-    getTournamentTeamsWithLimit(id: string): Promise<TournamentTeamModel[]> {
+    getTournamentTeamsWithLimit(id: string): Promise<DbTeamWithContent[]> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT content
                               FROM teams
@@ -142,7 +157,7 @@ class DbWrapper {
                               LIMIT 64`, [id])
                 .then(result => {
                     if (result.rows.length <= 0) return resolve([]);
-                    resolve(result.rows as TournamentTeamModel[]);
+                    resolve(result.rows as DbTeamWithContent[]);
                 })
                 .catch(error => reject(error));
         })

@@ -1,7 +1,7 @@
 import {
     TournamentPhaseController,
-    TournamentPhaseDefinition,
-    TournamentTeamModel
+    TournamentPhaseData,
+    TournamentPhaseDefinition
 } from "../../../../common/tournament/tournament-models";
 import {
     WakfuWarriorsMatchModel,
@@ -19,12 +19,29 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         this.data = data;
     }
 
-    getQualifiedTeams(): TournamentTeamModel[] {
-        return [...this.data.teams.filter(t => t.winInPhaseOne >= 2)];
+    getQualifiedTeams(): string[] {
+        return [...(this.data.teams.filter(t => t.winInPhaseOne >= 2).map(t => t.id) as string[])];
     }
 
     mustGoToNextPhase(): boolean {
+        // TODO v2 migrate to a db request
         return this.data.currentRound == 4 && this.data.matches.filter(m => !m.done).length == 0;
+    }
+
+    mustGoToNextRound(): boolean {
+        return false;
+    }
+
+    initTeams(teams: string[]) {
+        teams.forEach(team => this.data.teams.push({
+            id: team,
+            winInPhaseOne: 0
+        }))
+    }
+
+    // TODO later do something here to init from misc previous phase
+    initTeamsFromPreviousRound(previousPhaseData: any, qualifiedTeams: string[]) {
+        throw new Error("Can't init with previous data from phase 1")
     }
 
     prepareRound(): void {
@@ -52,6 +69,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
                 }
 
                 this.data.matches.push({
+                    id: "TODO", // TODO v2 generate id here
                     done: false,
                     teamA: team.id || "",
                     teamB: opponent.id || "",
@@ -90,6 +108,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
     }
 }
 
+// TODO v2
 export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel, WakfuWarriorsPhaseTwoData> {
     data: WakfuWarriorsPhaseTwoData;
     definition: TournamentPhaseDefinition;
@@ -99,12 +118,25 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
         this.data = data;
     }
 
-    getQualifiedTeams(): TournamentTeamModel[] {
+    getQualifiedTeams(): string[] {
         return [];
     }
 
     mustGoToNextPhase(): boolean {
         return false;
+    }
+
+    mustGoToNextRound(): boolean {
+        return false;
+    }
+
+    initTeams(teams: string[]) {
+
+    }
+
+    // TODO later improve signature to avoid any here
+    initTeamsFromPreviousRound(previousPhaseData: TournamentPhaseData<any, any>, qualifiedTeams: string[]) {
+        const previous = previousPhaseData as WakfuWarriorsPhaseOneData;
     }
 
     prepareRound(): void {

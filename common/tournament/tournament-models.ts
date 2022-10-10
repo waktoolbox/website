@@ -28,8 +28,7 @@ export interface TournamentPhaseDefinition {
     poolNumber?: number;
 }
 
-export interface TournamentPhaseData<T extends TournamentTeamModel, M extends TournamentMatchModel> {
-    id?: string;
+export interface TournamentPhaseData<T extends TournamentPhaseTeamModel, M extends TournamentPhaseMatchModel> {
     teams: T[];
     matches: M[];
     currentRound: number
@@ -40,13 +39,21 @@ export interface TournamentRoundDefinition {
     bo: number;
 }
 
-export interface TournamentPhaseController<T extends TournamentTeamModel, M extends TournamentMatchModel, V extends TournamentPhaseData<T, M>> {
+export interface TournamentPhaseController<T extends TournamentPhaseTeamModel, M extends TournamentPhaseMatchModel, V extends TournamentPhaseData<T, M>> {
     definition: TournamentPhaseDefinition;
     data: V;
 
+    initTeams: (teams: string[]) => void;
+    initTeamsFromPreviousRound: <W extends TournamentPhaseTeamModel, X extends TournamentPhaseMatchModel, Y extends TournamentPhaseData<W, X>> (previousPhaseData: Y, qualifiedTeams: string[]) => void;
+
     prepareRound: () => void;
     mustGoToNextPhase: () => boolean;
-    getQualifiedTeams: () => TournamentTeamModel[];
+    mustGoToNextRound: () => boolean;
+    getQualifiedTeams: () => string[];
+}
+
+export interface TournamentPhaseTeamModel {
+    id: string;
 }
 
 export interface TournamentTeamModel {
@@ -75,6 +82,13 @@ export interface TournamentStatsClassModel {
     victories: number;
     killed: number;
     death: number;
+}
+
+export interface TournamentPhaseMatchModel {
+    id: string;
+    done: boolean;
+    teamA: string;
+    teamB: string;
 }
 
 // TODO v2

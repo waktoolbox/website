@@ -163,6 +163,17 @@
     "wakfu": "Wakfu est un MMORPG édité par Ankama Studio. Tous droits réservés.\nLe site internet “Waktool” est un fansite communautaire non-officiel du MMORPG Wakfu sans aucun lien avec Ankama.\n",
     "login": "Attention ! Ne communiquez jamais vos identifiants de jeu."
   },
+  "maps": {
+    "968": "Forêt flottante",
+    "969": "Cascades en cascades",
+    "970": "Piton de la foutaise",
+    "971": "Jungle en vitesse",
+    "972": "Dalle blanche",
+    "973": "Couvent dôme",
+    "974": "Mine trouée",
+    "975": "Bassin Mi-Chaud",
+    "976": "Baie Max"
+  },
   "tmp": {
     "description": "Pour cette édition inédite : formez des équipes jusqu'à 6 joueurs (personnes physiques) et préparez votre build 230 pour des affrontements épiques au format six contre six sur le serveur bêta. Les croupiers d'Ecaflipus permettront de s'équiper pour les tranches 200 à 230, avec des châsses blanches dont le nécessaire d'enchantement sera mis à disposition gratuitement. Par ailleurs, si vous vous sentez guerriers solitaires, le mode six héros sera exceptionnellement disponible.\n\nAprès une phase de qualification de quatre poules de seize équipes, en résultera un arbre de trente-deux équipes où s'affronteront donc les meilleurs joueurs des combats JcJ inter-serveurs !",
     "rewards": "Troisième place :\n- Un costume Peeveepee ou Buffalo (au choix) ;\n- Un titre spécial ;\n- Une décoration Trophée Bronze ;\n- Un pack de mise à jour « Nora » (ou un autre pack présent dans la boutique hors packs Anathar, Magmog, Justice avec un (1) mois de booster en complément).\n\nDeuxième place :\n- Un costume Peeveepee ou Buffalo (au choix) ;\n- Un titre spécial ;\n- Une décoration Trophée Argent ;\n- Un pack de mise à jour « Nora » (ou un autre pack présent dans la boutique hors packs - Anathar, Magmog, Justice avec un (1) mois de booster en complément) ;\n- Un mois de booster supplémentaire.\n\nPremière place :\n- Un costume Peeveepee ou Buffalo (au choix) ;\n- Une aura cosmétique inédite ;\n- Un titre spécial ;\n- Une décoration Trophée Or ;\n- Un pack de mise à jour « Nora » (ou un autre pack présent dans la boutique hors packs - Anathar, Magmog, Justice avec un mois de booster en complément) ;\n- Deux (2) mois de booster supplémentaires."

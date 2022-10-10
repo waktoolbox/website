@@ -7,8 +7,8 @@ import {
 import {WakfuWarriorPhaseOne, WakfuWarriorPhaseTwo} from "./impl/wakfu-warriors-phase-controller";
 import {WakfuWarriorsPhaseOneData, WakfuWarriorsPhaseTwoData} from "../../../common/tournament/impl/wakfu-warriors";
 
-export function getAppropriateController(phase: TournamentPhaseType, definition: TournamentPhaseDefinition, data: TournamentPhaseData<any, any>): TournamentPhaseController<any, any, any> {
-    switch (phase) {
+export function getAppropriateController(definition: TournamentPhaseDefinition, data: TournamentPhaseData<any, any>): TournamentPhaseController<any, any, any> {
+    switch (definition.phaseType) {
         case TournamentPhaseType.NONE:
             throw new Error("No phase provided");
         case TournamentPhaseType.WAKFU_WARRIORS_ROUND_ROBIN:
