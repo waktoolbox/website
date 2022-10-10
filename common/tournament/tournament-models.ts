@@ -98,8 +98,9 @@ export interface TournamentMatchModel {
     referee?: string;
     winner?: string;
     round?: number;
-    tree?: number;
-    rounds: TournamentMatchRoundModel[]
+    rounds: TournamentMatchRoundModel[];
+
+    [key: string]: any; // prevent type error through super typing client side
 }
 
 export interface TournamentMatchRoundModel {

@@ -6,6 +6,7 @@ import {validateTournamentDefinition, validateTournamentTeam} from "../../../cli
 import {DbHelper} from "../../db/pg-helper";
 import {TournamentHomeProvider} from "./tournament-home-provider";
 import {DiscordBot} from "../../discord/bot";
+import {getMatch, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
@@ -34,6 +35,21 @@ export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::home', (callback) => {
         if (!callback) return;
         TournamentHomeProvider.getHome().then(home => callback(home)).catch(error => console.error(error));
+    })
+
+    socket.on('tournament::getTeamsNames', (teamIds, callback) => {
+        if (!callback) return;
+        DbHelper.getTeamsNames(teamIds).then(r => callback(r))
+    })
+
+    socket.on('tournament::getNextMatches', (tournamentId, phase, callback) => {
+        if (!callback) return;
+        getNextMatches(tournamentId, parseInt(phase)).then(r => callback(r))
+    })
+
+    socket.on('tournament::getMatch', (id, callback) => {
+        if (!callback) return;
+        getMatch(id).then(r => callback(r));
     })
 }
 
@@ -86,6 +102,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
 
     socket.on('tournament::registerTeam', (id, data, callback) => {
         if (!callback) return;
+
         function reject() {
             return socket.emit('error', 'tournament.cant.save.team');
         }
@@ -329,4 +346,54 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             })
             .catch((_) => callback(false))
     })
+
+    socket.on('tournament::admin:goToNextPhase', (tournamentId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                goToNextPhaseOrRound(tournamentId).then(result => {
+                    callback(result);
+                    if (result) return socket.emit('success', 'tournament.admin.nextPhaseStarted');
+                    socket.emit('error', 'tournament.admin.cantGoToNextPhase');
+                }).catch(error => {
+                    console.error(error);
+                    callback(false);
+                    socket.emit('error', 'tournament.admin.cantGoToNextPhase');
+                })
+            })
+            .catch((_) => callback(false))
+    });
+
+    socket.on('tournament::referee:setWinner', (tournamentId, matchId, winnerId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{winner}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(winnerId)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:validateMatch', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{done}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(true)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
 }

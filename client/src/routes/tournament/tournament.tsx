@@ -6,7 +6,11 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CheckIcon from '@mui/icons-material/Check';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
-import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
+import {
+    TournamentDefinition,
+    TournamentMatchModel,
+    TournamentTeamModel
+} from "../../../../common/tournament/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
@@ -15,7 +19,10 @@ import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from 
 enum Tabs {
     HOME,
     TEAMS,
-    SINGLE_TEAM
+    SINGLE_TEAM,
+    PLANNING,
+    MATCH,
+    RESULTS
 }
 
 const MenuButtonsStyle = {
@@ -31,16 +38,20 @@ const ActiveMenuButtonsStyle = {
 }
 
 const accountPersistence = new Map<string, any>();
+const teamsNamesPersistence = new Map<string, string>();
 
 export default function Tournament() {
-    const {id, targetTab, teamId} = useParams();
+    const {id, targetTab, teamId, matchId} = useParams();
     const [localTeamId, setLocalTeamId] = useState<string>(teamId as string);
+    const [localMatchId, setLocalMatchId] = useState<string>(matchId as string)
     const [tournament, setTournament] = useState<TournamentDefinition>();
     const [accounts, setAccounts] = useState(new Map<string, any>());
     const [teams, setTeams] = useState<any[]>();
     const [team, setTeam] = useState<TournamentTeamModel>();
     const [tab, setTab] = useState(Tabs.HOME)
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
+    const [nextMatches, setNextMatches] = useState<TournamentMatchModel[]>();
+    const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -81,6 +92,16 @@ export default function Tournament() {
             case Tabs.SINGLE_TEAM:
                 loadTeam();
                 break;
+            case Tabs.PLANNING:
+                navigate(`/tournament/${id}/tab/3`);
+                loadNextMatches();
+                break;
+            case Tabs.MATCH:
+                loadMatch();
+                break;
+            case Tabs.RESULTS:
+                // TODO v2
+                break;
         }
         setTab(newTab)
     }
@@ -105,9 +126,74 @@ export default function Tournament() {
         })
     }
 
+    const loadNextMatches = () => {
+        // TODO v2 bind real phase here
+        socket.emit('tournament::getNextMatches', id, 1, (matches: TournamentMatchModel[]) => {
+            const namesToRequest: string[] = [];
+            matches.forEach(t => {
+                if (!t || !t.id) return;
+                if (teamsNamesPersistence.has(t.id)) return;
+                namesToRequest.push(t.id)
+            })
+
+            if (namesToRequest.length <= 0) setNextMatches(matches)
+
+            socket.emit('tournament::getTeamsNames', namesToRequest, (names: { id: string, name: string }[]) => {
+                names.forEach(name => {
+                    teamsNamesPersistence.set(name.id, name.name)
+                })
+                setNextMatches(matches)
+            })
+        })
+    }
+
+    const loadMatch = (match?: string, goToTab?: boolean) => {
+        if (goToTab) {
+            setTab(Tabs.MATCH);
+            if (match) {
+                setLocalMatchId(match);
+                navigate(`/tournament/${id}/tab/4/match/${match}`);
+            }
+        }
+        socket.emit('tournament::getMatch', match || localMatchId, (match: TournamentMatchModel) => {
+            if (!match) return;
+
+            socket.emit('tournament::getTeamsNames', [match.teamA, match.teamB], (names: { id: string, name: string }[]) => {
+                names.forEach(name => {
+                    teamsNamesPersistence.set(name.id, name.name)
+                })
+                setCurrentMatch(match)
+            })
+        })
+    }
+
     const goToTeam = (tid: string) => {
         setLocalTeamId(tid);
         loadTeam(tid, true)
+    }
+
+    function setWinner(matchId: string | undefined, team: string) {
+        if (!id) return;
+        socket.emit('tournament::referee:setWinner', id, matchId, team, (done: boolean) => {
+            if (done) {
+                setCurrentMatch({
+                    ...currentMatch,
+                    winner: team
+                } as TournamentMatchModel)
+            }
+        })
+    }
+
+    function validateMatch(matchId: string | undefined) {
+        if (!id) return;
+        socket.emit('tournament::referee:validateMatch', id, matchId, (done: boolean) => {
+            if (done) {
+                setCurrentMatch({
+                    ...currentMatch,
+                    done: true
+                } as TournamentMatchModel)
+            }
+        })
     }
 
     return (
@@ -171,14 +257,18 @@ export default function Tournament() {
                                     {t('tournament.display.teamsButton')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
-                                <Button variant="text" style={MenuButtonsStyle}
-                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
+                                <Button variant="text"
+                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.PLANNING ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.PLANNING)}>
                                     <CalendarMonthIcon sx={{mr: 1}}/>
                                     {t('tournament.display.planning')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
-                                <Button variant="text" style={MenuButtonsStyle}
-                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
+                                <Button variant="text"
+                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.RESULTS ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.RESULTS)}>
                                     <EmojiEventsIcon sx={{mr: 1}}/>
                                     {t('tournament.display.results')}
                                 </Button>
@@ -329,7 +419,7 @@ export default function Tournament() {
                                     </Grid>
                                     <Grid item xs={12}>
                                         {teams && teams.length > 0 && teams.map(team => (
-                                            <Card key={team} sx={{
+                                            <Card key={team.id} sx={{
                                                 m: 3,
                                                 borderRadius: 4,
                                                 boxShadow: '5px 5px 15px 0px #000000',
@@ -456,6 +546,59 @@ export default function Tournament() {
                                             </Card>
                                         </Stack>
                                     </Grid>
+                                </Grid>
+                            }
+
+                            {tab === Tabs.PLANNING && nextMatches &&
+                                <Grid container>
+                                    {nextMatches.length > 0 && nextMatches.map(match => (
+                                        <Grid item xs={12} key={match.id}>
+                                            <Card>
+                                                <CardContent>
+                                                    Team A : {match.teamA} - Team B : {match.teamB} - Rounds
+                                                    : {JSON.stringify(match.rounds)} - Date : {match.date} - Done
+                                                    : {match.done ? "Y" : "N"} - Pool : {match.pool} |
+                                                    <Button onClick={() => loadMatch(match.id, true)}>GOTO
+                                                        match</Button>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+
+                                    {nextMatches.length <= 0 &&
+                                        <Grid item xs={12}>
+                                            TODO v2 no match planned
+                                        </Grid>
+                                    }
+                                </Grid>
+                            }
+
+                            {tab === Tabs.MATCH && currentMatch &&
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        Team A : {currentMatch.teamA} - Team B : {currentMatch.teamB} - Rounds
+                                        : {JSON.stringify(currentMatch.rounds)} - Date : {currentMatch.date} - Done
+                                        : {currentMatch.done ? "Y" : "N"}<br/>
+                                        Winner : {currentMatch.winner} - Round : {currentMatch.round} - Pool
+                                        : {currentMatch.pool}
+                                    </Grid>
+                                    {tournament.referees.includes(me || "") &&
+                                        <Grid item xs={12}>
+                                            <Card>
+                                                <CardContent>
+                                                    Actions arbitre
+                                                    <Button
+                                                        onClick={() => setWinner(currentMatch.id, currentMatch.teamA)}>Team
+                                                        A winner</Button>
+                                                    <Button
+                                                        onClick={() => setWinner(currentMatch.id, currentMatch.teamB)}>Team
+                                                        B winner</Button>
+                                                    <Button onClick={() => validateMatch(currentMatch.id)}>Valider
+                                                        match</Button>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    }
                                 </Grid>
                             }
 

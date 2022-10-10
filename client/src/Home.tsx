@@ -34,6 +34,7 @@ export function Home() {
                 <Route path="/tournament/:id" element={<TournamentView/>}/>
                 <Route path="/tournament/:id/tab/:targetTab" element={<TournamentView/>}/>
                 <Route path="/tournament/:id/tab/:targetTab/team/:teamId" element={<TournamentView/>}/>
+                <Route path="/tournament/:id/tab/:targetTab/match/:matchId" element={<TournamentView/>}/>
 
                 <Route path="/edit-tournament" element={<TournamentEditor/>}/>
                 <Route path="/edit-tournament/:id" element={<TournamentEditor/>}/>

@@ -265,7 +265,10 @@ export default function TournamentEditor() {
             >
                 {tab === 1 && (
                     <Box sx={{p: 3}}>
-                        <Typography>TODO phases</Typography>
+                        <Button onClick={() => socket.emit('tournament::admin:goToNextPhase', id, () => {
+                        })}>
+                            {t('tournament.admin.goToNextPhase')}
+                        </Button>
                     </Box>
                 )}
             </div>

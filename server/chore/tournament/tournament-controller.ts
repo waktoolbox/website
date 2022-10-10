@@ -1,5 +1,9 @@
 import {DbHelper} from "../../db/pg-helper";
-import {TournamentDefinition, TournamentPhaseData} from "../../../common/tournament/tournament-models";
+import {
+    TournamentDefinition,
+    TournamentMatchModel,
+    TournamentPhaseData
+} from "../../../common/tournament/tournament-models";
 import {getAppropriateController, getBaseData} from "./tournament-controller-mapper";
 
 function getTournament(id: string): Promise<TournamentDefinition | undefined> {
@@ -71,6 +75,28 @@ function getMaxPhase(id: string): Promise<number | undefined> {
                 console.error(error);
                 resolve(undefined);
             })
+    })
+}
+
+export function getNextMatches(id: string, phase: number): Promise<TournamentMatchModel[]> {
+    return new Promise((resolve) => {
+        DbHelper.rawQuery(`SELECT content
+                           FROM matches
+                           WHERE "tournamentId" = $1
+                             AND phase = $2
+                             AND content ->> ('done') = 'false'`, [id, phase])
+            .then(result => resolve(result.rowCount > 0 ? result.rows.map(r => r.content) : []))
+            .catch(_ => resolve([]))
+    })
+}
+
+export function getMatch(id: string): Promise<TournamentMatchModel | undefined> {
+    return new Promise(resolve => {
+        DbHelper.rawQuery(`SELECT content
+                           FROM matches
+                           WHERE id = $1`, [id])
+            .then(r => resolve(r.rowCount <= 0 ? undefined : r.rows[0].content))
+            .catch(e => resolve(undefined));
     })
 }
 
