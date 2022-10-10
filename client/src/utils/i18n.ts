@@ -10,7 +10,7 @@ i18n
     .init({
         debug: process.env.NODE_ENV !== 'production',
         fallbackLng: 'en',
-        supportedLngs: ['en', 'fr', 'es', 'pt'],
+        supportedLngs: ['en', 'fr'/*, 'es', 'pt'*/],
         interpolation: {
             escapeValue: false,
         }
