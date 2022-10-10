@@ -50,7 +50,7 @@ export default function Tournament() {
     const [team, setTeam] = useState<TournamentTeamModel>();
     const [tab, setTab] = useState(Tabs.HOME)
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
-    const [nextMatches, setNextMatches] = useState<TournamentMatchModel[]>();
+    const [matchesToDisplay, setMatchesToDisplay] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
@@ -100,7 +100,8 @@ export default function Tournament() {
                 loadMatch();
                 break;
             case Tabs.RESULTS:
-                // TODO v2
+                navigate(`/tournament/${id}/tab/5`);
+                loadMatchesResult()
                 break;
         }
         setTab(newTab)
@@ -127,8 +128,16 @@ export default function Tournament() {
     }
 
     const loadNextMatches = () => {
+        loadMatchesToDisplay('tournament::getNextMatches')
+    }
+
+    const loadMatchesResult = () => {
+        loadMatchesToDisplay('tournament::getMatchesResult')
+    }
+
+    const loadMatchesToDisplay = (event: string) => {
         // TODO v2 bind real phase here
-        socket.emit('tournament::getNextMatches', id, 1, (matches: TournamentMatchModel[]) => {
+        socket.emit(event, id, 1, (matches: TournamentMatchModel[]) => {
             const namesToRequest: string[] = [];
             matches.forEach(t => {
                 if (!t || !t.id) return;
@@ -136,13 +145,13 @@ export default function Tournament() {
                 namesToRequest.push(t.id)
             })
 
-            if (namesToRequest.length <= 0) setNextMatches(matches)
+            if (namesToRequest.length <= 0) setMatchesToDisplay(matches)
 
             socket.emit('tournament::getTeamsNames', namesToRequest, (names: { id: string, name: string }[]) => {
                 names.forEach(name => {
                     teamsNamesPersistence.set(name.id, name.name)
                 })
-                setNextMatches(matches)
+                setMatchesToDisplay(matches)
             })
         })
     }
@@ -549,9 +558,9 @@ export default function Tournament() {
                                 </Grid>
                             }
 
-                            {tab === Tabs.PLANNING && nextMatches &&
+                            {(tab === Tabs.PLANNING || tab === Tabs.RESULTS) && matchesToDisplay &&
                                 <Grid container>
-                                    {nextMatches.length > 0 && nextMatches.map(match => (
+                                    {matchesToDisplay.length > 0 && matchesToDisplay.map(match => (
                                         <Grid item xs={12} key={match.id}>
                                             <Card>
                                                 <CardContent>
@@ -565,7 +574,7 @@ export default function Tournament() {
                                         </Grid>
                                     ))}
 
-                                    {nextMatches.length <= 0 &&
+                                    {matchesToDisplay.length <= 0 &&
                                         <Grid item xs={12}>
                                             TODO v2 no match planned
                                         </Grid>

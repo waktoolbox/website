@@ -8,7 +8,6 @@ import {Server} from 'socket.io';
 import {SocketManager} from "./server/api/socket-manager";
 import {DbHelper} from "./server/db/pg-helper";
 import {DiscordBot} from "./server/discord/bot";
-import {goToNextPhaseOrRound} from "./server/chore/tournament/tournament-controller";
 
 const app: Express = express();
 const server = http.createServer(app);

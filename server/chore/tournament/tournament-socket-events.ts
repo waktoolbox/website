@@ -6,7 +6,7 @@ import {validateTournamentDefinition, validateTournamentTeam} from "../../../cli
 import {DbHelper} from "../../db/pg-helper";
 import {TournamentHomeProvider} from "./tournament-home-provider";
 import {DiscordBot} from "../../discord/bot";
-import {getMatch, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
+import {getMatch, getMatchesResult, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
@@ -45,6 +45,11 @@ export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::getNextMatches', (tournamentId, phase, callback) => {
         if (!callback) return;
         getNextMatches(tournamentId, parseInt(phase)).then(r => callback(r))
+    })
+
+    socket.on('tournament::getMatchesResult', (tournamentId, phase, callback) => {
+        if (!callback) return;
+        getMatchesResult(tournamentId, parseInt(phase)).then(r => callback(r))
     })
 
     socket.on('tournament::getMatch', (id, callback) => {
