@@ -1,4 +1,5 @@
 import {
+    TournamentDefinition,
     TournamentPhaseController,
     TournamentPhaseData,
     TournamentPhaseDefinition
@@ -9,12 +10,15 @@ import {
     WakfuWarriorsPhaseTwoData,
     WakfuWarriorsTeamModel
 } from "../../../../common/tournament/impl/wakfu-warriors";
+import * as crypto from "crypto";
 
 export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsMatchModel, WakfuWarriorsPhaseOneData> {
+    tournament: TournamentDefinition;
     definition: TournamentPhaseDefinition;
     data: WakfuWarriorsPhaseOneData;
 
-    constructor(definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseOneData) {
+    constructor(tournament: TournamentDefinition, definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseOneData) {
+        this.tournament = tournament;
         this.definition = definition;
         this.data = data;
     }
@@ -35,7 +39,8 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
     initTeams(teams: string[]) {
         teams.forEach(team => this.data.teams.push({
             id: team,
-            winInPhaseOne: 0
+            winInPhaseOne: 0,
+            lossInPhaseOne: 0
         }))
     }
 
@@ -44,39 +49,77 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         throw new Error("Can't init with previous data from phase 1")
     }
 
-    prepareRound(): void {
+    prepareRound() {
         if (this.data.currentRound == 0) return this.preparePhase();
 
         const teamsMap: Map<String, WakfuWarriorsTeamModel> = new Map()
         this.data.teams.forEach(t => teamsMap.set(t.id || "", t));
+        const createdMatches = [];
         for (const pool of this.data.teamPool) {
+            const index = this.data.teamPool.indexOf(pool);
             const teams: (WakfuWarriorsTeamModel | undefined)[] = pool.teams
                 .map(id => teamsMap.get(id))
-                .filter(t => t?.winInPhaseOne || 0 >= 2);
-            if (!teams) {
-                // TODO v2 what do we do if there is no teams
-                return;
-            }
+                .filter(t => t?.winInPhaseOne || 0 < 2);
+            if (!teams) continue;
 
             // noinspection JSAssignmentUsedAsCondition
             for (let team: WakfuWarriorsTeamModel | undefined; team = teams.pop();) {
                 // tricky compute to identify sub-pool
                 const opponent = teams.find(t => t?.winInPhaseOne == team?.winInPhaseOne);
 
-                if (!opponent) {
-                    team.winInPhaseOne++;
-                    continue; // no opponent for any possible reason: it's an auto win
-                }
-
-                this.data.matches.push({
-                    id: "TODO", // TODO v2 generate id here
-                    done: false,
+                const uuid = crypto.randomUUID();
+                const match = {
+                    id: uuid,
+                    done: !opponent,
                     teamA: team.id || "",
-                    teamB: opponent.id || "",
-                    round: this.data.currentRound
-                })
+                    teamB: opponent?.id || "",
+                    round: this.data.currentRound,
+                    pool: index
+                };
+                this.data.matches.push(match)
+                pool.matches.push(uuid);
+                createdMatches.push(match);
             }
         }
+
+        this.createMatches(createdMatches);
+    }
+
+    createMatches(matches: WakfuWarriorsMatchModel[]) {
+        const dbMatches = matches.map(match => {
+            return {
+                id: match.id,
+                tournamentId: this.tournament.id,
+                phase: this.definition.phase,
+
+                content: {
+                    id: match.id,
+                    done: match.done,
+                    teamA: match.teamA,
+                    teamB: match.teamB,
+                    round: match.round,
+                    rounds: this.generateRoundForMatch()
+                }
+            }
+        });
+
+        // TODO v2
+        // const query = format(`INSERT INTO matches (id, "tournamentId", phase, content) VALUES %L`, dbMatches)
+        // DbHelper.rawQuery(query, [])
+        //     .then(result => console.log(result))
+        //     .catch(error => console.error("Error"))
+    }
+
+    generateRoundForMatch() {
+        const tournamentRoundDefinition = this.definition.roundModel.find(d => d.round == this.data.currentRound);
+
+        const result = [];
+        for (let i = 0; i < (tournamentRoundDefinition?.bo || 1); i++) {
+            result.push({
+                map: this.tournament.maps[Math.floor(Math.random() * this.tournament.maps.length)]
+            })
+        }
+        return result;
     }
 
     preparePhase() {
@@ -113,7 +156,7 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
     data: WakfuWarriorsPhaseTwoData;
     definition: TournamentPhaseDefinition;
 
-    constructor(definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseTwoData) {
+    constructor(tournament: TournamentDefinition, definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseTwoData) {
         this.definition = definition;
         this.data = data;
     }
@@ -139,7 +182,8 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
         const previous = previousPhaseData as WakfuWarriorsPhaseOneData;
     }
 
-    prepareRound(): void {
+    prepareRound() {
+        return [];
     }
 
     static getBaseData(): WakfuWarriorsPhaseTwoData {

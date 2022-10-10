@@ -65,4 +65,18 @@ export const pgInitDb = `
     )
         );
 
+    CREATE TABLE IF NOT EXISTS matches
+    (
+        id VARCHAR
+    (
+        50
+    ) PRIMARY KEY,
+        "tournamentId" VARCHAR
+    (
+        50
+    ),
+        phase int,
+        content JSONB
+        );
+
 `

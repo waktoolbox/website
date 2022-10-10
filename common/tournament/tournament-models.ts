@@ -21,6 +21,7 @@ export interface TournamentDefinition {
 }
 
 export interface TournamentPhaseDefinition {
+    phase: number;
     phaseType: TournamentPhaseType;
     roundModel: TournamentRoundDefinition[];
 
@@ -97,13 +98,17 @@ export interface TournamentMatchModel {
     date?: string;
     done: boolean;
     teamA: string;
-    teamADraft?: TournamentDraftResultModel;
     teamB: string;
-    teamBDraft?: TournamentDraftResultModel;
-    map?: number;
     referee?: string;
     winner?: string;
     round?: number;
+    rounds: TournamentMatchRoundModel[]
+}
+
+export interface TournamentMatchRoundModel {
+    teamADraft?: TournamentDraftResultModel;
+    teamBDraft?: TournamentDraftResultModel;
+    map?: number;
 }
 
 export interface TournamentDraftResultModel {

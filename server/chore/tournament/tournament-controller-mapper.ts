@@ -1,4 +1,5 @@
 import {
+    TournamentDefinition,
     TournamentPhaseController,
     TournamentPhaseData,
     TournamentPhaseDefinition,
@@ -7,14 +8,14 @@ import {
 import {WakfuWarriorPhaseOne, WakfuWarriorPhaseTwo} from "./impl/wakfu-warriors-phase-controller";
 import {WakfuWarriorsPhaseOneData, WakfuWarriorsPhaseTwoData} from "../../../common/tournament/impl/wakfu-warriors";
 
-export function getAppropriateController(definition: TournamentPhaseDefinition, data: TournamentPhaseData<any, any>): TournamentPhaseController<any, any, any> {
+export function getAppropriateController(tournament: TournamentDefinition, definition: TournamentPhaseDefinition, data: TournamentPhaseData<any, any>): TournamentPhaseController<any, any, any> {
     switch (definition.phaseType) {
         case TournamentPhaseType.NONE:
             throw new Error("No phase provided");
         case TournamentPhaseType.WAKFU_WARRIORS_ROUND_ROBIN:
-            return new WakfuWarriorPhaseOne(definition, data as WakfuWarriorsPhaseOneData);
+            return new WakfuWarriorPhaseOne(tournament, definition, data as WakfuWarriorsPhaseOneData);
         case TournamentPhaseType.WAKFU_WARRIORS_BRACKET_TOURNAMENT:
-            return new WakfuWarriorPhaseTwo(definition, data as WakfuWarriorsPhaseTwoData);
+            return new WakfuWarriorPhaseTwo(tournament, definition, data as WakfuWarriorsPhaseTwoData);
     }
 }
 

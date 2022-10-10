@@ -91,11 +91,12 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 
         if (isTournamentStart) {
             const baseData = getBaseData(phaseDefinition.phaseType);
-            controller = getAppropriateController(phaseDefinition, baseData)
+            controller = getAppropriateController(tournament, phaseDefinition, baseData)
 
             const teams = await getValidTeamsWithLimitWithinTournament(id)
             if (!teams || teams.length <= 0) return resolve(false);
 
+            // TODO later clean not selected teams
             controller.initTeams(teams)
             controller.prepareRound();
             return resolve(await insertTournamentData(id, maxPhase, controller.data));
@@ -106,7 +107,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
             console.error(`No db tournament data for tournament ${id} phase ${maxPhase}`)
             return resolve(false);
         }
-        controller = getAppropriateController(phaseDefinition, dbData)
+        controller = getAppropriateController(tournament, phaseDefinition, dbData)
 
         if (controller.mustGoToNextPhase()) {
             goToNextPhase().then(r => resolve(r)).catch(error => reject(error));
@@ -125,5 +126,6 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 function goToNextPhase(): Promise<boolean> {
     return new Promise((resolve, reject) => {
         // TODO v2
+        // controller.initMaps(tournament.maps);
     })
 }
