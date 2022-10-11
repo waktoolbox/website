@@ -15,18 +15,31 @@ export function registerTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+
     socket.on('tournament::getTeam', (id, callback) => {
         if (!callback) return;
         DbHelper.getTeam(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.team.not.found'));
     });
+
+    socket.on('tournament::getAllTeamMatches', (teamId, callback) => {
+        if (!callback) return;
+        DbHelper.rawQuery(`SELECT content
+                           FROM matches
+                           WHERE content ->> ('teamA') = $1
+                              OR content ->> ('teamB') = $1`, [teamId])
+            .then(result => callback(result.rowCount <= 0 ? [] : result.rows.map(r => r.content)))
+            .catch(_ => callback([]))
+    });
+
     socket.on('tournament::getTournamentTeamsWithLimit', (id, callback) => {
         if (!callback) return;
         DbHelper.getTournamentTeamsWithLimit(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+
     socket.on('tournament::isTournamentStarted', (id, callback) => {
         if (!callback) return;
         DbHelper.isTournamentStarted(id).then(result => callback(result)).catch(_ => callback(true));

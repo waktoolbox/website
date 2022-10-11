@@ -68,6 +68,12 @@
       "levelAndServer": "Niv. {{level}} / {{server}}",
       "manageMyTeam": "Modifier mon équipe",
       "manageMyRegistration": "Modifier mon inscription",
+      "match": {
+        "more": "En savoir plus",
+        "noDate": "Pas de date",
+        "noNextMatches": "Aucun match à venir",
+        "noMatchResult": "Aucun résultat de match"
+      },
       "myTeam": "Mon équipe",
       "planning": "Planning",
       "player": "Joueur",

@@ -15,6 +15,7 @@ import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
+import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
 
 enum Tabs {
     HOME,
@@ -51,6 +52,7 @@ export default function Tournament() {
     const [tab, setTab] = useState(Tabs.HOME)
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
     const [matchesToDisplay, setMatchesToDisplay] = useState<TournamentMatchModel[]>();
+    const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
@@ -116,6 +118,26 @@ export default function Tournament() {
 
     const loadTeam = (tid?: string, goToTab?: boolean) => {
         if (goToTab) setTab(Tabs.SINGLE_TEAM);
+        socket.emit('tournament::getAllTeamMatches', tid || localTeamId, (matches: TournamentMatchModel[]) => {
+            matches.sort((a, b) => {
+                if (a.date && b.date) return (Date.parse(a.date).toString() > Date.parse(b.date).toString()) ? -1 : 1;
+                if (a.date && !b.date) return 1;
+                if (!a.date && b.date) return -1;
+                return 0;
+            })
+
+            const namesToRequest: string[] = [];
+            matches.forEach(m => {
+                if (!teamsNamesPersistence.has(m.teamA) && !namesToRequest.includes(m.teamA)) {
+                    namesToRequest.push(m.teamA)
+                }
+                if (!teamsNamesPersistence.has(m.teamB) && !namesToRequest.includes(m.teamB)) {
+                    namesToRequest.push(m.teamB)
+                }
+            })
+            loadTeamNames(namesToRequest, () => setTeamMatches(matches));
+        })
+
         socket.emit('tournament::getTeam', tid || localTeamId, (team: TournamentTeamModel) => {
             if (!team) return;
 
@@ -144,15 +166,19 @@ export default function Tournament() {
                 if (teamsNamesPersistence.has(t.id)) return;
                 namesToRequest.push(t.id)
             })
+            loadTeamNames(namesToRequest, () => setMatchesToDisplay(matches))
+        })
+    }
 
-            if (namesToRequest.length <= 0) setMatchesToDisplay(matches)
+    const loadTeamNames = (namesToRequest: string[], callback: any) => {
+        if (namesToRequest.length <= 0) callback()
 
-            socket.emit('tournament::getTeamsNames', namesToRequest, (names: { id: string, name: string }[]) => {
-                names.forEach(name => {
-                    teamsNamesPersistence.set(name.id, name.name)
-                })
-                setMatchesToDisplay(matches)
+        socket.emit('tournament::getTeamsNames', namesToRequest, (names: { id: string, name: string }[]) => {
+            names.forEach(name => {
+                teamsNamesPersistence.set(name.id, name.name)
             })
+            callback()
+            console.log(teamsNamesPersistence)
         })
     }
 
@@ -499,16 +525,34 @@ export default function Tournament() {
                                                                                     span: <span className="firstWord"/>
                                                                                 }}/></Typography>
 
-                                                {/*TODO v2*/}
-                                                <Typography sx={{mt: 2}}>{t('coming.soon')}</Typography>
+                                                {teamMatches && teamMatches.filter(m => !m.done).map(match => (
+                                                    <TournamentTeamMatchView key={match.id} match={match}
+                                                                             displayedTeam={team.id}
+                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamB) || "<undefined>"}
+                                                                             goToMatch={() => loadMatch(match.id, true)}/>
+                                                ))}
+
+                                                {teamMatches && teamMatches.filter(m => !m.done).length <= 0 &&
+                                                    <Typography sx={{ml: 2, mt: 2}}
+                                                                variant="h6">{t('tournament.display.match.noNextMatches')}</Typography>
+                                                }
 
                                                 <Divider sx={{ml: 3, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
 
                                                 <Typography variant="h5"
                                                             sx={{color: "#fefffa"}}>{t('tournament.display.results')}</Typography>
 
-                                                {/*TODO v2*/}
-                                                <Typography sx={{mt: 2}}>{t('coming.soon')}</Typography>
+                                                {teamMatches && teamMatches.length > 0 && teamMatches.filter(m => m.done).map(match => (
+                                                    <TournamentTeamMatchView key={match.id} match={match}
+                                                                             displayedTeam={team.id}
+                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamB) || "<undefined>"}
+                                                                             goToMatch={() => loadMatch(match.id, true)}/>
+                                                ))}
+
+                                                {teamMatches && teamMatches.filter(m => m.done).length <= 0 &&
+                                                    <Typography sx={{ml: 2, mt: 2}}
+                                                                variant="h6">{t('tournament.display.match.noMatchResult')}</Typography>
+                                                }
                                             </Grid>
                                         </Grid>
                                     </Grid>

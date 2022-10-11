@@ -68,6 +68,12 @@
       "levelAndServer": "Lvl. {{level}} / {{server}}",
       "manageMyTeam": "Edit my team",
       "manageMyRegistration": "Edit my registration",
+      "match": {
+        "more": "Learn more",
+        "noDate": "No date",
+        "noNextMatches": "No next matches",
+        "noMatchResult": "No match results"
+      },
       "myTeam": "My team",
       "planning": "Planning",
       "player": "Player",
