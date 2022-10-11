@@ -18,24 +18,41 @@ export default function TournamentTeamMatchView({
             mt: 3, mr: 3, mb: 3,
             borderRadius: 4,
             boxShadow: '5px 5px 15px 0px #000000',
-            '&.MuiCardContent-root': {p: "16px"}
+            '&.MuiCardContent-root': {p: 2},
         }}>
-            <CardContent sx={{backgroundColor: "#162329", textAlign: "start"}}>
+            <CardContent sx={{
+                backgroundColor: "#162329", textAlign: "start",
+                "&:last-child": {
+                    pb: 2
+                }
+            }}>
                 <Grid container direction="row" alignItems="center">
                     <Grid item xs={1}>
                         {match.winner && match.winner === displayedTeam &&
-                            <EmojiEventsIcon sx={{width: "100%", height: '100%'}}/>
+                            <EmojiEventsIcon sx={{
+                                width: "80%",
+                                height: '80%',
+                                display: "flex",
+                                verticalAlign: "center",
+                                color: "#07c6b6"
+                            }}/>
                         }
                         {match.winner && match.winner !== displayedTeam &&
-                            <CancelIcon sx={{width: "100%", height: '100%'}}/>
+                            <CancelIcon sx={{
+                                width: "80%",
+                                height: '80%',
+                                display: "flex",
+                                verticalAlign: "center",
+                                color: "#00A4E9"
+                            }}/>
                         }
                     </Grid>
                     <Grid item xs={4} sx={{mt: "2px"}}>
                         <Typography>
                             <b>{!match.date ? t('tournament.display.match.noDate') : match.date}</b>
                         </Typography>
-                        <Typography sx={{color: "#848889"}}>
-                            {match.rounds && match.rounds.map(r => t(`maps.${r.map}`)).join(', ')}
+                        <Typography sx={{color: "#848889", whiteSpace: "pre-line"}}>
+                            {match.rounds && match.rounds.map((r, i) => `${i + 1}. ` + t(`maps.${r.map}`) + "\n")}
                         </Typography>
                     </Grid>
                     <Grid item xs={5} sx={{height: "100%"}}>
@@ -43,7 +60,7 @@ export default function TournamentTeamMatchView({
                                  variant="middle"/>
                         <Typography sx={{verticalAlign: "middle", mr: 1}} display="inline"><span
                             className="blueWord">vs</span></Typography>
-                        <Typography sx={{verticalAlign: "middle"}} display="inline">{otherTeamName}</Typography>
+                        <Typography variant="h6" sx={{verticalAlign: "middle"}} display="inline"><b>{otherTeamName}</b></Typography>
                     </Grid>
                     <Grid item xs={2}>
                         <Button sx={{
