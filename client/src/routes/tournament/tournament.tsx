@@ -14,8 +14,10 @@ import {
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
-import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
+import {Button, Card, CardContent, Divider, Grid, Icon, Stack, TextField, Typography} from "@mui/material";
 import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
+import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 
 enum Tabs {
     HOME,
@@ -54,6 +56,7 @@ export default function Tournament() {
     const [matchesToDisplay, setMatchesToDisplay] = useState<TournamentMatchModel[]>();
     const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
+    const [currentMatchDate, setCurrentMatchDate] = useState<string>();
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -205,6 +208,34 @@ export default function Tournament() {
     const goToTeam = (tid: string) => {
         setLocalTeamId(tid);
         loadTeam(tid, true)
+    }
+
+    function setMatchDate(matchDate: string | null | undefined) {
+        if (!id || !matchDate) return;
+        setCurrentMatchDate(matchDate)
+    }
+
+    function validateMatchDate(matchId: string | undefined) {
+        socket.emit('tournament::referee:setMatchDate', id, matchId, currentMatchDate, (done: boolean) => {
+            if (done) {
+                setCurrentMatch({
+                    ...currentMatch,
+                    date: currentMatchDate
+                } as TournamentMatchModel)
+            }
+        })
+    }
+
+    function setReferee(matchId: string | undefined) {
+        if (!id) return;
+        socket.emit('tournament::referee:setReferee', id, matchId, (done: boolean) => {
+            if (done) {
+                setCurrentMatch({
+                    ...currentMatch,
+                    referee: me
+                } as TournamentMatchModel)
+            }
+        })
     }
 
     function setWinner(matchId: string | undefined, team: string) {
@@ -633,13 +664,30 @@ export default function Tournament() {
                                         : {JSON.stringify(currentMatch.rounds)} - Date : {currentMatch.date} - Done
                                         : {currentMatch.done ? "Y" : "N"}<br/>
                                         Winner : {currentMatch.winner} - Round : {currentMatch.round} - Pool
-                                        : {currentMatch.pool}
+                                        : {currentMatch.pool}<br/>
+                                        Referee
+                                        : {[accounts.get(currentMatch.referee || "")].map(a => a.username + "#" + a.discriminator) || "TODO v2"}
                                     </Grid>
                                     {tournament.referees.includes(me || "") &&
                                         <Grid item xs={12}>
                                             <Card>
                                                 <CardContent>
                                                     Actions arbitre
+
+                                                    <LocalizationProvider dateAdapter={AdapterMoment}>
+                                                        <DateTimePicker
+                                                            label={t('tournament.startDate')}
+                                                            value={currentMatch.date}
+                                                            onChange={(value, ignored) => setMatchDate(value)}
+                                                            renderInput={(params) => <TextField {...params} />}
+                                                        />
+                                                    </LocalizationProvider>
+                                                    <Button
+                                                        onClick={() => validateMatchDate(currentMatch.id)}>Set match
+                                                        date</Button>
+                                                    <Button
+                                                        onClick={() => setReferee(currentMatch.id)}>Met set
+                                                        referee</Button>
                                                     <Button
                                                         onClick={() => setWinner(currentMatch.id, currentMatch.teamA)}>Team
                                                         A winner</Button>
