@@ -137,6 +137,20 @@ class DbWrapper {
         });
     }
 
+    isTournamentStreamer(id: string, user: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT COUNT(*)
+                              FROM tournaments
+                              WHERE id = $1
+                                AND content -> ('streamers') ? $2;`,
+                [id, user])
+                .then(result => {
+                    resolve(result.rows && result.rows.length > 0 && result.rows[0].count > 0)
+                })
+                .catch(error => reject(error));
+        });
+    }
+
     isTournamentStarted(id: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT COUNT(*)

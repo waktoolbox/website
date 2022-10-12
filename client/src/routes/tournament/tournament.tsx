@@ -41,6 +41,7 @@ const ActiveMenuButtonsStyle = {
 }
 
 const accountPersistence = new Map<string, any>();
+const streamerPersistence = new Map<string, any>();
 const teamsNamesPersistence = new Map<string, string>();
 
 export default function Tournament() {
@@ -49,6 +50,7 @@ export default function Tournament() {
     const [localMatchId, setLocalMatchId] = useState<string>(matchId as string)
     const [tournament, setTournament] = useState<TournamentDefinition>();
     const [accounts, setAccounts] = useState(new Map<string, any>());
+    const [streamers, setStreamers] = useState(new Map<string, any>());
     const [teams, setTeams] = useState<any[]>();
     const [team, setTeam] = useState<TournamentTeamModel>();
     const [tab, setTab] = useState(Tabs.HOME)
@@ -181,7 +183,6 @@ export default function Tournament() {
                 teamsNamesPersistence.set(name.id, name.name)
             })
             callback()
-            console.log(teamsNamesPersistence)
         })
     }
 
@@ -195,6 +196,13 @@ export default function Tournament() {
         }
         socket.emit('tournament::getMatch', match || localMatchId, (match: TournamentMatchModel) => {
             if (!match) return;
+
+            if (match.streamer && !streamerPersistence.has(match.streamer)) {
+                socket.emit('account::getStreamer', match.streamer, (streamer: any) => {
+                    streamerPersistence.set(streamer.id, streamer);
+                    setStreamers(streamerPersistence);
+                })
+            }
 
             socket.emit('tournament::getTeamsNames', [match.teamA, match.teamB], (names: { id: string, name: string }[]) => {
                 names.forEach(name => {
@@ -257,6 +265,41 @@ export default function Tournament() {
                 setCurrentMatch({
                     ...currentMatch,
                     done: true
+                } as TournamentMatchModel)
+            }
+        })
+    }
+
+    function removeStreamer(matchId: string | undefined) {
+        if (!id) return
+        socket.emit('tournament::admin:removeMatchStreamer', id, matchId, (done: boolean) => {
+            if (done) {
+                setCurrentMatch({
+                    ...currentMatch,
+                    streamer: undefined
+                } as TournamentMatchModel)
+            }
+        })
+    }
+
+    function setStreamer(matchId: string | undefined) {
+        if (!id) return
+        socket.emit('tournament::streamer:setMatchStreamer', id, matchId, (done: boolean) => {
+            if (done) {
+                if (!streamerPersistence.has(me || "")) {
+                    socket.emit('account::getStreamer', me, (streamer: any) => {
+                        streamerPersistence.set(streamer.id, streamer);
+                        setStreamers(streamerPersistence)
+                        setCurrentMatch({
+                            ...currentMatch,
+                            streamer: me
+                        } as TournamentMatchModel)
+                    })
+                    return;
+                }
+                setCurrentMatch({
+                    ...currentMatch,
+                    streamer: me
                 } as TournamentMatchModel)
             }
         })
@@ -666,8 +709,21 @@ export default function Tournament() {
                                         Winner : {currentMatch.winner} - Round : {currentMatch.round} - Pool
                                         : {currentMatch.pool}<br/>
                                         Referee
-                                        : {[accounts.get(currentMatch.referee || "")].map(a => a.username + "#" + a.discriminator) || "TODO v2"}
+                                        : {currentMatch.referee ? [accounts.get(currentMatch.referee || "")].map(a => a.username + "#" + a.discriminator) : "TODO v2 no referee"}<br/>
+                                        Streamer
+                                        : {currentMatch.streamer ? ([streamers.get(currentMatch.streamer || "") || {}].map(a => a.username + "#" + a.discriminator + " - " + a.twitchUrl)) : "TODO v2 no streamer"}
                                     </Grid>
+                                    {tournament.admins.includes(me || "") &&
+                                        <Grid item xs={12}>
+                                            <Card>
+                                                <CardContent>
+                                                    Actions admin
+                                                    <Button onClick={() => removeStreamer(currentMatch.id)}>Retirer
+                                                        streamer</Button>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    }
                                     {tournament.referees.includes(me || "") &&
                                         <Grid item xs={12}>
                                             <Card>
@@ -696,6 +752,18 @@ export default function Tournament() {
                                                         B winner</Button>
                                                     <Button onClick={() => validateMatch(currentMatch.id)}>Valider
                                                         match</Button>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    }
+                                    {tournament.streamers.includes(me || "") &&
+                                        <Grid item xs={12}>
+                                            <Card>
+                                                <CardContent>
+                                                    Actions streamer
+
+                                                    <Button onClick={() => setStreamer(currentMatch.id)}>Me désigner
+                                                        streamer</Button>
                                                 </CardContent>
                                             </Card>
                                         </Grid>

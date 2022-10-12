@@ -2,6 +2,7 @@
   "account": {
     "ankamaName": "Ankama nickname",
     "ankamaDiscriminator": "# Ankama",
+    "invalidTwitchUrl": "Twitch URL must start with https://www.twitch.tv/",
     "menuItem": "My account",
     "unableToSave": "Unable to save account modifications",
     "saved": "Account saved",

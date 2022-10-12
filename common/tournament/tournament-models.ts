@@ -96,6 +96,7 @@ export interface TournamentMatchModel {
     teamA: string;
     teamB: string;
     referee?: string;
+    streamer?: string;
     winner?: string;
     round?: number;
     rounds: TournamentMatchRoundModel[];

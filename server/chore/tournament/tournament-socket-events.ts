@@ -383,6 +383,39 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             .catch((_) => callback(false))
     });
 
+    socket.on('tournament::admin:removeMatchStreamer', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{streamer}', 'null')
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::streamer:setMatchStreamer', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentStreamer(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{streamer}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2
+                                     AND (content ->> ('streamer')) is null`, [matchId, tournamentId, JSON.stringify(socket.data.user)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
     socket.on('tournament::referee:setMatchDate', (tournamentId, matchId, date, callback) => {
         if (!callback) return;
         DbHelper.isTournamentReferee(tournamentId, socket.data.user)
@@ -392,7 +425,8 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                 DbHelper.rawQuery(`UPDATE matches
                                    SET content = jsonb_set(content, '{date}', $3)
                                    WHERE id = $1
-                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(date)])
+                                     AND "tournamentId" = $2
+                                     AND (content ->> ('streamer')) is null`, [matchId, tournamentId, JSON.stringify(date)])
                     .then(result => callback(result.rowCount > 0))
                     .catch(_ => callback(false))
             })
