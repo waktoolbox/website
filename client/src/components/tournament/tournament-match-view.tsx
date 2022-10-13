@@ -235,7 +235,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                 }
                             }}>
                                 <Typography variant="h5" display="inline">{t(`maps.${fight.map}`)}</Typography>
-                                <img src={`/maps/${fight.map}.jpg`} alt={`Image of map ${fight.map}`}
+                                <img src={`/maps/${fight.map}.jpg`} alt={`Map ${fight.map}`}
                                      style={{width: "100%", borderRadius: 6, marginTop: 8}}/>
                             </CardContent>
                         </Card>
