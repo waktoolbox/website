@@ -12,7 +12,7 @@
   "actions": "Actions",
   "coming.soon": "Arrivera prochainement",
   "connect": "Connexion",
-  "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
+  "date": "{{date, datetime}}",
   "delete": "Supprimer",
   "draft": {
     "assignToA": "Assigner à l'équipe A",
@@ -70,10 +70,19 @@
       "manageMyTeam": "Modifier mon équipe",
       "manageMyRegistration": "Modifier mon inscription",
       "match": {
+        "goToDraft": "Aller au draft",
+        "live": "Live",
+        "matchNb": "Combat {{nb}}",
         "more": "En savoir plus",
         "noDate": "Pas de date",
         "noNextMatches": "Aucun match à venir",
-        "noMatchResult": "Aucun résultat de match"
+        "noMatchResult": "Aucun résultat de match",
+        "noStreamer": "Pas de streamer",
+        "pool": "Poule {{pool}}",
+        "round": "Round {{round}}",
+        "setMeAsStreamer": "Me désigner comme streamer",
+        "setNullAsStreamer": "Retirer le streamer",
+        "watchStream": "Regarder le stream"
       },
       "myTeam": "Mon équipe",
       "planning": "Planning",

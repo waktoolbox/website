@@ -14,10 +14,9 @@ import {
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
-import {Button, Card, CardContent, Divider, Grid, Icon, Stack, TextField, Typography} from "@mui/material";
+import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
 import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
-import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
-import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
+import TournamentMatchView from "../../components/tournament/tournament-match-view";
 
 enum Tabs {
     HOME,
@@ -58,7 +57,6 @@ export default function Tournament() {
     const [matchesToDisplay, setMatchesToDisplay] = useState<TournamentMatchModel[]>();
     const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
-    const [currentMatchDate, setCurrentMatchDate] = useState<string>();
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -216,93 +214,6 @@ export default function Tournament() {
     const goToTeam = (tid: string) => {
         setLocalTeamId(tid);
         loadTeam(tid, true)
-    }
-
-    function setMatchDate(matchDate: string | null | undefined) {
-        if (!id || !matchDate) return;
-        setCurrentMatchDate(matchDate)
-    }
-
-    function validateMatchDate(matchId: string | undefined) {
-        socket.emit('tournament::referee:setMatchDate', id, matchId, currentMatchDate, (done: boolean) => {
-            if (done) {
-                setCurrentMatch({
-                    ...currentMatch,
-                    date: currentMatchDate
-                } as TournamentMatchModel)
-            }
-        })
-    }
-
-    function setReferee(matchId: string | undefined) {
-        if (!id) return;
-        socket.emit('tournament::referee:setReferee', id, matchId, (done: boolean) => {
-            if (done) {
-                setCurrentMatch({
-                    ...currentMatch,
-                    referee: me
-                } as TournamentMatchModel)
-            }
-        })
-    }
-
-    function setWinner(matchId: string | undefined, team: string) {
-        if (!id) return;
-        socket.emit('tournament::referee:setWinner', id, matchId, team, (done: boolean) => {
-            if (done) {
-                setCurrentMatch({
-                    ...currentMatch,
-                    winner: team
-                } as TournamentMatchModel)
-            }
-        })
-    }
-
-    function validateMatch(matchId: string | undefined) {
-        if (!id) return;
-        socket.emit('tournament::referee:validateMatch', id, matchId, (done: boolean) => {
-            if (done) {
-                setCurrentMatch({
-                    ...currentMatch,
-                    done: true
-                } as TournamentMatchModel)
-            }
-        })
-    }
-
-    function removeStreamer(matchId: string | undefined) {
-        if (!id) return
-        socket.emit('tournament::admin:removeMatchStreamer', id, matchId, (done: boolean) => {
-            if (done) {
-                setCurrentMatch({
-                    ...currentMatch,
-                    streamer: undefined
-                } as TournamentMatchModel)
-            }
-        })
-    }
-
-    function setStreamer(matchId: string | undefined) {
-        if (!id) return
-        socket.emit('tournament::streamer:setMatchStreamer', id, matchId, (done: boolean) => {
-            if (done) {
-                if (!streamerPersistence.has(me || "")) {
-                    socket.emit('account::getStreamer', me, (streamer: any) => {
-                        streamerPersistence.set(streamer.id, streamer);
-                        setStreamers(streamerPersistence)
-                        setCurrentMatch({
-                            ...currentMatch,
-                            streamer: me
-                        } as TournamentMatchModel)
-                    })
-                    return;
-                }
-                setCurrentMatch({
-                    ...currentMatch,
-                    streamer: me
-                } as TournamentMatchModel)
-            }
-        })
     }
 
     return (
@@ -701,74 +612,20 @@ export default function Tournament() {
                             }
 
                             {tab === Tabs.MATCH && currentMatch &&
-                                <Grid container>
-                                    <Grid item xs={12}>
-                                        Team A : {currentMatch.teamA} - Team B : {currentMatch.teamB} - Rounds
-                                        : {JSON.stringify(currentMatch.rounds)} - Date : {currentMatch.date} - Done
-                                        : {currentMatch.done ? "Y" : "N"}<br/>
-                                        Winner : {currentMatch.winner} - Round : {currentMatch.round} - Pool
-                                        : {currentMatch.pool}<br/>
-                                        Referee
-                                        : {currentMatch.referee ? [accounts.get(currentMatch.referee || "")].map(a => a.username + "#" + a.discriminator) : "TODO v2 no referee"}<br/>
-                                        Streamer
-                                        : {currentMatch.streamer ? ([streamers.get(currentMatch.streamer || "") || {}].map(a => a.username + "#" + a.discriminator + " - " + a.twitchUrl)) : "TODO v2 no streamer"}
-                                    </Grid>
-                                    {tournament.admins.includes(me || "") &&
-                                        <Grid item xs={12}>
-                                            <Card>
-                                                <CardContent>
-                                                    Actions admin
-                                                    <Button onClick={() => removeStreamer(currentMatch.id)}>Retirer
-                                                        streamer</Button>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
+                                <TournamentMatchView data={{
+                                    accounts: accounts,
+                                    me: me || "",
+                                    teams: teamsNamesPersistence,
+                                    streamers: streamers,
+                                    tournament: tournament,
+                                    currentMatch: currentMatch,
+                                    addStreamer: (id: string, data: any) => {
+                                        streamerPersistence.set(id, data)
+                                        setStreamers(streamerPersistence)
                                     }
-                                    {tournament.referees.includes(me || "") &&
-                                        <Grid item xs={12}>
-                                            <Card>
-                                                <CardContent>
-                                                    Actions arbitre
+                                }}
+                                />
 
-                                                    <LocalizationProvider dateAdapter={AdapterMoment}>
-                                                        <DateTimePicker
-                                                            label={t('tournament.startDate')}
-                                                            value={currentMatch.date}
-                                                            onChange={(value, ignored) => setMatchDate(value)}
-                                                            renderInput={(params) => <TextField {...params} />}
-                                                        />
-                                                    </LocalizationProvider>
-                                                    <Button
-                                                        onClick={() => validateMatchDate(currentMatch.id)}>Set match
-                                                        date</Button>
-                                                    <Button
-                                                        onClick={() => setReferee(currentMatch.id)}>Met set
-                                                        referee</Button>
-                                                    <Button
-                                                        onClick={() => setWinner(currentMatch.id, currentMatch.teamA)}>Team
-                                                        A winner</Button>
-                                                    <Button
-                                                        onClick={() => setWinner(currentMatch.id, currentMatch.teamB)}>Team
-                                                        B winner</Button>
-                                                    <Button onClick={() => validateMatch(currentMatch.id)}>Valider
-                                                        match</Button>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
-                                    }
-                                    {tournament.streamers.includes(me || "") &&
-                                        <Grid item xs={12}>
-                                            <Card>
-                                                <CardContent>
-                                                    Actions streamer
-
-                                                    <Button onClick={() => setStreamer(currentMatch.id)}>Me désigner
-                                                        streamer</Button>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
-                                    }
-                                </Grid>
                             }
 
                         </Grid>

@@ -74,6 +74,20 @@ function App() {
                     color: '#fefffa !important'
                 }),
             },
+        },
+        MuiTab: {
+            styleOverrides: {
+                textColorPrimary: ({ownerState}: { ownerState: any }) => ({
+                    color: '#8299a1'
+                }),
+            },
+        },
+        MuiTabs: {
+            styleOverrides: {
+                indicator: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#03c8be'
+                }),
+            },
         }
     }
 

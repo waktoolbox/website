@@ -425,8 +425,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
                 DbHelper.rawQuery(`UPDATE matches
                                    SET content = jsonb_set(content, '{date}', $3)
                                    WHERE id = $1
-                                     AND "tournamentId" = $2
-                                     AND (content ->> ('streamer')) is null`, [matchId, tournamentId, JSON.stringify(date)])
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(date)])
                     .then(result => callback(result.rowCount > 0))
                     .catch(_ => callback(false))
             })

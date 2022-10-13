@@ -118,6 +118,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
                             teamA: team || "",
                             teamB: opponent || "",
                             winner: !opponent ? team : undefined,
+                            phase: this.definition.phase,
                             round: this.data.currentRound,
                             pool: index,
                             rounds: this.generateRoundForMatch(),
