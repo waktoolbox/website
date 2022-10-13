@@ -16,6 +16,13 @@ type PropsTypes = {
     addStreamer(id: string, data: any): void
 }
 
+const dateFormat = {
+    date: {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', timeZoneName: 'short'
+    }
+}
+
 export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const {
         accounts,
@@ -30,9 +37,37 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const socket = useContext(SocketContext)
 
     const [tab, setTab] = useState(0);
-    const [match, setCurrentMatch] = useState(currentMatch)
+    const [match, setMatch] = useState(currentMatch)
     const [fight, setFight] = useState(currentMatch.rounds[tab]);
     const [currentMatchDate, setCurrentMatchDate] = useState<string>();
+    const [currentDraftDate, setCurrentDraftDate] = useState<string | null>(fight.draftDate || null);
+
+    function setDraftDate(draftDate: string | null | undefined) {
+        if (!draftDate) return;
+        setCurrentDraftDate((draftDate as any).toISOString())
+    }
+
+    function validateDraftDate() {
+        socket.emit('tournament::referee:setDraftDate', tournament.id, match.id, tab, currentDraftDate, (done: boolean) => {
+            if (done) {
+                setFight({
+                    ...fight,
+                    draftDate: currentDraftDate
+                } as any)
+            }
+        })
+    }
+
+    function setFightWinner(team: string) {
+        socket.emit('tournament::referee:setFightWinner', tournament.id, match.id, tab, team, (done: boolean) => {
+            if (done) {
+                setFight({
+                    ...fight,
+                    winner: team
+                } as any)
+            }
+        })
+    }
 
     function setMatchDate(matchDate: string | null | undefined) {
         if (!matchDate) return;
@@ -42,7 +77,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     function validateMatchDate(matchId: string | undefined) {
         socket.emit('tournament::referee:setMatchDate', tournament.id, matchId, currentMatchDate, (done: boolean) => {
             if (done) {
-                setCurrentMatch({
+                setMatch({
                     ...match,
                     date: currentMatchDate
                 } as TournamentMatchModel)
@@ -53,7 +88,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     function setReferee(matchId: string | undefined) {
         socket.emit('tournament::referee:setReferee', tournament.id, matchId, (done: boolean) => {
             if (done) {
-                setCurrentMatch({
+                setMatch({
                     ...match,
                     referee: me
                 } as TournamentMatchModel)
@@ -64,7 +99,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     function setWinner(matchId: string | undefined, team: string) {
         socket.emit('tournament::referee:setWinner', tournament.id, matchId, team, (done: boolean) => {
             if (done) {
-                setCurrentMatch({
+                setMatch({
                     ...match,
                     winner: team
                 } as TournamentMatchModel)
@@ -75,7 +110,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     function validateMatch(matchId: string | undefined) {
         socket.emit('tournament::referee:validateMatch', tournament.id, matchId, (done: boolean) => {
             if (done) {
-                setCurrentMatch({
+                setMatch({
                     ...match,
                     done: true
                 } as TournamentMatchModel)
@@ -86,7 +121,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     function removeStreamer(matchId: string | undefined) {
         socket.emit('tournament::admin:removeMatchStreamer', tournament.id, matchId, (done: boolean) => {
             if (done) {
-                setCurrentMatch({
+                setMatch({
                     ...match,
                     streamer: undefined
                 } as TournamentMatchModel)
@@ -100,14 +135,14 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                 if (!streamers.has(me || "")) {
                     socket.emit('account::getStreamer', me, (streamer: any) => {
                         addStreamer(streamer.id, streamer);
-                        setCurrentMatch({
+                        setMatch({
                             ...match,
                             streamer: me
                         } as TournamentMatchModel)
                     })
                     return;
                 }
-                setCurrentMatch({
+                setMatch({
                     ...match,
                     streamer: me
                 } as TournamentMatchModel)
@@ -128,6 +163,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
 
     const onTabChange = (event: SyntheticEvent, newTab: number) => {
         setFight(match.rounds[newTab])
+        setCurrentDraftDate(match.rounds[newTab].draftDate || null)
         setTab(newTab);
     }
 
@@ -140,12 +176,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                 <Typography variant="h5" display="inline" sx={{color: "#fefffa"}}>{teams.get(match.teamB)}</Typography>
                 <Typography variant="h6" color="#8299a1">{match.date
                     ? t('date', {
-                        date: Date.parse(match.date), formatParams: {
-                            date: {
-                                year: 'numeric', month: 'long', day: 'numeric',
-                                hour: 'numeric', minute: 'numeric', timeZoneName: 'short'
-                            }
-                        }
+                        date: Date.parse(match.date), formatParams: dateFormat
                     })
                     : t('tournament.display.match.noDate')}
                 </Typography>
@@ -165,10 +196,26 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                 </Tabs>
                 <Grid container>
                     <Grid item xs={8} sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        {/*TODO v2 bind link*/}
-                        <Button sx={{width: "50%", pt: 2, pb: 2}}>
-                            {t('tournament.display.match.goToDraft')}
-                        </Button>
+                        {/*TODO v2 bind link & TODO v3 stats*/}
+                        <Grid container>
+                            <Grid item xs={12}>
+                                {fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
+                                    <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}>
+                                        {t('tournament.display.match.goToDraft')}
+                                    </Button>
+                                }
+                                {!fight.draftDate &&
+                                    <Typography
+                                        variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
+                                }
+                                {fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
+                                    <Typography variant="h5">{t('tournament.display.match.draftDate', {
+                                        date: Date.parse(fight.draftDate),
+                                        formatParams: dateFormat
+                                    })}</Typography>
+                                }
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item xs={4}>
                         <Card sx={{backgroundColor: '#017d7f', borderRadius: 3, mb: 2}}>
@@ -227,57 +274,93 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                 }
                             </CardContent>
                         </Card>
+                        <Card sx={{backgroundColor: '#213943', borderRadius: 3, textAlign: "start", mb: 2}}>
+                            <CardContent sx={{
+                                "&:last-child": {
+                                    pb: 2
+                                }
+                            }}>
+                                <Typography variant="h4">{t('tournament.display.match.arbitration')}</Typography>
+                                <Typography color="#8299a1"
+                                            sx={{mt: 2}}>{match.referee ? [accounts.get(match.referee || "")].map(a => a.username + "#" + a.discriminator) : "TODO v2 no referee"}</Typography>
+
+                                {match.referee && match.referee === me &&
+                                    <Grid container sx={{mt: 2}}>
+                                        <Grid item xs={12}>
+                                            <LocalizationProvider dateAdapter={AdapterMoment}>
+                                                <DateTimePicker
+                                                    label={t('tournament.startDate')}
+                                                    value={currentDraftDate}
+                                                    onChange={(value, ignored) => setDraftDate(value)}
+                                                    renderInput={(params) => <TextField {...params} />}
+                                                />
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}} onClick={validateDraftDate}>
+                                                {t('tournament.display.match.buttonSetDraftDate')}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}}
+                                                    onClick={() => setFightWinner(match.teamA)}>
+                                                {t('tournament.display.match.buttonSetFightWinnerTeam', {name: teams.get(match.teamA)})}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}}
+                                                    onClick={() => setFightWinner(match.teamA)}>
+                                                {t('tournament.display.match.buttonSetFightWinnerTeam', {name: teams.get(match.teamB)})}
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                }
+                            </CardContent>
+                        </Card>
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid item xs={12} sx={{mt: 2}}>
-                Team A : {teams.get(match.teamA)} - Team B : {match.teamB} - Rounds
-                : {JSON.stringify(match.rounds)} - Date : {match.date} - Done
-                : {match.done ? "Y" : "N"}<br/>
-                Winner : {match.winner} - Round : {match.round} - Pool
-                : {match.pool}<br/>
-                Referee
-                : {match.referee ? [accounts.get(match.referee || "")].map(a => a.username + "#" + a.discriminator) : "TODO v2 no referee"}<br/>
-            </Grid>
-            {tournament.admins.includes(me || "") &&
-                <Grid item xs={12}>
-                    <Card>
-                        <CardContent>
-                            Actions admin
-                            <Button onClick={() => removeStreamer(match.id)}>Retirer
-                                streamer</Button>
-                        </CardContent>
-                    </Card>
-                </Grid>
-            }
             {tournament.referees.includes(me || "") &&
-                <Grid item xs={12}>
-                    <Card>
+                <Grid item xs={12} sx={{mt: 2}}>
+                    <Card sx={{pr: 2, backgroundColor: '#162329', borderRadius: 3, ml: 2, mr: 2}}>
                         <CardContent>
-                            Actions arbitre
+                            <Grid container>
+                                <Grid item xs={4}>
+                                    <Button sx={{m: 1, width: "90%"}}
+                                            onClick={() => setReferee(match.id)}>{t('tournament.display.match.buttonSetMatchReferee')}</Button>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <LocalizationProvider dateAdapter={AdapterMoment}>
+                                        <DateTimePicker
+                                            label={t('tournament.startDate')}
+                                            value={currentMatchDate || match.date}
+                                            onChange={(value, ignored) => setMatchDate(value)}
+                                            renderInput={(params) => <TextField {...params} />}
+                                        />
+                                    </LocalizationProvider>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Button sx={{m: 1, width: "90%"}} onClick={() => validateMatchDate(match.id)}>
+                                        {t('tournament.display.match.buttonSetMatchDate')}
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Button sx={{m: 1, width: "90%"}} onClick={() => setWinner(match.id, match.teamA)}>
+                                        {t('tournament.display.match.buttonSetMatchWinnerTeam', {name: teams.get(match.teamA)})}
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={4}>
 
-                            <LocalizationProvider dateAdapter={AdapterMoment}>
-                                <DateTimePicker
-                                    label={t('tournament.startDate')}
-                                    value={match.date}
-                                    onChange={(value, ignored) => setMatchDate(value)}
-                                    renderInput={(params) => <TextField {...params} />}
-                                />
-                            </LocalizationProvider>
-                            <Button
-                                onClick={() => validateMatchDate(match.id)}>Set match
-                                date</Button>
-                            <Button
-                                onClick={() => setReferee(match.id)}>Met set
-                                referee</Button>
-                            <Button
-                                onClick={() => setWinner(match.id, match.teamA)}>Team
-                                A winner</Button>
-                            <Button
-                                onClick={() => setWinner(match.id, match.teamB)}>Team
-                                B winner</Button>
-                            <Button onClick={() => validateMatch(match.id)}>Valider
-                                match</Button>
+                                    <Button sx={{m: 1, width: "90%"}} onClick={() => setWinner(match.id, match.teamB)}>
+                                        {t('tournament.display.match.buttonSetMatchWinnerTeam', {name: teams.get(match.teamB)})}
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Button sx={{m: 1, width: "90%"}} onClick={() => validateMatch(match.id)}>
+                                        Valider match
+                                    </Button>
+                                </Grid>
+                            </Grid>
                         </CardContent>
                     </Card>
                 </Grid>

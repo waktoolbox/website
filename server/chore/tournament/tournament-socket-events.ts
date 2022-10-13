@@ -416,6 +416,60 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             .catch(_ => callback(false))
     });
 
+    socket.on('tournament::referee:setDraftDate', (tournamentId, matchId, round, date, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.rawQuery(`SELECT content
+                                   FROM matches
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2
+                                   LIMIT 1`, [matchId, tournamentId])
+                    .then(result => {
+                        if (result.rowCount <= 0) return callback(false);
+
+                        const match = result.rows[0].content;
+                        if (!match.rounds || match.rounds.length < round) return callback(false);
+                        match.rounds[round].draftDate = date;
+                        DbHelper.rawQuery(`UPDATE matches
+                                           SET content = $3
+                                           WHERE id = $1
+                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
+                            .then(r => callback(r.rowCount > 0))
+                            .catch(_ => callback(false))
+                    }).catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setFightWinner', (tournamentId, matchId, round, winner, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.rawQuery(`SELECT content
+                                   FROM matches
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2
+                                   LIMIT 1`, [matchId, tournamentId])
+                    .then(result => {
+                        if (result.rowCount <= 0) return callback(false);
+
+                        const match = result.rows[0].content;
+                        if (!match.rounds || match.rounds.length < round) return callback(false);
+                        match.rounds[round].winner = winner;
+                        DbHelper.rawQuery(`UPDATE matches
+                                           SET content = $3
+                                           WHERE id = $1
+                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
+                            .then(r => callback(r.rowCount > 0))
+                            .catch(_ => callback(false))
+                    }).catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
     socket.on('tournament::referee:setMatchDate', (tournamentId, matchId, date, callback) => {
         if (!callback) return;
         DbHelper.isTournamentReferee(tournamentId, socket.data.user)
