@@ -256,8 +256,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                 {match.streamer && streamers.get(match.streamer || "") && streamers.get(match.streamer || "").twitchUrl &&
                                     <a href={streamers.get(match.streamer || "").twitchUrl}>
                                         <Button sx={{backgroundColor: "#6441A5", width: "100%"}}>
-                                            <Icon sx={{mr: 1}}>
-                                                <img style={{width: "24px", height: "24px"}} src='/images/twitch.png'
+                                            <Icon sx={{mr: 1, position: "relative", top: "-2px", zIndex: 0}}>
+                                                <img style={{width: "24px", height: "30px"}} src='/images/twitch.svg'
                                                      alt="Twitch icon"/>
                                             </Icon>
                                             {t('tournament.display.match.watchStream')}
