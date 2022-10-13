@@ -161,7 +161,7 @@ export default function Tournament() {
     }
 
     const loadMatchesToDisplay = (event: string) => {
-        // TODO v2 bind real phase here
+        // TODO v3 bind real phase here
         socket.emit(event, id, 1, (matches: TournamentMatchModel[]) => {
             const namesToRequest: string[] = [];
             matches.forEach(t => {
@@ -605,7 +605,8 @@ export default function Tournament() {
 
                                     {matchesToDisplay.length <= 0 &&
                                         <Grid item xs={12}>
-                                            TODO v2 no match planned
+                                            <Typography
+                                                variant="h5">{t('tournament.display.noMatchPlanned')}</Typography>
                                         </Grid>
                                     }
                                 </Grid>

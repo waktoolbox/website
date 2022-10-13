@@ -196,7 +196,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                 </Tabs>
                 <Grid container>
                     <Grid item xs={8} sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        {/*TODO v2 bind link & TODO v3 stats*/}
+                        {/*TODO v2 bind draft link & draft results & winner */}
                         <Grid container>
                             <Grid item xs={12}>
                                 {fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
@@ -282,7 +282,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                             }}>
                                 <Typography variant="h4">{t('tournament.display.match.arbitration')}</Typography>
                                 <Typography color="#8299a1"
-                                            sx={{mt: 2}}>{match.referee ? [accounts.get(match.referee || "")].map(a => a.username + "#" + a.discriminator) : "TODO v2 no referee"}</Typography>
+                                            sx={{mt: 2}}>{match.referee ? [accounts.get(match.referee || "")].map(a => a.username + "#" + a.discriminator) : t('tournament.display.match.noReferee')}</Typography>
 
                                 {match.referee && match.referee === me &&
                                     <Grid container sx={{mt: 2}}>

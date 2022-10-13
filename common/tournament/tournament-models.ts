@@ -88,7 +88,6 @@ export interface TournamentStatsClassModel {
     death: number;
 }
 
-// TODO v2
 export interface TournamentMatchModel {
     id?: string;
     date?: string;

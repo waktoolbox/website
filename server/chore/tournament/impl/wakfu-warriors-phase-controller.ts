@@ -25,7 +25,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
     }
 
     getQualifiedTeams(): string[] {
-        // TODO v2
+        // TODO v3
         return [];
         // return [...(this.data.teams.filter(t => t.winInPhaseOne >= 2).map(t => t.id) as string[])];
     }
@@ -180,7 +180,7 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
     }
 }
 
-// TODO v2
+// TODO v3
 export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsPhaseTwoData> {
     data: WakfuWarriorsPhaseTwoData;
     definition: TournamentPhaseDefinition;

@@ -175,7 +175,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 
 function goToNextPhase(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-        // TODO v2
+        // TODO v3
         console.log("Next phase")
     })
 }
