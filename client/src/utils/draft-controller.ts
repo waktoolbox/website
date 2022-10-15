@@ -1,7 +1,7 @@
 import {Breeds} from "./breeds";
 
 // TODO later : find a way to let this in common
-export interface DraftController<C extends DraftConfiguration, N extends DraftNotifier, V extends DraftValidator> {
+export interface DraftController<N extends DraftNotifier, V extends DraftValidator> {
     notifier: N;
     validator: V;
 

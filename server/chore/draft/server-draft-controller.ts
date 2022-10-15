@@ -11,7 +11,7 @@ import {
 } from "../../../client/src/utils/draft-controller";
 import {SocketManager} from "../../api/socket-manager";
 
-export class ServerDraftController implements DraftController<ServerDraftConfiguration, DraftNotifier, ServerDraftValidator>, DraftNotifier {
+export class ServerDraftController implements DraftController<DraftNotifier, ServerDraftValidator>, DraftNotifier {
     notifier: DraftNotifier;
     validator: ServerDraftValidator;
     data: DraftData;

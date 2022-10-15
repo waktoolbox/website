@@ -18,7 +18,7 @@ import {DraftTemplates} from "../utils/draft-templates";
 import {Breeds, BreedsArray} from "../utils/breeds";
 import {Variant} from "@mui/material/styles/createTypography";
 
-class ClientDraftController implements DraftController<DraftConfiguration, DraftNotifier, DraftValidator>, DraftNotifier, DraftValidator {
+class ClientDraftController implements DraftController<DraftNotifier, DraftValidator>, DraftNotifier, DraftValidator {
     notifier: DraftNotifier = this;
     validator: DraftValidator = this;
     data: DraftData;
@@ -283,7 +283,7 @@ export default function Draft() {
                 socket.emit('draft::leave', id);
             }
         }
-    }, [id, socket])
+    }, [id, socket]) // eslint-disable-line react-hooks/exhaustive-deps
 
     function createDraft() {
         socket.emit('draft::create', {
