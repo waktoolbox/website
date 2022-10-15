@@ -36,7 +36,6 @@ export default function Menu() {
         localStorage.removeItem('token');
         localStorage.removeItem('discordId');
         userContext.dispatch({type: "setConnected", payload: false});
-        socket.disconnect();
         navigate('/');
     }
 
@@ -88,6 +87,13 @@ export default function Menu() {
                             <Stack>
                                 <ListItemText primary={t('tournament.tools')}/>
                                 <List>
+                                    <ListItem key="participations.myTeams"
+                                              sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
+                                        {/*TODO later setup tournament creation*/}
+                                        <Link to="/draft">
+                                            <ListItemText primary={t('draft.link')}/>
+                                        </Link>
+                                    </ListItem>
                                     <ListItem key="participations.myTeams"
                                               sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
                                         {/*TODO later setup tournament creation*/}

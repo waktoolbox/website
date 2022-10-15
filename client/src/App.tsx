@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {socket, SocketContext} from "./context/socket-context";
+import {SocketProvider} from "./context/socket-context";
 import {UserContextProvider} from "./context/user-context";
 import {Home} from "./Home";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
@@ -91,13 +91,13 @@ function App() {
 
     return (
         <div className="App">
-            <ThemeProvider theme={theme}>
-                <UserContextProvider>
-                    <SocketContext.Provider value={socket}>
+            <SocketProvider>
+                <ThemeProvider theme={theme}>
+                    <UserContextProvider>
                         <Home/>
-                    </SocketContext.Provider>
-                </UserContextProvider>
-            </ThemeProvider>
+                    </UserContextProvider>
+                </ThemeProvider>
+            </SocketProvider>
 
             <footer style={{backgroundColor: "#0d1518"}}>
                 <img style={{marginTop: 16}} src="/logo.png" alt="logo"/>

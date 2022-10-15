@@ -9,6 +9,7 @@ import TournamentRegistration from "./routes/tournament/tournament-registration"
 import TournamentRegistrationValidation from "./routes/tournament/tournament-registration-validation";
 import React from "react";
 import jwtDecode from "jwt-decode";
+import Draft from "./routes/draft";
 
 export function Home() {
     const params = new URLSearchParams(window.location.search);
@@ -27,6 +28,8 @@ export function Home() {
                 <Route path="/" element={<TournamentHome/>}/>
 
                 <Route path="/account" element={<Account/>}/>
+                <Route path="/draft" element={<Draft/>}/>
+                <Route path="/draft/:id" element={<Draft/>}/>
 
                 <Route path="/tournament/:id" element={<TournamentView/>}/>
                 <Route path="/tournament/:id/tab/:targetTab" element={<TournamentView/>}/>

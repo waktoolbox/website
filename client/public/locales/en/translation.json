@@ -13,6 +13,9 @@
   "connect": "Sign in",
   "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
   "delete": "Delete",
+  "draft": {
+    "link": "Draft"
+  },
   "discord.discriminator": "# Discord",
   "discord.pseudo": "Discord nickname",
   "disconnect": "Log out",

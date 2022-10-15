@@ -46,7 +46,7 @@ export default function TournamentHome() {
         socket.emit('tournament::home', (home: any) => {
             setHome(home);
         })
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [socket]) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <Grid container>
