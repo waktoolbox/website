@@ -15,6 +15,7 @@ export class ServerDraftController implements DraftController<ServerDraftConfigu
     notifier: DraftNotifier;
     validator: ServerDraftValidator;
     data: DraftData;
+    startDate = Date.now();
 
     private lockedForTeamA: number[] = [];
     private lockedForTeamB: number[] = [];
@@ -35,18 +36,19 @@ export class ServerDraftController implements DraftController<ServerDraftConfigu
         if (!this.data.users.find(u => u.id === user.id)) {
             this.data.users.push((user));
         }
+        SocketManager.io()?.to(`draft-${this.data.id}`).emit('draft::userJoined', user);
         if (this.data.teamA?.find(u => u.id === user.id)) {
             return this.onUserAssigned(user, DraftTeam.TEAM_A)
         }
         if (this.data.teamB?.find(u => u.id === user.id)) {
             return this.onUserAssigned(user, DraftTeam.TEAM_B)
         }
-        SocketManager.io()?.to(`draft-${this.data.id}`).emit('draft::userJoined', user);
     }
 
     assignUser(userId: string, team: DraftTeam) {
         const associatedTeam = team === DraftTeam.TEAM_A ? this.data.teamA : this.data.teamB;
         if (!associatedTeam) return;
+        if (associatedTeam.length >= 6) return;
         const draftUser = this.data.users.find(u => u.id === userId);
         if (!draftUser) return;
         if (this.data?.teamA?.find(u => u.id === userId)) return;
@@ -121,6 +123,7 @@ export class ServerDraftController implements DraftController<ServerDraftConfigu
                 console.error(`Unknown draft action: ${action.type}`)
                 return;
         }
+        this.data.history.push(action);
         this.data.currentAction++;
     }
 

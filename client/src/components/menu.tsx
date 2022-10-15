@@ -28,6 +28,10 @@ export default function Menu() {
         if (token && !userContext?.userState?.connected) {
             socket.emit('authenticate', token, (connected: boolean) => {
                 userContext.dispatch({type: "setConnected", payload: connected});
+                if (!connected) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('discordId');
+                }
             });
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps

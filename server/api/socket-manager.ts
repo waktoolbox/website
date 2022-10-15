@@ -17,7 +17,7 @@ class Manager {
                 const tokenContent = verifyToken(token);
                 if (!tokenContent) {
                     callback(false);
-                    return socket.disconnect();
+                    return;
                 }
                 socket.data.user = tokenContent.discord_id;
                 socket.data.username = tokenContent.username;

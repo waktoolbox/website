@@ -7,6 +7,16 @@ import {SocketManager} from "../../api/socket-manager";
 class Manager {
     private currentDrafts: Map<string, ServerDraftController> = new Map();
 
+    constructor() {
+        setInterval(() => {
+            this.currentDrafts.forEach(draft => {
+                if (Math.abs(draft.startDate - Date.now()) > 60 * 60 * 1000) {
+                    this.currentDrafts.delete(draft.data.id);
+                }
+            })
+        }, 60000)
+    }
+
     userRequestDraft(socket: Socket, draftId: string): Promise<DraftData | undefined> {
         // TODO v2 check DB for draft ID
         return new Promise((resolve) => {
@@ -15,7 +25,11 @@ class Manager {
                 if (!draft) return resolve(undefined);
 
                 socket.join(`draft-${draftId}`)
-                draft.onUserJoin(this.createUser(socket))
+                const user = this.createUser(socket);
+                draft.onUserJoin(user)
+                socket.on('disconnect', () => {
+                    SocketManager.io()?.to(`draft-${draftId}`).emit('draft::userDisconnected', user.id)
+                })
 
                 return resolve(draft.data);
             }
@@ -29,28 +43,31 @@ class Manager {
             ? {
                 id: socket.data.user,
                 username: socket.data.username,
-                discriminator: socket.data.discriminator
+                discriminator: socket.data.discriminator,
+                present: true
             }
             : {
                 id: socket.id,
                 username: socket.id,
-                discriminator: "0000"
+                discriminator: "0000",
+                present: true
             };
     }
 
     userCreateDraft(socket: Socket, draftData: DraftData): DraftData | undefined {
         if (!draftData || !draftData.configuration || !draftData.configuration.actions) return undefined;
+        const user = this.createUser(socket);
         const controller = new ServerDraftController({
             id: crypto.randomUUID(),
             configuration: {
-                leader: socket.id,
+                leader: user.id,
                 providedByServer: false,
                 actions: draftData.configuration.actions
             },
             history: [],
             currentAction: 0,
 
-            users: [this.createUser(socket)],
+            users: [user],
 
             teamA: [],
             teamAInfo: {
@@ -65,11 +82,10 @@ class Manager {
         });
 
         socket.on('disconnect', () => {
-            this.currentDrafts.delete(draftData.id);
-            SocketManager.io()?.to(`draft-${draftData.id}`).emit('draft::creatorDisconnected')
+            SocketManager.io()?.to(`draft-${controller.data.id}`).emit('draft::creatorDisconnected')
+            this.currentDrafts.delete(controller.data.id);
         })
 
-        // TODO draft cron delete
         this.currentDrafts.set(controller.data.id, controller);
         return controller.data;
     }
@@ -79,7 +95,7 @@ class Manager {
 
         const draft = this.currentDrafts.get(draftId);
         if (!draft) return;
-        if (!draft.validator.validate(action, socket.data.id ? socket.data.id : socket.id)) return;
+        if (!draft.validator.validate(action, socket.data.user ? socket.data.user : socket.id)) return;
 
         draft.onAction(action);
 
@@ -95,7 +111,7 @@ class Manager {
         if (!draft) return;
         if (draft.data.configuration.providedByServer) return;
         if (draft.data.currentAction > 0) return;
-        if (draft.data.configuration.leader !== socket.id) return;
+        if (draft.data.configuration.leader !== socket.id && draft.data.configuration.leader !== socket.data.user) return;
         draft.assignUser(userId, team);
     }
 
@@ -107,7 +123,7 @@ class Manager {
 
         const associatedTeam = team === DraftTeam.TEAM_A ? draft.data.teamA : draft.data.teamB;
         if (!associatedTeam) return;
-        if (!associatedTeam.find(u => u.id === socket.id || u.id === socket.data.id)) return;
+        if (!associatedTeam.find(u => u.id === socket.id || u.id === socket.data.user)) return;
 
         draft.onTeamReady(team, ready)
     }
