@@ -392,7 +392,7 @@ export default function Draft() {
                 <Grid item xs={12} sx={{mb: 2}}>
                     {/*TODO v2 clean it*/}
                     <Typography variant="h4">WIP</Typography>
-                    <Typography>For bugs, please DM Maude Clonet#8238 with a screen</Typography>
+                    <Typography>{t('draft.bugs')}</Typography>
                 </Grid>
             }
             <Grid item xs={6} lg={3} order={{xs: 2, lg: 1}} sx={{pb: 2}}>
