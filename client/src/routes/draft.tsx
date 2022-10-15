@@ -18,11 +18,6 @@ import {DraftTemplates} from "../utils/draft-templates";
 import {Breeds, BreedsArray} from "../utils/breeds";
 import {Variant} from "@mui/material/styles/createTypography";
 
-type BreedStatus = {
-    id: number;
-    locked: boolean;
-}
-
 class ClientDraftController implements DraftController<DraftConfiguration, DraftNotifier, DraftValidator>, DraftNotifier, DraftValidator {
     notifier: DraftNotifier = this;
     validator: DraftValidator = this;
@@ -393,11 +388,18 @@ export default function Draft() {
 
     return (
         <Grid container sx={{width: "90%", margin: "auto", mt: 4, mb: 4}}>
+            {!teamReady &&
+                <Grid item xs={12} sx={{mb: 2}}>
+                    {/*TODO v2 clean it*/}
+                    <Typography variant="h4">WIP</Typography>
+                    <Typography>For bugs, please DM Maude Clonet#8238 with a screen</Typography>
+                </Grid>
+            }
             <Grid item xs={6} lg={3} order={{xs: 2, lg: 1}} sx={{pb: 2}}>
-                {teamA && <DraftTeamColumn draftTeam={DraftTeam.TEAM_A} team={teamA}/>}
+                {teamA && id && <DraftTeamColumn draftTeam={DraftTeam.TEAM_A} team={teamA}/>}
             </Grid>
             <Grid item xs={6} lg={3} order={{xs: 3, lg: 3}} sx={{pb: 2}}>
-                {teamB && <DraftTeamColumn draftTeam={DraftTeam.TEAM_B} team={teamB}/>}
+                {teamB && id && <DraftTeamColumn draftTeam={DraftTeam.TEAM_B} team={teamB}/>}
             </Grid>
             {(imDraftLeader || teamReady || !id || endReason) &&
                 <Grid item xs={12} lg={6} order={{xs: 1, lg: 2}}
