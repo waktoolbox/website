@@ -93,7 +93,6 @@ export default function Menu() {
                                 <List>
                                     <ListItem key="participations.myTeams"
                                               sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
-                                        {/*TODO later setup tournament creation*/}
                                         <Link to="/draft">
                                             <ListItemText primary={t('draft.link')}/>
                                         </Link>
