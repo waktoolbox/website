@@ -28,6 +28,10 @@ export default function Menu() {
         if (token && !userContext?.userState?.connected) {
             socket.emit('authenticate', token, (connected: boolean) => {
                 userContext.dispatch({type: "setConnected", payload: connected});
+                if (!connected) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('discordId');
+                }
             });
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -36,7 +40,6 @@ export default function Menu() {
         localStorage.removeItem('token');
         localStorage.removeItem('discordId');
         userContext.dispatch({type: "setConnected", payload: false});
-        socket.disconnect();
         navigate('/');
     }
 
@@ -88,6 +91,12 @@ export default function Menu() {
                             <Stack>
                                 <ListItemText primary={t('tournament.tools')}/>
                                 <List>
+                                    <ListItem key="participations.myTeams"
+                                              sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
+                                        <Link to="/draft">
+                                            <ListItemText primary={t('draft.link')}/>
+                                        </Link>
+                                    </ListItem>
                                     <ListItem key="participations.myTeams"
                                               sx={{color: '#9da5a8', '&:hover': {color: '#10e9d6'}}}>
                                         {/*TODO later setup tournament creation*/}

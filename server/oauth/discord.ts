@@ -38,7 +38,11 @@ export async function doOAuth(code: string) {
                     account.discriminator = discordData.discriminator;
                     await account.save();
 
-                    resolve(createToken({discord_id: account.id}));
+                    resolve(createToken({
+                        discord_id: account.id,
+                        username: discordData.username,
+                        discriminator: discordData.discriminator
+                    }));
                 })
         });
     })

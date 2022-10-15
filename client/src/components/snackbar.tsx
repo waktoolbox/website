@@ -19,27 +19,23 @@ export default function MySnackbar() {
             setOpen(true);
         }
 
-        socket.on('error', key => {
-            pop(key, "error");
-        });
+        const error = (key: string) => pop(key, "error");
+        socket.on('error', error);
 
-        socket.on('info', key => {
-            pop(key, "info");
-        });
+        const info = (key: string) => pop(key, "info");
+        socket.on('info', info);
 
-        socket.on('warning', key => {
-            pop(key, "warning");
-        });
+        const warning = (key: string) => pop(key, "warning");
+        socket.on('warning', warning);
 
-        socket.on('success', key => {
-            pop(key, "success");
-        });
+        const success = (key: string) => pop(key, "success");
+        socket.on('success', success);
 
         return () => {
-            socket.off('error');
-            socket.off('info');
-            socket.off('warning');
-            socket.off('success');
+            socket.off('error', error);
+            socket.off('info', info);
+            socket.off('warning', warning);
+            socket.off('success', success);
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

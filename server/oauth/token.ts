@@ -10,7 +10,9 @@ function loadSecret() {
 }
 
 export interface TokenContent {
-    discord_id: string
+    discord_id: string;
+    username: string;
+    discriminator: string;
 }
 
 export function createToken(content: TokenContent) {
