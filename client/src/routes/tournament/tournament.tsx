@@ -355,15 +355,15 @@ export default function Tournament() {
                                                 </Icon>
                                                 <Typography display="inline">Regulamento</Typography>
                                             </a>
-                                            {/*<a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_pt-br.pdf" target="_blank">*/}
-                                            <div>
-                                                <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
-                                                    <img src={`/flags/es.svg`} alt={`flag_es`}/>
-                                                </Icon>
-                                                <Typography display="inline">La traducción del reglamento estará
-                                                    disponible próximamente.</Typography>
-                                            </div>
-                                            {/*</a>*/}
+                                            <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-10/Wakfu_Warriors_2022_Reglamento_es-es.pdf"
+                                               target="_blank">
+                                                <div>
+                                                    <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
+                                                        <img src={`/flags/es.svg`} alt={`flag_es`}/>
+                                                    </Icon>
+                                                    <Typography display="inline">Reglamento</Typography>
+                                                </div>
+                                            </a>
                                         </Stack>
                                     </Grid>
                                     <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>

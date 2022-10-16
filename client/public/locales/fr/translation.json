@@ -110,6 +110,7 @@
     "editor": {
       "addAdmin": "Ajouter un admin",
       "addReferee": "Ajouter un arbitre",
+      "goToNextPhase": "Lancer l'étape suivante",
       "information": {
         "general": "Informations générales",
         "phases": "Phases",
@@ -117,6 +118,7 @@
         "users": "Utilisateurs"
       },
       "registrationDate": "Date d'inscription",
+      "reminderAnkamaInfo": "Envoyer un MP Waktool pour les informations Ankama",
       "streamerLink": "Chaîne du streamer",
       "streamerName": "Nom du streamer",
       "teamPage": "Page",

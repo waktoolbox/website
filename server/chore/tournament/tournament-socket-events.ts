@@ -383,6 +383,42 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             .catch((_) => callback(false))
     });
 
+    socket.on('tournament::admin:reminderAnkamaInfo', (tournamentId) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return;
+                DbHelper.rawQuery(`SELECT accounts.id
+                                   FROM teams
+                                            CROSS JOIN LATERAL JSONB_ARRAY_ELEMENTS(teams.content -> ('players')) AS e(usr)
+                                            LEFT JOIN accounts
+                                                      ON substr(usr::text, 2, length(usr::text) - 2) = accounts.id
+                                   WHERE accounts."ankamaName" is null
+                                      OR accounts."ankamaDiscriminator" is null
+                                   GROUP BY accounts.id;`, [])
+                    .then(result => {
+                        if (result.rowCount <= 0) return;
+
+                        result.rows.map(r => r.id).forEach(id => {
+                            DiscordBot.sendPrivateMessage(id,
+                                `:warning: __**IMPORTANT REMINDER**__ :warning:  — If your Ankama nickname is not correctly registered through Waktool, you will not have access to the beta server on Monday. This is your only chance to be whitelisted!
+
+__**How to register my Ankama nickname?**__
+-> Sign in to WAKTOOL (https://www.waktool.com)
+-> Open the menu
+-> "My account"
+-> Entry your Ankama Nickname
+-> Entry your Ankama # discriminator (without #)
+
+Ankama will not provide additional access!`)
+                        })
+                    })
+                    .catch(_ => {
+                    })
+            })
+            .catch((_) => {
+            })
+    })
+
     socket.on('tournament::admin:removeMatchStreamer', (tournamentId, matchId, callback) => {
         if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)

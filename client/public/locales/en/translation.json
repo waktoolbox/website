@@ -109,6 +109,7 @@
     "editor": {
       "addAdmin": "Add an admin",
       "addReferee": "Add a referee",
+      "goToNextPhase": "Start next step",
       "information": {
         "general": "General information",
         "phases": "Phases",
@@ -116,6 +117,7 @@
         "users": "Users"
       },
       "registrationDate": "Registration date",
+      "reminderAnkamaInfo": "Senda Waktool DM for missing Ankama info",
       "streamerLink": "Streamer's channel",
       "streamerName": "Streamer's name",
       "teamPage": "Page",

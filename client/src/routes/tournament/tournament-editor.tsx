@@ -267,7 +267,7 @@ export default function TournamentEditor() {
                     <Box sx={{p: 3}}>
                         <Button onClick={() => socket.emit('tournament::admin:goToNextPhase', id, () => {
                         })}>
-                            {t('tournament.admin.goToNextPhase')}
+                            {t('tournament.editor.goToNextPhase')}
                         </Button>
                     </Box>
                 )}
@@ -334,6 +334,8 @@ export default function TournamentEditor() {
             >
                 {tab === 3 && (
                     <Box sx={{p: 3}}>
+                        <Button
+                            onClick={() => socket.emit('tournament::admin:reminderAnkamaInfo', id)}>{t('tournament.editor.reminderAnkamaInfo')}</Button>
                         <TableContainer>
                             <TableHead>
                                 <TableRow>
