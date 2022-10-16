@@ -356,7 +356,7 @@ export default function Tournament() {
                                                 <Typography display="inline">Regulamento</Typography>
                                             </a>
                                             <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-10/Wakfu_Warriors_2022_Reglamento_es-es.pdf"
-                                               target="_blank">
+                                               rel="noreferrer" target="_blank">
                                                 <div>
                                                     <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
                                                         <img src={`/flags/es.svg`} alt={`flag_es`}/>
