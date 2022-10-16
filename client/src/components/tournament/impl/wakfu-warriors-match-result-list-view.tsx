@@ -132,7 +132,7 @@ export default function WakfuWarriorsMatchResultListView({data}: { data: PropsTy
                         {tab > 0 && matchesToDisplay &&
                             <Grid container>
                                 {tournamentPhaseType === TournamentPhaseType.WAKFU_WARRIORS_ROUND_ROBIN && matchesToDisplay.map((matchList, index) => (
-                                    <Grid item xs={12} lg={4}>
+                                    <Grid key={index} item xs={12} lg={4}>
                                         <Card sx={{
                                             mb: 2, mr: 2, mt: 2,
                                             borderRadius: 4,
