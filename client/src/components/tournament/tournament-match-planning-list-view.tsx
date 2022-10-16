@@ -42,7 +42,7 @@ export default function TournamentMatchPlanningListView({data}: { data: PropsTyp
         }
 
         setTabs(tabs);
-    }, [matches])
+    }, [matches]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const onTabChange = (event: SyntheticEvent, newTab: number) => {
         setMatchesToDisplay(matchByTab.get(newTab) || [])
