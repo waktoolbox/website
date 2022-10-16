@@ -19,7 +19,7 @@ import {
 import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
-import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../utils/tournament-models";
 import {validateTournamentDefinition} from "../../utils/tournament-validator";
 import {PlayerPicker} from "../../components/player-picker";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -265,7 +265,10 @@ export default function TournamentEditor() {
             >
                 {tab === 1 && (
                     <Box sx={{p: 3}}>
-                        <Typography>TODO phases</Typography>
+                        <Button onClick={() => socket.emit('tournament::admin:goToNextPhase', id, () => {
+                        })}>
+                            {t('tournament.editor.goToNextPhase')}
+                        </Button>
                     </Box>
                 )}
             </div>
@@ -331,6 +334,8 @@ export default function TournamentEditor() {
             >
                 {tab === 3 && (
                     <Box sx={{p: 3}}>
+                        <Button
+                            onClick={() => socket.emit('tournament::admin:reminderAnkamaInfo', id)}>{t('tournament.editor.reminderAnkamaInfo')}</Button>
                         <TableContainer>
                             <TableHead>
                                 <TableRow>

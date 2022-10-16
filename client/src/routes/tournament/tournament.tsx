@@ -6,16 +6,23 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CheckIcon from '@mui/icons-material/Check';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
-import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentMatchModel, TournamentTeamModel} from "../../utils/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
+import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
+import TournamentMatchView from "../../components/tournament/tournament-match-view";
+import TournamentMatchPlanningListView from "../../components/tournament/tournament-match-planning-list-view";
+import WakfuWarriorsMatchResultListView from "../../components/tournament/impl/wakfu-warriors-match-result-list-view";
 
 enum Tabs {
     HOME,
     TEAMS,
-    SINGLE_TEAM
+    SINGLE_TEAM,
+    PLANNING,
+    MATCH,
+    RESULTS
 }
 
 const MenuButtonsStyle = {
@@ -31,16 +38,24 @@ const ActiveMenuButtonsStyle = {
 }
 
 const accountPersistence = new Map<string, any>();
+const streamerPersistence = new Map<string, any>();
+const teamsNamesPersistence = new Map<string, string>();
 
 export default function Tournament() {
-    const {id, targetTab, teamId} = useParams();
+    const {id, targetTab, teamId, matchId} = useParams();
     const [localTeamId, setLocalTeamId] = useState<string>(teamId as string);
+    const [localMatchId, setLocalMatchId] = useState<string>(matchId as string)
     const [tournament, setTournament] = useState<TournamentDefinition>();
     const [accounts, setAccounts] = useState(new Map<string, any>());
+    const [streamers, setStreamers] = useState(new Map<string, any>());
     const [teams, setTeams] = useState<any[]>();
     const [team, setTeam] = useState<TournamentTeamModel>();
     const [tab, setTab] = useState(Tabs.HOME)
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
+    const [planningToDisplay, setPlanningToDisplay] = useState<TournamentMatchModel[]>();
+    const [resultToDisplay, setResultToDisplay] = useState<TournamentMatchModel[]>();
+    const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
+    const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -81,6 +96,17 @@ export default function Tournament() {
             case Tabs.SINGLE_TEAM:
                 loadTeam();
                 break;
+            case Tabs.PLANNING:
+                navigate(`/tournament/${id}/tab/3`);
+                loadNextMatches();
+                break;
+            case Tabs.MATCH:
+                loadMatch();
+                break;
+            case Tabs.RESULTS:
+                navigate(`/tournament/${id}/tab/5`);
+                loadMatchesResult()
+                break;
         }
         setTab(newTab)
     }
@@ -94,6 +120,26 @@ export default function Tournament() {
 
     const loadTeam = (tid?: string, goToTab?: boolean) => {
         if (goToTab) setTab(Tabs.SINGLE_TEAM);
+        socket.emit('tournament::getAllTeamMatches', tid || localTeamId, (matches: TournamentMatchModel[]) => {
+            matches.sort((a, b) => {
+                if (a.date && b.date) return (Date.parse(a.date).toString() > Date.parse(b.date).toString()) ? -1 : 1;
+                if (a.date && !b.date) return 1;
+                if (!a.date && b.date) return -1;
+                return 0;
+            })
+
+            const namesToRequest: string[] = [];
+            matches.forEach(m => {
+                if (!teamsNamesPersistence.has(m.teamA) && !namesToRequest.includes(m.teamA)) {
+                    namesToRequest.push(m.teamA)
+                }
+                if (!teamsNamesPersistence.has(m.teamB) && !namesToRequest.includes(m.teamB)) {
+                    namesToRequest.push(m.teamB)
+                }
+            })
+            loadTeamNames(namesToRequest, () => setTeamMatches(matches));
+        })
+
         socket.emit('tournament::getTeam', tid || localTeamId, (team: TournamentTeamModel) => {
             if (!team) return;
 
@@ -101,6 +147,69 @@ export default function Tournament() {
                 accs.forEach(acc => accountPersistence.set(acc.id, acc))
                 setAccounts(accountPersistence)
                 setTeam(team);
+            })
+        })
+    }
+
+    const loadNextMatches = () => {
+        loadMatchesToDisplay('tournament::getNextMatches', setPlanningToDisplay)
+    }
+
+    const loadMatchesResult = () => {
+        loadMatchesToDisplay('tournament::getMatchesResult', setResultToDisplay)
+    }
+
+    const loadMatchesToDisplay = (event: string, callbackSetter: any) => {
+        // TODO v3 bind real phase here
+        socket.emit(event, id, 1, (matches: TournamentMatchModel[]) => {
+            const namesToRequest: string[] = [];
+            matches.forEach(t => {
+                if (!t || !t.id) return;
+                if (!teamsNamesPersistence.has(t.teamA)) {
+                    namesToRequest.push(t.teamA)
+                }
+                if (!teamsNamesPersistence.has(t.teamB)) {
+                    namesToRequest.push(t.teamB)
+                }
+            })
+            loadTeamNames(namesToRequest, () => callbackSetter(matches))
+        })
+    }
+
+    const loadTeamNames = (namesToRequest: string[], callback: any) => {
+        if (namesToRequest.length <= 0) callback()
+
+        socket.emit('tournament::getTeamsNames', namesToRequest, (names: { id: string, name: string }[]) => {
+            names.forEach(name => {
+                teamsNamesPersistence.set(name.id, name.name)
+            })
+            callback()
+        })
+    }
+
+    const loadMatch = (match?: string, goToTab?: boolean) => {
+        if (goToTab) {
+            setTab(Tabs.MATCH);
+            if (match) {
+                setLocalMatchId(match);
+                navigate(`/tournament/${id}/tab/4/match/${match}`);
+            }
+        }
+        socket.emit('tournament::getMatch', match || localMatchId, (match: TournamentMatchModel) => {
+            if (!match) return;
+
+            if (match.streamer && !streamerPersistence.has(match.streamer)) {
+                socket.emit('account::getStreamer', match.streamer, (streamer: any) => {
+                    streamerPersistence.set(streamer.id, streamer);
+                    setStreamers(streamerPersistence);
+                })
+            }
+
+            socket.emit('tournament::getTeamsNames', [match.teamA, match.teamB], (names: { id: string, name: string }[]) => {
+                names.forEach(name => {
+                    teamsNamesPersistence.set(name.id, name.name)
+                })
+                setCurrentMatch(match)
             })
         })
     }
@@ -171,14 +280,18 @@ export default function Tournament() {
                                     {t('tournament.display.teamsButton')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
-                                <Button variant="text" style={MenuButtonsStyle}
-                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
+                                <Button variant="text"
+                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.PLANNING ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.PLANNING)}>
                                     <CalendarMonthIcon sx={{mr: 1}}/>
                                     {t('tournament.display.planning')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
-                                <Button variant="text" style={MenuButtonsStyle}
-                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}>
+                                <Button variant="text"
+                                        disabled={Date.parse(tournament.startDate).toString() > Date.now().toString()}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.RESULTS ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.RESULTS)}>
                                     <EmojiEventsIcon sx={{mr: 1}}/>
                                     {t('tournament.display.results')}
                                 </Button>
@@ -242,15 +355,15 @@ export default function Tournament() {
                                                 </Icon>
                                                 <Typography display="inline">Regulamento</Typography>
                                             </a>
-                                            {/*<a href="https://static.ankama.com/upload/backoffice/direct/2022-10-07/Wakfu_Warriors_2022_Rules_pt-br.pdf" target="_blank">*/}
-                                            <div>
-                                                <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
-                                                    <img src={`/flags/es.svg`} alt={`flag_es`}/>
-                                                </Icon>
-                                                <Typography display="inline">La traducción del reglamento estará
-                                                    disponible próximamente.</Typography>
-                                            </div>
-                                            {/*</a>*/}
+                                            <a href="https://static.ankama.com/upload/backoffice/direct/2022-10-10/Wakfu_Warriors_2022_Reglamento_es-es.pdf"
+                                               target="_blank">
+                                                <div>
+                                                    <Icon sx={{verticalAlign: "middle", mr: 1, mb: '6px'}}>
+                                                        <img src={`/flags/es.svg`} alt={`flag_es`}/>
+                                                    </Icon>
+                                                    <Typography display="inline">Reglamento</Typography>
+                                                </div>
+                                            </a>
                                         </Stack>
                                     </Grid>
                                     <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>
@@ -329,7 +442,7 @@ export default function Tournament() {
                                     </Grid>
                                     <Grid item xs={12}>
                                         {teams && teams.length > 0 && teams.map(team => (
-                                            <Card key={team} sx={{
+                                            <Card key={team.id} sx={{
                                                 m: 3,
                                                 borderRadius: 4,
                                                 boxShadow: '5px 5px 15px 0px #000000',
@@ -373,7 +486,7 @@ export default function Tournament() {
 
                             {tab === Tabs.SINGLE_TEAM && team &&
                                 <Grid container>
-                                    <Grid item lg={8} xs={12} sx={{textAlign: "start", pl: 4}}>
+                                    <Grid item lg={9} xs={12} sx={{textAlign: "start", pl: 4}}>
                                         <Grid container>
                                             <Grid item xs={12}>
                                                 <Typography variant="h4" sx={{
@@ -400,20 +513,38 @@ export default function Tournament() {
                                                                                     span: <span className="firstWord"/>
                                                                                 }}/></Typography>
 
-                                                {/*TODO v2*/}
-                                                <Typography sx={{mt: 2}}>{t('coming.soon')}</Typography>
+                                                {teamMatches && teamMatches.filter(m => !m.done).map(match => (
+                                                    <TournamentTeamMatchView key={match.id} match={match}
+                                                                             displayedTeam={team.id}
+                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamB) || "<undefined>"}
+                                                                             goToMatch={() => loadMatch(match.id, true)}/>
+                                                ))}
+
+                                                {teamMatches && teamMatches.filter(m => !m.done).length <= 0 &&
+                                                    <Typography sx={{ml: 2, mt: 2}}
+                                                                variant="h6">{t('tournament.display.match.noNextMatches')}</Typography>
+                                                }
 
                                                 <Divider sx={{ml: 3, mr: 3, mt: 2, mb: 2}} variant="middle" flexItem/>
 
                                                 <Typography variant="h5"
                                                             sx={{color: "#fefffa"}}>{t('tournament.display.results')}</Typography>
 
-                                                {/*TODO v2*/}
-                                                <Typography sx={{mt: 2}}>{t('coming.soon')}</Typography>
+                                                {teamMatches && teamMatches.length > 0 && teamMatches.filter(m => m.done).map(match => (
+                                                    <TournamentTeamMatchView key={match.id} match={match}
+                                                                             displayedTeam={team.id}
+                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamB) || "<undefined>"}
+                                                                             goToMatch={() => loadMatch(match.id, true)}/>
+                                                ))}
+
+                                                {teamMatches && teamMatches.filter(m => m.done).length <= 0 &&
+                                                    <Typography sx={{ml: 2, mt: 2}}
+                                                                variant="h6">{t('tournament.display.match.noMatchResult')}</Typography>
+                                                }
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                    <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>
+                                    <Grid item lg={3} xs={12} sx={{pl: 3, pr: 3}}>
                                         <Stack spacing={2}>
                                             <Card>
                                                 <CardContent
@@ -457,6 +588,71 @@ export default function Tournament() {
                                         </Stack>
                                     </Grid>
                                 </Grid>
+                            }
+
+                            {(tab === Tabs.PLANNING) &&
+                                <Grid container>
+                                    <Grid item xs={12} sx={{mb: 2}}>
+                                        <Typography
+                                            variant="h4">{t('tournament.display.' + (tab === Tabs.PLANNING ? "planning" : "results"))}</Typography>
+                                    </Grid>
+                                    {planningToDisplay && planningToDisplay.length > 0 &&
+                                        <TournamentMatchPlanningListView data={{
+                                            tournament: tournament,
+                                            teams: teamsNamesPersistence,
+                                            matches: planningToDisplay,
+                                            goToMatch: (matchId) => loadMatch(matchId, true)
+                                        }}/>
+                                    }
+
+                                    {(!planningToDisplay || planningToDisplay.length <= 0) &&
+                                        <Grid item xs={12}>
+                                            <Typography
+                                                variant="h5">{t('tournament.display.noMatchPlanned')}</Typography>
+                                        </Grid>
+                                    }
+                                </Grid>
+                            }
+
+                            {(tab === Tabs.RESULTS) &&
+                                <Grid container>
+                                    <Grid item xs={12} sx={{mb: 2}}>
+                                        <Typography
+                                            variant="h4">{t('tournament.display.results')}</Typography>
+                                    </Grid>
+                                    {resultToDisplay && resultToDisplay.length > 0 &&
+                                        <WakfuWarriorsMatchResultListView data={{
+                                            tournament: tournament,
+                                            teams: teamsNamesPersistence,
+                                            matches: resultToDisplay,
+                                            goToMatch: (matchId) => loadMatch(matchId, true)
+                                        }}/>
+                                    }
+
+                                    {(!resultToDisplay || resultToDisplay.length <= 0) &&
+                                        <Grid item xs={12}>
+                                            <Typography
+                                                variant="h5">{t('tournament.display.noMatchPlanned')}</Typography>
+                                        </Grid>
+                                    }
+                                </Grid>
+                            }
+
+                            {tab === Tabs.MATCH && currentMatch &&
+                                <TournamentMatchView data={{
+                                    accounts: accounts,
+                                    me: me || "",
+                                    teams: teamsNamesPersistence,
+                                    streamers: streamers,
+                                    tournament: tournament,
+                                    currentMatch: currentMatch,
+                                    addStreamer: (id: string, data: any) => {
+                                        streamerPersistence.set(id, data)
+                                        setStreamers(streamerPersistence)
+                                    }
+                                }}
+                                />
+
                             }
 
                         </Grid>

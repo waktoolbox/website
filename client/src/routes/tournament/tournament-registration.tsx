@@ -1,7 +1,7 @@
 import {Button, Card, CardContent, Grid, MenuItem, Stack, TextField, Typography} from "@mui/material";
 import {Trans, useTranslation} from "react-i18next";
 import React, {ChangeEvent, useContext, useEffect, useState} from "react";
-import {TournamentTeamModel} from "../../../../common/tournament/tournament-models";
+import {TournamentTeamModel} from "../../utils/tournament-models";
 import {PlayerPicker} from "../../components/player-picker";
 import {validateTournamentTeam} from "../../utils/tournament-validator";
 import {SocketContext} from "../../context/socket-context";

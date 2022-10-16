@@ -21,6 +21,7 @@ export interface TournamentDefinition {
 }
 
 export interface TournamentPhaseDefinition {
+    phase: number;
     phaseType: TournamentPhaseType;
     roundModel: TournamentRoundDefinition[];
 
@@ -28,10 +29,9 @@ export interface TournamentPhaseDefinition {
     poolNumber?: number;
 }
 
-export interface TournamentPhaseData<T extends TournamentTeamModel, M extends TournamentMatchModel> {
-    id?: string;
+export interface TournamentPhaseData<T extends TournamentPhaseTeamModel> {
     teams: T[];
-    matches: M[];
+    matches: string[];
     currentRound: number
 }
 
@@ -40,13 +40,24 @@ export interface TournamentRoundDefinition {
     bo: number;
 }
 
-export interface TournamentPhaseController<T extends TournamentTeamModel, M extends TournamentMatchModel, V extends TournamentPhaseData<T, M>> {
+export interface TournamentPhaseController<T extends TournamentPhaseTeamModel, V extends TournamentPhaseData<T>> {
     definition: TournamentPhaseDefinition;
     data: V;
 
-    prepareRound: () => void;
-    mustGoToNextPhase: () => boolean;
-    getQualifiedTeams: () => TournamentTeamModel[];
+    initTeams: (teams: string[]) => void;
+    initTeamsFromPreviousRound: <W extends TournamentPhaseTeamModel, Y extends TournamentPhaseData<W>> (previousPhaseData: Y, qualifiedTeams: string[]) => void;
+
+    prepareRound(): Promise<boolean>;
+
+    mustGoToNextPhase(): Promise<boolean>;
+
+    mustGoToNextRound(): Promise<boolean>;
+
+    getQualifiedTeams(): string[];
+}
+
+export interface TournamentPhaseTeamModel {
+    id: string;
 }
 
 export interface TournamentTeamModel {
@@ -77,19 +88,29 @@ export interface TournamentStatsClassModel {
     death: number;
 }
 
-// TODO v2
 export interface TournamentMatchModel {
     id?: string;
     date?: string;
     done: boolean;
     teamA: string;
-    teamADraft?: TournamentDraftResultModel;
     teamB: string;
+    referee?: string;
+    streamer?: string;
+    winner?: string;
+    phase?: number,
+    round?: number;
+    rounds: TournamentMatchRoundModel[];
+
+    [key: string]: any; // prevent type error through super typing client side
+}
+
+export interface TournamentMatchRoundModel {
+    draftFirstPicker?: string;
+    draftDate?: string;
+    teamADraft?: TournamentDraftResultModel;
     teamBDraft?: TournamentDraftResultModel;
     map?: number;
-    referee?: string;
     winner?: string;
-    round?: number;
 }
 
 export interface TournamentDraftResultModel {

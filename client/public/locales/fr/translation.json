@@ -2,6 +2,7 @@
   "account": {
     "ankamaName": "Pseudo Ankama",
     "ankamaDiscriminator": "# Ankama",
+    "invalidTwitchUrl": "L'URL Twitch doit commencer par https://www.twitch.tv/",
     "menuItem": "Mon compte",
     "unableToSave": "Impossible de sauvegarder les modifications du compte",
     "saved": "Compte sauvegardé",
@@ -11,7 +12,7 @@
   "actions": "Actions",
   "coming.soon": "Arrivera prochainement",
   "connect": "Connexion",
-  "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
+  "date": "{{date, datetime}}",
   "delete": "Supprimer",
   "draft": {
     "assignToA": "Assigner à l'équipe A",
@@ -68,7 +69,37 @@
       "levelAndServer": "Niv. {{level}} / {{server}}",
       "manageMyTeam": "Modifier mon équipe",
       "manageMyRegistration": "Modifier mon inscription",
+      "match": {
+        "allMatches": "Tous les matchs",
+        "arbitration": "Arbitrage",
+        "buttonSetDraftDate": "Définir la date du draft",
+        "buttonSetFightWinnerTeam": "{{name}} gagne ce combat",
+        "buttonSetMatchDate": "Définir la date du match",
+        "buttonSetMatchReferee": "Me définir comme arbitre",
+        "buttonSetMatchWinnerTeam": "Définir {{name}} comme équipe gagnante",
+        "buttonValidateMatch": "Valider le match",
+        "draftDate": "Draft à partir du : {{date, datetime}}",
+        "draftNotAvailableYet": "Ce draft n'est pas disponible pour l'instant",
+        "eliminated": "(Éliminée)",
+        "goToDraft": "Aller au draft",
+        "live": "Live",
+        "matchNb": "Combat {{nb}}",
+        "more": "En savoir plus",
+        "noDate": "Pas de date",
+        "noNextMatches": "Aucun match à venir",
+        "noMatchResult": "Aucun résultat de match",
+        "noReferee": "Pas d'arbitre",
+        "noStreamer": "Pas de streamer",
+        "pool": "Poule {{pool}}",
+        "qualified": "(Qualifiée)",
+        "resultPhaseTitle": "<span>Étape</span> {{nb}}",
+        "round": "Round {{round}}",
+        "setMeAsStreamer": "Me désigner comme streamer",
+        "setNullAsStreamer": "Retirer le streamer",
+        "watchStream": "Regarder le stream"
+      },
       "myTeam": "Mon équipe",
+      "noMatchPlanned": "Aucun match à afficher",
       "planning": "Planning",
       "player": "Joueur",
       "register": "S'inscrire",
@@ -79,6 +110,7 @@
     "editor": {
       "addAdmin": "Ajouter un admin",
       "addReferee": "Ajouter un arbitre",
+      "goToNextPhase": "Lancer l'étape suivante",
       "information": {
         "general": "Informations générales",
         "phases": "Phases",
@@ -86,6 +118,7 @@
         "users": "Utilisateurs"
       },
       "registrationDate": "Date d'inscription",
+      "reminderAnkamaInfo": "Envoyer un MP Waktool pour les informations Ankama",
       "streamerLink": "Chaîne du streamer",
       "streamerName": "Nom du streamer",
       "teamPage": "Page",
@@ -162,6 +195,17 @@
   "waktool": {
     "wakfu": "Wakfu est un MMORPG édité par Ankama Studio. Tous droits réservés.\nLe site internet “Waktool” est un fansite communautaire non-officiel du MMORPG Wakfu sans aucun lien avec Ankama.\n",
     "login": "Attention ! Ne communiquez jamais vos identifiants de jeu."
+  },
+  "maps": {
+    "968": "Forêt flottante",
+    "969": "Cascades en cascades",
+    "970": "Piton de la foutaise",
+    "971": "Jungle en vitesse",
+    "972": "Dalle blanche",
+    "973": "Couvent dôme",
+    "974": "Mine trouée",
+    "975": "Bassin Mi-Chaud",
+    "976": "Baie Max"
   },
   "tmp": {
     "description": "Pour cette édition inédite : formez des équipes jusqu'à 6 joueurs (personnes physiques) et préparez votre build 230 pour des affrontements épiques au format six contre six sur le serveur bêta. Les croupiers d'Ecaflipus permettront de s'équiper pour les tranches 200 à 230, avec des châsses blanches dont le nécessaire d'enchantement sera mis à disposition gratuitement. Par ailleurs, si vous vous sentez guerriers solitaires, le mode six héros sera exceptionnellement disponible.\n\nAprès une phase de qualification de quatre poules de seize équipes, en résultera un arbre de trente-deux équipes où s'affronteront donc les meilleurs joueurs des combats JcJ inter-serveurs !",

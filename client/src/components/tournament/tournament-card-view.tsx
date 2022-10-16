@@ -1,6 +1,6 @@
 import {Box, Card, CardContent, CardMedia, Typography} from "@mui/material";
 import {Link} from "react-router-dom";
-import {TournamentDefinition} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
 
 type TournamentViewProps = {

@@ -1,4 +1,4 @@
-import {TournamentDefinition, TournamentTeamModel} from "../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "./tournament-models";
 
 export function validateTournamentDefinition(definition: TournamentDefinition, now: number): string[] | undefined {
     const errors = [];

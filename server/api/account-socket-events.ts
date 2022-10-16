@@ -15,6 +15,19 @@ export function registerAccountEvents(socket: Socket) {
             })
     })
 
+    socket.on('account::getStreamer', (id, callback) => {
+        if (!callback) return;
+        DbHelper.rawQuery(`SELECT id, username, discriminator, "twitchUrl"
+                           FROM accounts
+                           WHERE id = $1
+                           LIMIT 1`, [id])
+            .then(result => callback(result.rowCount > 0 ? result.rows[0] : undefined))
+            .catch(error => {
+                console.error(error);
+                callback([]);
+            })
+    })
+
     socket.on('account::findById', (id, callback) => {
         if (!callback) return;
         DbHelper.rawQuery(`SELECT id, username, discriminator
@@ -57,10 +70,13 @@ export function registerAccountLoggedInEvents(socket: Socket) {
     });
 
     socket.on("account::updateMyAccount", (ankamaName, ankamaDiscriminator, twitchUrl) => {
+        if (twitchUrl && !twitchUrl.startsWith('https://www.twitch.tv/')) {
+            return socket.emit('error', "account.invalidTwitchUrl")
+        }
         DbHelper.rawQuery(`UPDATE accounts
-                           SET "ankamaName" = $2,
+                           SET "ankamaName"          = $2,
                                "ankamaDiscriminator" = $3,
-                               "twitchUrl" = $4
+                               "twitchUrl"           = $4
                            WHERE id = $1`,
             [socket.data.user, ankamaName, ankamaDiscriminator, twitchUrl])
             .then(result => {

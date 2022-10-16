@@ -1,11 +1,12 @@
 import {Socket} from "socket.io";
-import {TournamentDefinition, TournamentTeamModel} from "../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../../client/src/utils/tournament-models";
 import * as crypto from "crypto";
 // TODO sorry, lack of time
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";
 import {DbHelper} from "../../db/pg-helper";
 import {TournamentHomeProvider} from "./tournament-home-provider";
 import {DiscordBot} from "../../discord/bot";
+import {getMatch, getMatchesResult, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
@@ -14,18 +15,31 @@ export function registerTournamentEvents(socket: Socket) {
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+
     socket.on('tournament::getTeam', (id, callback) => {
         if (!callback) return;
         DbHelper.getTeam(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.team.not.found'));
     });
+
+    socket.on('tournament::getAllTeamMatches', (teamId, callback) => {
+        if (!callback) return;
+        DbHelper.rawQuery(`SELECT content
+                           FROM matches
+                           WHERE content ->> ('teamA') = $1
+                              OR content ->> ('teamB') = $1`, [teamId])
+            .then(result => callback(result.rowCount <= 0 ? [] : result.rows.map(r => r.content)))
+            .catch(_ => callback([]))
+    });
+
     socket.on('tournament::getTournamentTeamsWithLimit', (id, callback) => {
         if (!callback) return;
         DbHelper.getTournamentTeamsWithLimit(id)
             .then(result => callback(result))
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
+
     socket.on('tournament::isTournamentStarted', (id, callback) => {
         if (!callback) return;
         DbHelper.isTournamentStarted(id).then(result => callback(result)).catch(_ => callback(true));
@@ -34,6 +48,26 @@ export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::home', (callback) => {
         if (!callback) return;
         TournamentHomeProvider.getHome().then(home => callback(home)).catch(error => console.error(error));
+    })
+
+    socket.on('tournament::getTeamsNames', (teamIds, callback) => {
+        if (!callback) return;
+        DbHelper.getTeamsNames(teamIds).then(r => callback(r))
+    })
+
+    socket.on('tournament::getNextMatches', (tournamentId, phase, callback) => {
+        if (!callback) return;
+        getNextMatches(tournamentId, parseInt(phase)).then(r => callback(r))
+    })
+
+    socket.on('tournament::getMatchesResult', (tournamentId, phase, callback) => {
+        if (!callback) return;
+        getMatchesResult(tournamentId, parseInt(phase)).then(r => callback(r))
+    })
+
+    socket.on('tournament::getMatch', (id, callback) => {
+        if (!callback) return;
+        getMatch(id).then(r => callback(r));
     })
 }
 
@@ -86,6 +120,7 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
 
     socket.on('tournament::registerTeam', (id, data, callback) => {
         if (!callback) return;
+
         function reject() {
             return socket.emit('error', 'tournament.cant.save.team');
         }
@@ -329,4 +364,209 @@ export function registerLoggedInTournamentEvents(socket: Socket) {
             })
             .catch((_) => callback(false))
     })
+
+    socket.on('tournament::admin:goToNextPhase', (tournamentId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false)
+                goToNextPhaseOrRound(tournamentId).then(result => {
+                    callback(result);
+                    if (result) return socket.emit('success', 'tournament.admin.nextPhaseStarted');
+                    socket.emit('error', 'tournament.admin.cantGoToNextPhase');
+                }).catch(error => {
+                    console.error(error);
+                    callback(false);
+                    socket.emit('error', 'tournament.admin.cantGoToNextPhase');
+                })
+            })
+            .catch((_) => callback(false))
+    });
+
+    socket.on('tournament::admin:reminderAnkamaInfo', (tournamentId) => {
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return;
+                DbHelper.rawQuery(`SELECT accounts.id
+                                   FROM teams
+                                            CROSS JOIN LATERAL JSONB_ARRAY_ELEMENTS(teams.content -> ('players')) AS e(usr)
+                                            LEFT JOIN accounts
+                                                      ON substr(usr::text, 2, length(usr::text) - 2) = accounts.id
+                                   WHERE accounts."ankamaName" is null
+                                      OR accounts."ankamaDiscriminator" is null
+                                   GROUP BY accounts.id;`, [])
+                    .then(result => {
+                        if (result.rowCount <= 0) return;
+
+                        result.rows.map(r => r.id).forEach(id => {
+                            DiscordBot.sendPrivateMessage(id,
+                                `:warning: __**IMPORTANT REMINDER**__ :warning:  — If your Ankama nickname is not correctly registered through Waktool, you will not have access to the beta server on Monday. This is your only chance to be whitelisted!
+
+__**How to register my Ankama nickname?**__
+-> Sign in to WAKTOOL (https://www.waktool.com)
+-> Open the menu
+-> "My account"
+-> Entry your Ankama Nickname
+-> Entry your Ankama # discriminator (without #)
+
+Ankama will not provide additional access!`)
+                        })
+                    })
+                    .catch(_ => {
+                    })
+            })
+            .catch((_) => {
+            })
+    })
+
+    socket.on('tournament::admin:removeMatchStreamer', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{streamer}', 'null')
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::streamer:setMatchStreamer', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentStreamer(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{streamer}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2
+                                     AND (content ->> ('streamer')) is null`, [matchId, tournamentId, JSON.stringify(socket.data.user)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setDraftDate', (tournamentId, matchId, round, date, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.rawQuery(`SELECT content
+                                   FROM matches
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2
+                                   LIMIT 1`, [matchId, tournamentId])
+                    .then(result => {
+                        if (result.rowCount <= 0) return callback(false);
+
+                        const match = result.rows[0].content;
+                        if (!match.rounds || match.rounds.length < round) return callback(false);
+                        match.rounds[round].draftDate = date;
+                        DbHelper.rawQuery(`UPDATE matches
+                                           SET content = $3
+                                           WHERE id = $1
+                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
+                            .then(r => callback(r.rowCount > 0))
+                            .catch(_ => callback(false))
+                    }).catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setFightWinner', (tournamentId, matchId, round, winner, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.rawQuery(`SELECT content
+                                   FROM matches
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2
+                                   LIMIT 1`, [matchId, tournamentId])
+                    .then(result => {
+                        if (result.rowCount <= 0) return callback(false);
+
+                        const match = result.rows[0].content;
+                        if (!match.rounds || match.rounds.length < round) return callback(false);
+                        match.rounds[round].winner = winner;
+                        DbHelper.rawQuery(`UPDATE matches
+                                           SET content = $3
+                                           WHERE id = $1
+                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
+                            .then(r => callback(r.rowCount > 0))
+                            .catch(_ => callback(false))
+                    }).catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setMatchDate', (tournamentId, matchId, date, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{date}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(date)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setReferee', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{referee}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(socket.data.user)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setWinner', (tournamentId, matchId, winnerId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{winner}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(winnerId)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:validateMatch', (tournamentId, matchId, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+
+                DbHelper.rawQuery(`UPDATE matches
+                                   SET content = jsonb_set(content, '{done}', $3)
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(true)])
+                    .then(result => callback(result.rowCount > 0))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
 }

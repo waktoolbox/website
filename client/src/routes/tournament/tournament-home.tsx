@@ -1,4 +1,4 @@
-import {Box, Button, Card, CardContent, Grid, Typography} from "@mui/material";
+import {Box, Button, Card, Grid, Typography} from "@mui/material";
 import React, {useContext, useEffect, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
 import {Trans, useTranslation} from "react-i18next";
@@ -120,7 +120,7 @@ export default function TournamentHome() {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sx={{mb: 2}}>
                     <Typography sx={{mb: 2}} variant="h5">
                         <Trans i18nKey="tournament.home.registrations.title"
                                components={{span: <span className="firstWord"/>}}/>
@@ -152,26 +152,26 @@ export default function TournamentHome() {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                    <Typography variant="h5">
-                        <Trans i18nKey="tournament.home.matches.title"
-                               components={{span: <span className="firstWord"/>}}/>
-                    </Typography>
-                    <Card sx={{m: 1, backgroundColor: "#152429"}}>
-                        <CardContent>
-                            {/*TODO v2*/}
-                            {home && home.matches && home.matches.length > 0 && home.matches.map((match: any) => (
-                                // <Link key={match.id} to={`/tournament/${featured.id}`}>
-                                //     <Typography>{featured.name + " - " + featured.startdate + " -> " + featured.enddate}</Typography>
-                                // </Link>
-                                "TODO"
-                            ))}
-                            {(!home || !home.matches || home.matches.length <= 0) &&
-                                <Typography>{t('tournament.home.matches.none')}</Typography>
-                            }
-                        </CardContent>
-                    </Card>
-                </Grid>
+                {/*TODO later coming matches*/}
+                {/*<Grid item xs={12}>*/}
+                {/*    <Typography variant="h5">*/}
+                {/*        <Trans i18nKey="tournament.home.matches.title"*/}
+                {/*               components={{span: <span className="firstWord"/>}}/>*/}
+                {/*    </Typography>*/}
+                {/*    <Card sx={{m: 1, backgroundColor: "#152429"}}>*/}
+                {/*        <CardContent>*/}
+                {/*            {home && home.matches && home.matches.length > 0 && home.matches.map((match: any) => (*/}
+                {/*                // <Link key={match.id} to={`/tournament/${featured.id}`}>*/}
+                {/*                //     <Typography>{featured.name + " - " + featured.startdate + " -> " + featured.enddate}</Typography>*/}
+                {/*                // </Link>*/}
+                {/*                "TODO"*/}
+                {/*            ))}*/}
+                {/*            {(!home || !home.matches || home.matches.length <= 0) &&*/}
+                {/*                <Typography>{t('tournament.home.matches.none')}</Typography>*/}
+                {/*            }*/}
+                {/*        </CardContent>*/}
+                {/*    </Card>*/}
+                {/*</Grid>*/}
             </Grid>
         </Grid>
     )

@@ -9,7 +9,88 @@ import {useTranslation} from "react-i18next";
 
 function App() {
     const {t} = useTranslation();
-    // @ts-ignore
+
+    const customComponents = {
+        MuiCalendarOrClockPicker: {
+            styleOverrides: {
+                root: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiCalendarPicker: {
+            styleOverrides: {
+                root: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiClock: {
+            styleOverrides: {
+                amButton: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiClockPicker: {
+            styleOverrides: {
+                root: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiDayPicker: {
+            styleOverrides: {
+                weekDayLabel: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiPickersCalendarHeader: {
+            styleOverrides: {
+                switchViewIcon: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiPickersDay: {
+            styleOverrides: {
+                root: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa'
+                }),
+            },
+        },
+        MuiPickersArrowSwitcher: {
+            styleOverrides: {
+                button: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#1f333a',
+                    color: '#fefffa !important'
+                }),
+            },
+        },
+        MuiTab: {
+            styleOverrides: {
+                textColorPrimary: ({ownerState}: { ownerState: any }) => ({
+                    color: '#8299a1'
+                }),
+            },
+        },
+        MuiTabs: {
+            styleOverrides: {
+                indicator: ({ownerState}: { ownerState: any }) => ({
+                    backgroundColor: '#03c8be'
+                }),
+            },
+        }
+    }
+
     const theme = createTheme({
         palette: {
             background: {
@@ -85,7 +166,8 @@ function App() {
                         }
                     }),
                 },
-            }
+            },
+            ...customComponents
         }
     })
 

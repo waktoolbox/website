@@ -2,6 +2,7 @@
   "account": {
     "ankamaName": "Ankama nickname",
     "ankamaDiscriminator": "# Ankama",
+    "invalidTwitchUrl": "Twitch URL must start with https://www.twitch.tv/",
     "menuItem": "My account",
     "unableToSave": "Unable to save account modifications",
     "saved": "Account saved",
@@ -11,7 +12,7 @@
   "actions": "Actions",
   "coming.soon": "Coming soon",
   "connect": "Sign in",
-  "dateTime": "{{date, datetime}} {{hours}}:{{minutes}}",
+  "date": "{{date, datetime}}",
   "delete": "Delete",
   "draft": {
     "assignToA": "Assign to team A",
@@ -68,7 +69,37 @@
       "levelAndServer": "Lvl. {{level}} / {{server}}",
       "manageMyTeam": "Edit my team",
       "manageMyRegistration": "Edit my registration",
+      "match": {
+        "allMatches": "All matches",
+        "arbitration": "Arbitration",
+        "buttonSetDraftDate": "Set draft date",
+        "buttonSetFightWinnerTeam": "{{name}} win this fight",
+        "buttonSetMatchDate": "Define match date",
+        "buttonSetMatchReferee": "Define me a referee",
+        "buttonSetMatchWinnerTeam": "Define {{name}} as winner team",
+        "buttonValidateMatch": "Validate match",
+        "draftDate": "Draft from: {{date, datetime}}",
+        "draftNotAvailableYet": "This draft isn't available for now",
+        "eliminated": "(Eliminated)",
+        "goToDraft": "Go to draft",
+        "live": "Live",
+        "matchNb": "Fight {{nb}}",
+        "more": "Learn more",
+        "noDate": "No date",
+        "noNextMatches": "No next matches",
+        "noMatchResult": "No match results",
+        "noReferee": "No referee",
+        "noStreamer": "No streamer",
+        "pool": "Pool {{pool}}",
+        "qualified": "(Qualified)",
+        "resultPhaseTitle": "<span>Step</span> {{nb}}",
+        "round": "Round {{round}}",
+        "setMeAsStreamer": "Set me as streamer",
+        "setNullAsStreamer": "Unset streamer",
+        "watchStream": "Watch stream"
+      },
       "myTeam": "My team",
+      "noMatchPlanned": "No matches to display",
       "planning": "Planning",
       "player": "Player",
       "register": "Register",
@@ -79,6 +110,7 @@
     "editor": {
       "addAdmin": "Add an admin",
       "addReferee": "Add a referee",
+      "goToNextPhase": "Start next step",
       "information": {
         "general": "General information",
         "phases": "Phases",
@@ -86,6 +118,7 @@
         "users": "Users"
       },
       "registrationDate": "Registration date",
+      "reminderAnkamaInfo": "Send a Waktool DM for missing Ankama info",
       "streamerLink": "Streamer's channel",
       "streamerName": "Streamer's name",
       "teamPage": "Page",
@@ -162,6 +195,17 @@
   "waktool": {
     "wakfu": "Wakfu is a MMORPG published by Ankama Studio. All rights reserved.\nThe \"Waktool\" website is an unofficial community fansite of the MMORPG Wakfu without any link to Ankama.",
     "login": "Please note! The Waktool team will never ask your login details."
+  },
+  "maps": {
+    "968": "Floating Forest",
+    "969": "Waterfall Chase",
+    "970": "Garbage Peak",
+    "971": "Quick Jungle",
+    "972": "White Slab",
+    "973": "Monastery Dome",
+    "974": "Holey Mine",
+    "975": "Lukewarm Basin",
+    "976": "Max Bay"
   },
   "tmp": {
     "description": "For this all-new edition, form teams of up to six players (private individuals) and get Build 230 ready for epic battles in a six-versus-six format on the beta server. The machines in Ecaflipus will provide equipment for level brackets 200–230, with white sockets for which everything needed for enchantment will be made available for free. Furthermore, if you're feeling all lone warrior, six-heroes mode will be available just for the occasion.\n\nAfter the qualifiers with four pools of sixteen teams, the result will be a tree of thirty-two teams where the best players in the inter-server PvP battles will compete!",
