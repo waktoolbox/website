@@ -87,13 +87,13 @@ export default function WakfuWarriorsMatchResultListView({data}: { data: PropsTy
         }
         setTournamentPhaseType(phaseType)
         setTabs(tabs);
-    }, [matches])
+    }, [matches]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const computeTeamQualification = (round: number, team: string) => {
         if (round < 2) return undefined;
         const qualification = teamQualification.get(team);
         if (!qualification) return undefined;
-        if (round == 2) {
+        if (round === 2) {
             if (qualification.presentInPhase3) return undefined;
             if (qualification.winQty >= 2) return t('tournament.display.match.qualified');
             if (qualification.lossQty >= 2) return t('tournament.display.match.eliminated');
