@@ -1,4 +1,4 @@
-import {TournamentDefinition, TournamentMatchModel} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentMatchModel} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
 import React, {SyntheticEvent, useContext, useState} from "react";
 import {SocketContext} from "../../context/socket-context";

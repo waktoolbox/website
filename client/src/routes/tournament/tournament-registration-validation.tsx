@@ -1,7 +1,7 @@
 import {Button, Stack, Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import React, {useContext, useEffect, useState} from "react";
-import {TournamentTeamModel} from "../../../../common/tournament/tournament-models";
+import {TournamentTeamModel} from "../../utils/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {useNavigate, useParams} from "react-router-dom";
 

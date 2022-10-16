@@ -70,6 +70,7 @@
       "manageMyTeam": "Modifier mon équipe",
       "manageMyRegistration": "Modifier mon inscription",
       "match": {
+        "allMatches": "Tous les matchs",
         "arbitration": "Arbitrage",
         "buttonSetDraftDate": "Définir la date du draft",
         "buttonSetFightWinnerTeam": "{{name}} gagne ce combat",
@@ -95,7 +96,7 @@
         "watchStream": "Regarder le stream"
       },
       "myTeam": "Mon équipe",
-      "noMatchPlanned": "Aucun match planifié",
+      "noMatchPlanned": "Aucun match à afficher",
       "planning": "Planning",
       "player": "Joueur",
       "register": "S'inscrire",

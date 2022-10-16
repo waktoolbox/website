@@ -19,7 +19,7 @@ import {
 import {useTranslation} from "react-i18next";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
-import {TournamentDefinition, TournamentTeamModel} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../utils/tournament-models";
 import {validateTournamentDefinition} from "../../utils/tournament-validator";
 import {PlayerPicker} from "../../components/player-picker";
 import DeleteIcon from "@mui/icons-material/Delete";

@@ -1,5 +1,5 @@
 import {Socket} from "socket.io";
-import {TournamentDefinition, TournamentTeamModel} from "../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../../client/src/utils/tournament-models";
 import * as crypto from "crypto";
 // TODO sorry, lack of time
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";

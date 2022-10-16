@@ -3,7 +3,7 @@ import {
     TournamentPhaseController,
     TournamentPhaseData,
     TournamentPhaseDefinition
-} from "../../../../common/tournament/tournament-models";
+} from "../../../../client/src/utils/tournament-models";
 import {
     WakfuWarriorsMatchModel,
     WakfuWarriorsPhaseOneData,

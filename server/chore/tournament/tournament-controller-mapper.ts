@@ -4,7 +4,7 @@ import {
     TournamentPhaseData,
     TournamentPhaseDefinition,
     TournamentPhaseType
-} from "../../../common/tournament/tournament-models";
+} from "../../../client/src/utils/tournament-models";
 import {WakfuWarriorPhaseOne, WakfuWarriorPhaseTwo} from "./impl/wakfu-warriors-phase-controller";
 import {WakfuWarriorsPhaseOneData, WakfuWarriorsPhaseTwoData} from "../../../common/tournament/impl/wakfu-warriors";
 

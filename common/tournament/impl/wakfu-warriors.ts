@@ -1,4 +1,8 @@
-import {TournamentMatchModel, TournamentPhaseData, TournamentPhaseTeamModel,} from "../tournament-models";
+import {
+    TournamentMatchModel,
+    TournamentPhaseData,
+    TournamentPhaseTeamModel,
+} from "../../../client/src/utils/tournament-models";
 
 
 export interface WakfuWarriorsPhaseOneData extends TournamentPhaseData<WakfuWarriorsTeamModel> {

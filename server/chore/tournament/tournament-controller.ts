@@ -3,7 +3,7 @@ import {
     TournamentDefinition,
     TournamentMatchModel,
     TournamentPhaseData
-} from "../../../common/tournament/tournament-models";
+} from "../../../client/src/utils/tournament-models";
 import {getAppropriateController, getBaseData} from "./tournament-controller-mapper";
 
 function getTournament(id: string): Promise<TournamentDefinition | undefined> {

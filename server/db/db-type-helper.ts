@@ -1,4 +1,4 @@
-import {TournamentPhaseData, TournamentTeamModel} from "../../common/tournament/tournament-models";
+import {TournamentPhaseData, TournamentTeamModel} from "../../client/src/utils/tournament-models";
 
 export type DbTournamentData = {
     tournamentId: string;

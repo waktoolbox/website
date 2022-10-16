@@ -1,7 +1,7 @@
 import pg, {QueryResult} from 'pg';
 import {pgInitDb} from "./pg-populate";
 import {Account} from "../account/account";
-import {TournamentDefinition, TournamentTeamModel} from "../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentTeamModel} from "../../client/src/utils/tournament-models";
 import {DbTeamWithContent, DbTournamentData} from "./db-type-helper";
 
 class DbWrapper {

@@ -6,17 +6,14 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CheckIcon from '@mui/icons-material/Check';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
-import {
-    TournamentDefinition,
-    TournamentMatchModel,
-    TournamentTeamModel
-} from "../../../../common/tournament/tournament-models";
+import {TournamentDefinition, TournamentMatchModel, TournamentTeamModel} from "../../utils/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
 import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
 import TournamentMatchView from "../../components/tournament/tournament-match-view";
+import TournamentMatchListView from "../../components/tournament/tournament-match-list-view";
 
 enum Tabs {
     HOME,
@@ -54,7 +51,8 @@ export default function Tournament() {
     const [team, setTeam] = useState<TournamentTeamModel>();
     const [tab, setTab] = useState(Tabs.HOME)
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
-    const [matchesToDisplay, setMatchesToDisplay] = useState<TournamentMatchModel[]>();
+    const [planningToDisplay, setPlanningToDisplay] = useState<TournamentMatchModel[]>();
+    const [resultToDisplay, setResultToDisplay] = useState<TournamentMatchModel[]>();
     const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
     const [me] = useState(localStorage.getItem("discordId"))
@@ -153,23 +151,27 @@ export default function Tournament() {
     }
 
     const loadNextMatches = () => {
-        loadMatchesToDisplay('tournament::getNextMatches')
+        loadMatchesToDisplay('tournament::getNextMatches', setPlanningToDisplay)
     }
 
     const loadMatchesResult = () => {
-        loadMatchesToDisplay('tournament::getMatchesResult')
+        loadMatchesToDisplay('tournament::getMatchesResult', setResultToDisplay)
     }
 
-    const loadMatchesToDisplay = (event: string) => {
+    const loadMatchesToDisplay = (event: string, callbackSetter: any) => {
         // TODO v3 bind real phase here
         socket.emit(event, id, 1, (matches: TournamentMatchModel[]) => {
             const namesToRequest: string[] = [];
             matches.forEach(t => {
                 if (!t || !t.id) return;
-                if (teamsNamesPersistence.has(t.id)) return;
-                namesToRequest.push(t.id)
+                if (!teamsNamesPersistence.has(t.teamA)) {
+                    namesToRequest.push(t.teamA)
+                }
+                if (!teamsNamesPersistence.has(t.teamB)) {
+                    namesToRequest.push(t.teamB)
+                }
             })
-            loadTeamNames(namesToRequest, () => setMatchesToDisplay(matches))
+            loadTeamNames(namesToRequest, () => callbackSetter(matches))
         })
     }
 
@@ -483,7 +485,7 @@ export default function Tournament() {
 
                             {tab === Tabs.SINGLE_TEAM && team &&
                                 <Grid container>
-                                    <Grid item lg={8} xs={12} sx={{textAlign: "start", pl: 4}}>
+                                    <Grid item lg={9} xs={12} sx={{textAlign: "start", pl: 4}}>
                                         <Grid container>
                                             <Grid item xs={12}>
                                                 <Typography variant="h4" sx={{
@@ -541,7 +543,7 @@ export default function Tournament() {
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                    <Grid item lg={4} xs={12} sx={{pl: 3, pr: 3}}>
+                                    <Grid item lg={3} xs={12} sx={{pl: 3, pr: 3}}>
                                         <Stack spacing={2}>
                                             <Card>
                                                 <CardContent
@@ -587,23 +589,46 @@ export default function Tournament() {
                                 </Grid>
                             }
 
-                            {(tab === Tabs.PLANNING || tab === Tabs.RESULTS) && matchesToDisplay &&
+                            {(tab === Tabs.PLANNING) &&
                                 <Grid container>
-                                    {matchesToDisplay.length > 0 && matchesToDisplay.map(match => (
-                                        <Grid item xs={12} key={match.id}>
-                                            <Card>
-                                                <CardContent>
-                                                    Team A : {match.teamA} - Team B : {match.teamB} - Rounds
-                                                    : {JSON.stringify(match.rounds)} - Date : {match.date} - Done
-                                                    : {match.done ? "Y" : "N"} - Pool : {match.pool} |
-                                                    <Button onClick={() => loadMatch(match.id, true)}>GOTO
-                                                        match</Button>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
-                                    ))}
+                                    <Grid item xs={12} sx={{mb: 2}}>
+                                        <Typography
+                                            variant="h4">{t('tournament.display.' + (tab === Tabs.PLANNING ? "planning" : "results"))}</Typography>
+                                    </Grid>
+                                    {planningToDisplay && planningToDisplay.length > 0 &&
+                                        <TournamentMatchListView data={{
+                                            tournament: tournament,
+                                            teams: teamsNamesPersistence,
+                                            matches: planningToDisplay,
+                                            goToMatch: (matchId) => loadMatch(matchId, true)
+                                        }}/>
+                                    }
 
-                                    {matchesToDisplay.length <= 0 &&
+                                    {(!planningToDisplay || planningToDisplay.length <= 0) &&
+                                        <Grid item xs={12}>
+                                            <Typography
+                                                variant="h5">{t('tournament.display.noMatchPlanned')}</Typography>
+                                        </Grid>
+                                    }
+                                </Grid>
+                            }
+
+                            {(tab === Tabs.RESULTS) &&
+                                <Grid container>
+                                    <Grid item xs={12} sx={{mb: 2}}>
+                                        <Typography
+                                            variant="h4">{t('tournament.display.results')}</Typography>
+                                    </Grid>
+                                    {resultToDisplay && resultToDisplay.length > 0 &&
+                                        <TournamentMatchListView data={{
+                                            tournament: tournament,
+                                            teams: teamsNamesPersistence,
+                                            matches: resultToDisplay,
+                                            goToMatch: (matchId) => loadMatch(matchId, true)
+                                        }}/>
+                                    }
+
+                                    {(!resultToDisplay || resultToDisplay.length <= 0) &&
                                         <Grid item xs={12}>
                                             <Typography
                                                 variant="h5">{t('tournament.display.noMatchPlanned')}</Typography>
