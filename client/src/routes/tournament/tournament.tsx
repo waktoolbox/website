@@ -13,7 +13,8 @@ import {Trans, useTranslation} from "react-i18next";
 import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
 import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
 import TournamentMatchView from "../../components/tournament/tournament-match-view";
-import TournamentMatchListView from "../../components/tournament/tournament-match-list-view";
+import TournamentMatchPlanningListView from "../../components/tournament/tournament-match-planning-list-view";
+import WakfuWarriorsMatchResultListView from "../../components/tournament/impl/wakfu-warriors-match-result-list-view";
 
 enum Tabs {
     HOME,
@@ -596,7 +597,7 @@ export default function Tournament() {
                                             variant="h4">{t('tournament.display.' + (tab === Tabs.PLANNING ? "planning" : "results"))}</Typography>
                                     </Grid>
                                     {planningToDisplay && planningToDisplay.length > 0 &&
-                                        <TournamentMatchListView data={{
+                                        <TournamentMatchPlanningListView data={{
                                             tournament: tournament,
                                             teams: teamsNamesPersistence,
                                             matches: planningToDisplay,
@@ -620,7 +621,7 @@ export default function Tournament() {
                                             variant="h4">{t('tournament.display.results')}</Typography>
                                     </Grid>
                                     {resultToDisplay && resultToDisplay.length > 0 &&
-                                        <TournamentMatchListView data={{
+                                        <WakfuWarriorsMatchResultListView data={{
                                             tournament: tournament,
                                             teams: teamsNamesPersistence,
                                             matches: resultToDisplay,

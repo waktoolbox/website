@@ -13,7 +13,7 @@ type PropsTypes = {
 
 const matchByTab: Map<number, TournamentMatchModel[]> = new Map();
 
-export default function TournamentMatchListView({data}: { data: PropsTypes }) {
+export default function TournamentMatchPlanningListView({data}: { data: PropsTypes }) {
     const {
         tournament,
         teams,

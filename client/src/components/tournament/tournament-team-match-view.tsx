@@ -36,14 +36,14 @@ export default function TournamentTeamMatchView({
                 }
             }}>
                 <Grid container direction="row" alignItems="center">
-                    {displayedTeam &&
+                    {displayedTeam && match.winner &&
                         <Grid item xs={1}>
                             {match.winner && match.winner === displayedTeam &&
                                 <EmojiEventsIcon sx={{
                                     width: "80%",
                                     height: '80%',
                                     display: "flex",
-                                    verticalAlign: "center",
+                                    verticalAlign: "middle",
                                     color: "#07c6b6"
                                 }}/>
                             }
@@ -52,13 +52,13 @@ export default function TournamentTeamMatchView({
                                     width: "80%",
                                     height: '80%',
                                     display: "flex",
-                                    verticalAlign: "center",
-                                    color: "#00A4E9"
+                                    verticalAlign: "middle",
+                                    color: "#e64b4b"
                                 }}/>
                             }
                         </Grid>
                     }
-                    <Grid item xs={4} sx={{mt: "2px"}}>
+                    <Grid item xs={displayedTeam && !match.winner ? 5 : 4} sx={{mt: "2px"}}>
                         <Typography>
                             <b>{!match.date ? t('tournament.display.match.noDate') : t('date', {
                                 date: Date.parse(match.date),
@@ -73,12 +73,53 @@ export default function TournamentTeamMatchView({
                         <Divider sx={{pt: 2, pb: 3, m: 0, mr: 2, display: "inline"}} orientation="vertical"
                                  variant="middle"/>
                         {displayedTeamName &&
-                            <Typography variant="h6" sx={{verticalAlign: "middle"}}
-                                        display="inline"><b>{displayedTeamName}</b> </Typography>
+                            <Typography variant="h6" sx={{verticalAlign: "middle"}} display="inline">
+                                {!displayedTeam && match.winner === match.teamA &&
+                                    <EmojiEventsIcon sx={{
+                                        mr: 1,
+                                        mb: "3px",
+                                        height: '100%',
+                                        verticalAlign: "middle",
+                                        color: "#07c6b6"
+                                    }}/>
+                                }
+                                {!displayedTeam && match.winner === match.teamB &&
+                                    <CancelIcon sx={{
+                                        mr: 1,
+                                        mb: "3px",
+                                        height: '100%',
+                                        verticalAlign: "middle",
+                                        color: "#e64b4b"
+                                    }}/>
+                                }
+                                <b>{displayedTeamName}</b>
+                            </Typography>
                         }
-                        <Typography sx={{verticalAlign: "middle", mr: 1}} display="inline"><span
-                            className="blueWord">vs</span></Typography>
-                        <Typography variant="h6" sx={{verticalAlign: "middle"}} display="inline"><b>{otherTeamName}</b></Typography>
+                        <Typography sx={{verticalAlign: "middle", ml: (displayedTeamName ? 1 : 0), mr: 1}}
+                                    display="inline">
+                            <span className="blueWord">vs</span>
+                        </Typography>
+                        <Typography variant="h6" sx={{verticalAlign: "middle"}} display="inline">
+                            <b>{otherTeamName}</b>
+                            {!displayedTeam && match.winner === match.teamB &&
+                                <EmojiEventsIcon sx={{
+                                    ml: 1,
+                                    mb: "3px",
+                                    height: '100%',
+                                    verticalAlign: "middle",
+                                    color: "#07c6b6"
+                                }}/>
+                            }
+                            {!displayedTeam && match.winner === match.teamA &&
+                                <CancelIcon sx={{
+                                    ml: 1,
+                                    mb: "3px",
+                                    height: '100%',
+                                    verticalAlign: "middle",
+                                    color: "#e64b4b"
+                                }}/>
+                            }
+                        </Typography>
                     </Grid>
                     <Grid item xs={displayedTeam ? 2 : 3}>
                         <Button sx={{

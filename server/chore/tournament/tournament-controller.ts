@@ -166,9 +166,12 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
         }
 
         controller.prepareRound()
-            .then(_ => saveTournamentData(id, maxPhase, controller.data)
-                .then(result => resolve(result))
-                .catch(_ => reject("Unable to save tournament data"))
+            .then(prepared => {
+                    if (!prepared) resolve(false);
+                    saveTournamentData(id, maxPhase, controller.data)
+                        .then(result => resolve(result))
+                        .catch(_ => reject("Unable to save tournament data"))
+                }
             ).catch(error => reject("Unable to prepare round : " + error))
     })
 }

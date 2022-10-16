@@ -81,12 +81,15 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
             const passedMatches = await this.getAllMatchesOfPhase(1);
             const winScore: Map<string, number> = new Map();
             for (const match of passedMatches) {
-                if (!match.winner || match.winner === "") return resolve(false);
+                if (!match.winner || match.winner === "") {
+                    console.error(`Can't go to next phase for tournament ${this.tournament.id} due to match ${match.id}`);
+                    return resolve(false);
+                }
                 const teamAScore = winScore.get(match.teamA);
                 const teamBScore = winScore.get(match.teamB);
 
-                winScore.set(match.teamA, match.winner === match.teamA ? (teamAScore || 0) + 1 : (teamAScore || 0) - 1)
-                winScore.set(match.teamB, match.winner === match.teamB ? (teamBScore || 0) + 1 : (teamBScore || 0) - 1)
+                if (match.teamA) winScore.set(match.teamA, match.winner === match.teamA ? (teamAScore || 0) + 1 : (teamAScore || 0) - 1)
+                if (match.teamB) winScore.set(match.teamB, match.winner === match.teamB ? (teamBScore || 0) + 1 : (teamBScore || 0) - 1)
             }
 
             const teamsMap: Map<string, WakfuWarriorsTeamModel> = new Map()
