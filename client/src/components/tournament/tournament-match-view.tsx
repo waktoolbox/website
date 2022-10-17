@@ -5,6 +5,7 @@ import {SocketContext} from "../../context/socket-context";
 import {Button, Card, CardContent, Grid, Icon, styled, Tab, Tabs, TextField, Typography} from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
+import {useNavigate} from "react-router-dom";
 
 type PropsTypes = {
     accounts: Map<string, any>;
@@ -34,6 +35,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         addStreamer
     } = data;
     const {t} = useTranslation();
+    const navigate = useNavigate();
     const socket = useContext(SocketContext)
 
     const [tab, setTab] = useState(0);
@@ -167,6 +169,13 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         setTab(newTab);
     }
 
+    const startDraft = () => {
+        socket.emit('tournament::draftStart', tournament.id, match.id, tab, (isValid: boolean) => {
+            if (!isValid) return;
+            navigate(`/draft/${match.id}-${tab}`)
+        })
+    }
+
     // @ts-ignore
     return (
         <Grid container>
@@ -200,7 +209,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         <Grid container>
                             <Grid item xs={12}>
                                 {fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
-                                    <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}>
+                                    <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}
+                                            onClick={startDraft}>
                                         {t('tournament.display.match.goToDraft')}
                                     </Button>
                                 }

@@ -1,5 +1,9 @@
 import {Socket} from "socket.io";
-import {TournamentDefinition, TournamentTeamModel} from "../../../client/src/utils/tournament-models";
+import {
+    TournamentDefinition,
+    TournamentMatchModel,
+    TournamentTeamModel
+} from "../../../client/src/utils/tournament-models";
 import * as crypto from "crypto";
 // TODO sorry, lack of time
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";
@@ -7,6 +11,8 @@ import {DbHelper} from "../../db/pg-helper";
 import {TournamentHomeProvider} from "./tournament-home-provider";
 import {DiscordBot} from "../../discord/bot";
 import {getMatch, getMatchesResult, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
+import {DraftData, DraftUser} from "../../../client/src/utils/draft-controller";
+import {DraftTemplates} from "../../../client/src/utils/draft-templates";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
@@ -569,4 +575,61 @@ Ankama will not provide additional access!`)
             })
             .catch(_ => callback(false))
     });
+
+    socket.on('tournament::draftStart', (tournamentId, matchId, fightIndex, callback) => {
+        if (!callback) return;
+        DbHelper.rawQuery(`SELECT COUNT(*)
+                           FROM drafts_data
+                           WHERE id = $1`, [matchId + "-" + fightIndex])
+            .then(data => {
+                if (data.rowCount <= 0) return callback(false);
+                if (data.rows[0].count > 0) return callback(true);
+
+                DbHelper.rawQuery(`SELECT content
+                                   FROM matches
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId])
+                    .then(result => {
+                        if (result.rowCount <= 0) return callback(false);
+
+                        const match: TournamentMatchModel = result.rows[0].content;
+                        if (match.rounds.length <= fightIndex) return callback(false);
+
+                        const draft: DraftData = {
+                            id: matchId + "-" + fightIndex,
+                            configuration: {
+                                leader: undefined,
+                                providedByServer: true,
+                                actions: DraftTemplates[0].actions
+                            },
+                            history: [],
+                            currentAction: 0,
+
+                            users: [],
+
+                            teamA: DraftUser[];
+                            teamAInfo: {
+                                id: string,
+                                name: string
+                            },
+                            teamAReady: false;
+                            teamB: DraftUser[];
+                            teamBInfo: {
+                                id: string,
+                                name: string
+                            },
+                            teamBReady: false
+                        }
+
+                        // TODO later bind tournament draft format through configuration here
+                        DbHelper.rawQuery(`INSERT INTO drafts_data
+                                           VALUES ($1, $2)`, [draft.id, draft])
+                            .then(success => callback(success.rowCount > 0))
+                            .catch(_ => callback(false))
+                    })
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+
+    })
 }

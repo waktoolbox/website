@@ -3,6 +3,7 @@ import {DraftAction, DraftData, DraftTeam} from "../../../client/src/utils/draft
 import * as crypto from "crypto";
 import {Socket} from "socket.io";
 import {SocketManager} from "../../api/socket-manager";
+import {DbHelper} from "../../db/pg-helper";
 
 class Manager {
     private currentDrafts: Map<string, ServerDraftController> = new Map();
@@ -34,7 +35,27 @@ class Manager {
                 return resolve(draft.data);
             }
 
+            DbHelper.rawQuery(`SELECT content
+                               FROM drafts_data
+                               WHERE id = $1`, [draftId]).then(r => {
+                if (r.rowCount <= 0) return resolve(undefined);
+                const draftData = r.rows[0].content;
+                const draft = new ServerDraftController(draftData);
+                this.processDraftJoin(socket, draftId, draft);
+
+                return resolve(draft.data);
+            })
+
             resolve(undefined);
+        })
+    }
+
+    private processDraftJoin(socket: Socket, draftId: string, draft: ServerDraftController) {
+        socket.join(`draft-${draftId}`)
+        const user = this.createUser(socket);
+        draft.onUserJoin(user)
+        socket.on('disconnect', () => {
+            SocketManager.io()?.to(`draft-${draftId}`).emit('draft::userDisconnected', user.id)
         })
     }
 
