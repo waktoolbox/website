@@ -197,7 +197,7 @@ class Manager {
                     const match = rawMatch.rows[0].content;
 
                     const teamA = match.teamA === draft.teamAInfo?.id ? DraftTeam.TEAM_A : DraftTeam.TEAM_B;
-                    const teamB = match.teamA === draft.teamAInfo?.id ? DraftTeam.TEAM_A : DraftTeam.TEAM_B;
+                    const teamB = match.teamA === draft.teamAInfo?.id ? DraftTeam.TEAM_B : DraftTeam.TEAM_A;
 
                     const round = match.rounds[draftIdAndRound[1]];
                     round.teamADraft = {

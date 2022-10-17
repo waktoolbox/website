@@ -72,6 +72,7 @@
       "match": {
         "allMatches": "Tous les matchs",
         "arbitration": "Arbitrage",
+        "bo": "BO {{nb}}",
         "buttonSetDraftDate": "Définir la date du draft",
         "buttonSetFightWinnerTeam": "{{name}} gagne ce combat",
         "buttonSetMatchDate": "Définir la date du match",

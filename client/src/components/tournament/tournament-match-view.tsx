@@ -1,4 +1,6 @@
-import {TournamentDefinition, TournamentMatchModel} from "../../utils/tournament-models";
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CancelIcon from '@mui/icons-material/Cancel';
+import {TournamentDefinition, TournamentMatchModel, TournamentMatchRoundModel} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
 import React, {SyntheticEvent, useContext, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
@@ -6,6 +8,7 @@ import {Button, Card, CardContent, Grid, Icon, styled, Tab, Tabs, TextField, Typ
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {useNavigate} from "react-router-dom";
+import {DraftTeam} from "../../utils/draft-controller";
 
 type PropsTypes = {
     accounts: Map<string, any>;
@@ -160,6 +163,12 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         if (match.round) {
             result.push(t('tournament.display.match.round', {round: match.round}))
         }
+
+        const phase = tournament.phases.find(p => p.phase === match.phase);
+        if (phase) {
+            const round = phase.roundModel.find(r => r.round === match.round)
+            result.push(t('tournament.display.match.bo', {nb: round?.bo || 1}))
+        }
         return result.join(" - ")
     }
 
@@ -176,13 +185,102 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         })
     }
 
-    // @ts-ignore
+    const TeamColumn = ({fight, team}: { fight: TournamentMatchRoundModel, team: DraftTeam }) => {
+        const appropriateTeam = team === DraftTeam.TEAM_A ? match.teamA : match.teamB;
+        const appropriateDraft = team === DraftTeam.TEAM_A ? fight.teamADraft : fight.teamBDraft;
+        const otherTeam = team === DraftTeam.TEAM_A ? match.teamB : match.teamA;
+        return (
+            <Grid item xs={6}>
+                <Grid container>
+                    <Grid item xs={12}>
+                        {fight.winner === appropriateTeam &&
+                            <EmojiEventsIcon sx={{
+                                height: '60px',
+                                width: '60px',
+                                verticalAlign: "middle",
+                                color: "#07c6b6"
+                            }}/>
+                        }
+                        {fight.winner === otherTeam &&
+                            <CancelIcon sx={{
+                                height: '60px',
+                                width: '60px',
+                                verticalAlign: "middle",
+                                color: "#e64b4b"
+                            }}/>
+                        }
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography><b>{teams.get(appropriateTeam)}</b></Typography>
+                    </Grid>
+                    <Grid item xs={12} sx={{p: 3}}>
+                        <Grid container>
+                            {appropriateDraft && appropriateDraft.pickedClasses && appropriateDraft.pickedClasses.map(c => (
+                                <Grid item xs={4}>
+                                    <img src={`/classes/${c}_0.png`} style={{width: "100%"}} alt={`Breed ${c}`}/>
+                                </Grid>
+                            ))}
+                        </Grid>
+                        <Grid container sx={{p: 3}}>
+                            {appropriateDraft && appropriateDraft.bannedClasses && appropriateDraft.bannedClasses.map(c => (
+                                <Grid item xs={4}>
+                                    <img src={`/classes/${c}_0.png`} style={{width: "100%", filter: "grayscale(1)"}}
+                                         alt={`Breed ${c}`}/>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        )
+    }
+
     return (
         <Grid container>
             <Grid item xs={12} sx={{mt: 3}}>
-                <Typography variant="h5" display="inline" sx={{color: "#fefffa"}}>{teams.get(match.teamA)}</Typography>
-                <Typography variant="h6" display="inline" className="blueWord" sx={{ml: 1, mr: 1}}>vs</Typography>
-                <Typography variant="h5" display="inline" sx={{color: "#fefffa"}}>{teams.get(match.teamB)}</Typography>
+                <Typography variant="h4" display="inline" sx={{color: "#fefffa"}}>
+                    {match.winner === match.teamA &&
+                        <EmojiEventsIcon sx={{
+                            mr: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#07c6b6"
+                        }}/>
+                    }
+                    {match.winner === match.teamB &&
+                        <CancelIcon sx={{
+                            mr: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#e64b4b"
+                        }}/>
+                    }
+                    {teams.get(match.teamA)}
+                </Typography>
+                <Typography variant="h5" display="inline" className="blueWord" sx={{ml: 1, mr: 1}}>vs</Typography>
+                <Typography variant="h4" display="inline" sx={{color: "#fefffa"}}>
+                    {teams.get(match.teamB)}
+                    {match.winner === match.teamB &&
+                        <EmojiEventsIcon sx={{
+                            ml: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#07c6b6"
+                        }}/>
+                    }
+                    {match.winner === match.teamA &&
+                        <CancelIcon sx={{
+                            ml: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#e64b4b"
+                        }}/>
+                    }
+                </Typography>
                 <Typography variant="h6" color="#8299a1">{match.date
                     ? t('date', {
                         date: Date.parse(match.date), formatParams: dateFormat
@@ -204,25 +302,35 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                     ))}
                 </Tabs>
                 <Grid container>
-                    <Grid item xs={8} sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                    <Grid item xs={8} sx={{
+                        display: "flex",
+                        alignItems: fight.teamADraft ? "start" : "center",
+                        justifyContent: "center"
+                    }}>
                         {/*TODO v2 bind draft link & draft results & winner */}
                         <Grid container>
                             <Grid item xs={12}>
-                                {fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
+                                {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
                                     <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}
                                             onClick={startDraft}>
                                         {t('tournament.display.match.goToDraft')}
                                     </Button>
                                 }
-                                {!fight.draftDate &&
+                                {!fight.teamADraft && !fight.draftDate &&
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
                                 }
-                                {fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
+                                {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
                                     <Typography variant="h5">{t('tournament.display.match.draftDate', {
                                         date: Date.parse(fight.draftDate),
                                         formatParams: dateFormat
                                     })}</Typography>
+                                }
+                                {fight.teamADraft &&
+                                    <Grid container>
+                                        <TeamColumn fight={fight} team={DraftTeam.TEAM_A}/>
+                                        <TeamColumn fight={fight} team={DraftTeam.TEAM_B}/>
+                                    </Grid>
                                 }
                             </Grid>
                         </Grid>

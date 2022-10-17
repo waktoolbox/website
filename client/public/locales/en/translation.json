@@ -72,6 +72,7 @@
       "match": {
         "allMatches": "All matches",
         "arbitration": "Arbitration",
+        "bo": "BO {{nb}}",
         "buttonSetDraftDate": "Set draft date",
         "buttonSetFightWinnerTeam": "{{name}} win this fight",
         "buttonSetMatchDate": "Define match date",
