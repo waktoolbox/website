@@ -85,6 +85,6 @@ export const pgInitDb = `
     (
         50
     ) NOT NULL PRIMARY KEY,
-        content JSONB,
+        content JSONB
         );
 `

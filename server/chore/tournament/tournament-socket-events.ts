@@ -11,7 +11,7 @@ import {DbHelper} from "../../db/pg-helper";
 import {TournamentHomeProvider} from "./tournament-home-provider";
 import {DiscordBot} from "../../discord/bot";
 import {getMatch, getMatchesResult, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
-import {DraftData, DraftUser} from "../../../client/src/utils/draft-controller";
+import {DraftData} from "../../../client/src/utils/draft-controller";
 import {DraftTemplates} from "../../../client/src/utils/draft-templates";
 
 export function registerTournamentEvents(socket: Socket) {
@@ -576,6 +576,7 @@ Ankama will not provide additional access!`)
             .catch(_ => callback(false))
     });
 
+    // TODO later adapt this to other tournament format
     socket.on('tournament::draftStart', (tournamentId, matchId, fightIndex, callback) => {
         if (!callback) return;
         DbHelper.rawQuery(`SELECT COUNT(*)
@@ -585,51 +586,88 @@ Ankama will not provide additional access!`)
                 if (data.rowCount <= 0) return callback(false);
                 if (data.rows[0].count > 0) return callback(true);
 
-                DbHelper.rawQuery(`SELECT content
+                DbHelper.rawQuery(`SELECT phase, content
                                    FROM matches
                                    WHERE id = $1
                                      AND "tournamentId" = $2`, [matchId, tournamentId])
                     .then(result => {
                         if (result.rowCount <= 0) return callback(false);
 
+                        const phase: number = result.rows[0].phase;
                         const match: TournamentMatchModel = result.rows[0].content;
                         if (match.rounds.length <= fightIndex) return callback(false);
 
-                        const draft: DraftData = {
-                            id: matchId + "-" + fightIndex,
-                            configuration: {
-                                leader: undefined,
-                                providedByServer: true,
-                                actions: DraftTemplates[0].actions
-                            },
-                            history: [],
-                            currentAction: 0,
+                        DbHelper.rawQuery(`SELECT content
+                                           FROM teams
+                                           WHERE id = ANY ($1)`, [[match.teamA, match.teamB]])
+                            .then(teams => {
+                                if (teams.rowCount < 2) return callback(false);
+                                let teamA: TournamentTeamModel;
+                                let teamB: TournamentTeamModel;
 
-                            users: [],
+                                if (phase == 1) {
+                                    const sort = teams.rows.map(r => r.content).sort(() => Math.random() - 0.5);
+                                    teamA = sort[0];
+                                    teamB = sort[1];
+                                } else {
+                                    // TODO v2:
+                                    // - 16th: win at step 2 of phase 1 can pick side
+                                    // - then random
+                                    // - BO: first random, then loser will have hand
+                                    throw new Error("Not implemented");
+                                }
 
-                            teamA: DraftUser[];
-                            teamAInfo: {
-                                id: string,
-                                name: string
-                            },
-                            teamAReady: false;
-                            teamB: DraftUser[];
-                            teamBInfo: {
-                                id: string,
-                                name: string
-                            },
-                            teamBReady: false
-                        }
+                                const draft: DraftData = {
+                                    id: matchId + "-" + fightIndex,
+                                    configuration: {
+                                        leader: undefined,
+                                        providedByServer: true,
+                                        actions: DraftTemplates[0].actions
+                                    },
+                                    history: [],
+                                    currentAction: 0,
 
-                        // TODO later bind tournament draft format through configuration here
-                        DbHelper.rawQuery(`INSERT INTO drafts_data
-                                           VALUES ($1, $2)`, [draft.id, draft])
-                            .then(success => callback(success.rowCount > 0))
+                                    users: [],
+
+                                    teamA: teamA.players.map((p: string) => {
+                                        return {
+                                            id: p,
+                                            username: "",
+                                            discriminator: "",
+                                            captain: teamA.leader === p,
+                                            present: false
+                                        }
+                                    }),
+                                    teamAInfo: {
+                                        id: teamA.id || "",
+                                        name: teamA.name
+                                    },
+                                    teamAReady: false,
+                                    teamB: teamB.players.map((p: string) => {
+                                        return {
+                                            id: p,
+                                            username: "",
+                                            discriminator: "",
+                                            captain: teamB.leader === p,
+                                            present: false
+                                        }
+                                    }),
+                                    teamBInfo: {
+                                        id: teamB.id || "",
+                                        name: teamB.name
+                                    },
+                                    teamBReady: false
+                                }
+
+                                DbHelper.rawQuery(`INSERT INTO drafts_data
+                                                   VALUES ($1, $2)`, [draft.id, draft])
+                                    .then(success => callback(success.rowCount > 0))
+                                    .catch(_ => callback(false))
+                            })
                             .catch(_ => callback(false))
                     })
                     .catch(_ => callback(false))
             })
             .catch(_ => callback(false))
-
     })
 }

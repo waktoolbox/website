@@ -1,5 +1,5 @@
 import {ServerDraftController} from "./server-draft-controller";
-import {DraftAction, DraftData, DraftTeam} from "../../../client/src/utils/draft-controller";
+import {DraftAction, DraftActionType, DraftData, DraftTeam} from "../../../client/src/utils/draft-controller";
 import * as crypto from "crypto";
 import {Socket} from "socket.io";
 import {SocketManager} from "../../api/socket-manager";
@@ -41,12 +41,10 @@ class Manager {
                 if (r.rowCount <= 0) return resolve(undefined);
                 const draftData = r.rows[0].content;
                 const draft = new ServerDraftController(draftData);
+                this.currentDrafts.set(draftId, draft);
+                resolve(draft.data)
                 this.processDraftJoin(socket, draftId, draft);
-
-                return resolve(draft.data);
-            })
-
-            resolve(undefined);
+            }).catch(_ => resolve(undefined))
         })
     }
 
@@ -55,6 +53,12 @@ class Manager {
         const user = this.createUser(socket);
         draft.onUserJoin(user)
         socket.on('disconnect', () => {
+            const draftUser = draft.data.users.find(u => u.id === socket.id || u.id === socket.data.user);
+            if (draftUser) draftUser.present = false;
+            const teamA = draft.data.teamA?.find(u => u.id === socket.id || u.id === socket.data.user);
+            if (teamA) teamA.present = false;
+            const teamB = draft.data.teamB?.find(u => u.id === socket.id || u.id === socket.data.user);
+            if (teamB) teamB.present = false;
             SocketManager.io()?.to(`draft-${draftId}`).emit('draft::userDisconnected', user.id)
         })
     }
@@ -111,17 +115,25 @@ class Manager {
         return controller.data;
     }
 
-    onAction(draftId: string, action: DraftAction, socket: Socket) {
+    async onAction(draftId: string, action: DraftAction, socket: Socket) {
         if (!this.currentDrafts.has(draftId)) return;
 
         const draft = this.currentDrafts.get(draftId);
         if (!draft) return;
         if (!draft.validator.validate(action, socket.data.user ? socket.data.user : socket.id)) return;
 
-        draft.onAction(action);
+        const executed = draft.onAction(action);
+        if (executed && draft.data.configuration.providedByServer) {
+            await this.saveDraft(draft.data)
+        }
 
         if (draft.data.currentAction >= draft.data.configuration.actions.length) {
-            this.currentDrafts.delete(draftId);
+            this.saveDraftEnd(draft.data)
+                .then(success => {
+                    if (!success) return;
+                    this.currentDrafts.delete(draftId);
+                })
+                .catch(_ => _)
         }
     }
 
@@ -147,6 +159,65 @@ class Manager {
         if (!associatedTeam.find(u => u.id === socket.id || u.id === socket.data.user)) return;
 
         draft.onTeamReady(team, ready)
+    }
+
+    saveDraft(draft: DraftData): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            const savedDraft = {
+                ...draft,
+            };
+            savedDraft.users = [];
+            savedDraft.teamA = savedDraft.teamA?.map(u => {
+                return {...u, present: false}
+            });
+            savedDraft.teamAReady = false;
+            savedDraft.teamB = savedDraft.teamB?.map(u => {
+                return {...u, present: false}
+            });
+            savedDraft.teamBReady = false;
+
+            DbHelper.rawQuery(`UPDATE drafts_data
+                               SET content = $2
+                               WHERE id = $1`, [draft.id, JSON.stringify(savedDraft)])
+                .then(result => resolve(result.rowCount > 0))
+                .catch(_ => reject(false))
+        });
+    }
+
+    saveDraftEnd(draft: DraftData): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (!draft.configuration.providedByServer) return resolve(true);
+
+            const draftIdAndRound = draft.id.split('-');
+            DbHelper.rawQuery(`SELECT content
+                               FROM matches
+                               WHERE id = $1`, [draftIdAndRound[0]])
+                .then(rawMatch => {
+                    if (rawMatch.rowCount <= 0) return;
+                    const match = rawMatch.rows[0].content;
+
+                    const teamA = match.teamA === draft.teamAInfo?.id ? DraftTeam.TEAM_A : DraftTeam.TEAM_B;
+                    const teamB = match.teamA === draft.teamAInfo?.id ? DraftTeam.TEAM_A : DraftTeam.TEAM_B;
+
+                    const round = match.rounds[draftIdAndRound[1]];
+                    round.teamADraft = {
+                        pickedClasses: draft.history.filter(a => a.type === DraftActionType.PICK && a.team === teamA).map(a => a.breed),
+                        bannedClasses: draft.history.filter(a => a.type === DraftActionType.BAN && a.team === teamA).map(a => a.breed),
+                    }
+                    round.teamBDraft = {
+                        pickedClasses: draft.history.filter(a => a.type === DraftActionType.PICK && a.team === teamB).map(a => a.breed),
+                        bannedClasses: draft.history.filter(a => a.type === DraftActionType.BAN && a.team === teamB).map(a => a.breed),
+                    }
+
+                    DbHelper.rawQuery(`UPDATE matches
+                                       SET content = $2
+                                       WHERE id = $1`, [draftIdAndRound[0], JSON.stringify(match)])
+                        .then(result => resolve(result.rowCount > 0))
+                        .catch(_ => resolve(false));
+
+                })
+                .catch(_ => resolve(false))
+        })
     }
 
 }
