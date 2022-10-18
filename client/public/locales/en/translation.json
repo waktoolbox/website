@@ -93,6 +93,7 @@
         "noStreamer": "No streamer",
         "pool": "Pool {{pool}}",
         "qualified": "(Qualified)",
+        "rerollMap": "Reroll map",
         "resultPhaseTitle": "<span>Step</span> {{nb}}",
         "round": "Round {{round}}",
         "setMeAsStreamer": "Set me as streamer",

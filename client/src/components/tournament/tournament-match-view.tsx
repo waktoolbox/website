@@ -74,6 +74,14 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         })
     }
 
+    function rerollFightMap(matchId: string | undefined) {
+        socket.emit('tournament::admin:rerollMap', tournament.id, matchId, tab, (done: boolean) => {
+            if (done) {
+                window.location.reload();
+            }
+        })
+    }
+
     function setMatchDate(matchDate: string | null | undefined) {
         if (!matchDate) return;
         setCurrentMatchDate((matchDate as any).toISOString())
@@ -355,6 +363,11 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                 <Typography variant="h5" display="inline">{t(`maps.${fight.map}`)}</Typography>
                                 <img src={`/maps/${fight.map}.jpg`} alt={`Map ${fight.map}`}
                                      style={{width: "100%", borderRadius: 6, marginTop: 8}}/>
+
+                                {tournament.admins.includes(me || "") &&
+                                    <Button sx={{backgroundColor: "#e64b4b", width: "100%", mt: 1}}
+                                            onClick={() => rerollFightMap(match.id)}>{t('tournament.display.match.rerollMap')}</Button>
+                                }
                             </CardContent>
                         </Card>
                         <Card sx={{backgroundColor: '#213943', borderRadius: 3, textAlign: "start", mb: 2}}>

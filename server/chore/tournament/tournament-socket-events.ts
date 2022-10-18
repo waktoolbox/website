@@ -463,24 +463,13 @@ Ankama will not provide additional access!`)
         DbHelper.isTournamentReferee(tournamentId, socket.data.user)
             .then(isReferee => {
                 if (!isReferee) return callback(false);
-                DbHelper.rawQuery(`SELECT content
-                                   FROM matches
-                                   WHERE id = $1
-                                     AND "tournamentId" = $2
-                                   LIMIT 1`, [matchId, tournamentId])
-                    .then(result => {
-                        if (result.rowCount <= 0) return callback(false);
-
-                        const match = result.rows[0].content;
-                        if (!match.rounds || match.rounds.length < round) return callback(false);
-                        match.rounds[round].draftDate = date;
-                        DbHelper.rawQuery(`UPDATE matches
-                                           SET content = $3
-                                           WHERE id = $1
-                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
-                            .then(r => callback(r.rowCount > 0))
-                            .catch(_ => callback(false))
-                    }).catch(_ => callback(false))
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    match.rounds[round].draftDate = date;
+                    return match;
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false));
             })
             .catch(_ => callback(false))
     });
@@ -490,24 +479,31 @@ Ankama will not provide additional access!`)
         DbHelper.isTournamentReferee(tournamentId, socket.data.user)
             .then(isReferee => {
                 if (!isReferee) return callback(false);
-                DbHelper.rawQuery(`SELECT content
-                                   FROM matches
-                                   WHERE id = $1
-                                     AND "tournamentId" = $2
-                                   LIMIT 1`, [matchId, tournamentId])
-                    .then(result => {
-                        if (result.rowCount <= 0) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    match.rounds[round].winner = winner;
+                    return match;
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
 
-                        const match = result.rows[0].content;
-                        if (!match.rounds || match.rounds.length < round) return callback(false);
-                        match.rounds[round].winner = winner;
-                        DbHelper.rawQuery(`UPDATE matches
-                                           SET content = $3
-                                           WHERE id = $1
-                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
-                            .then(r => callback(r.rowCount > 0))
-                            .catch(_ => callback(false))
-                    }).catch(_ => callback(false))
+    socket.on('tournament::admin:rerollMap', (tournamentId, matchId, round, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    // TODO later bind this to tournament configuration
+                    const maps = [976, 975, 969, 973, 972, 968, 971, 970];
+                    match.rounds[round].map = maps[Math.floor(Math.random() * maps.length)];
+                    return match;
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
             })
             .catch(_ => callback(false))
     });

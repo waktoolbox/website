@@ -93,6 +93,7 @@
         "noStreamer": "Pas de streamer",
         "pool": "Poule {{pool}}",
         "qualified": "(Qualifiée)",
+        "rerollMap": "Relancer la carte",
         "resultPhaseTitle": "<span>Étape</span> {{nb}}",
         "round": "Round {{round}}",
         "setMeAsStreamer": "Me désigner comme streamer",

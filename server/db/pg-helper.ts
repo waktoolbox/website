@@ -1,7 +1,11 @@
 import pg, {QueryResult} from 'pg';
 import {pgInitDb} from "./pg-populate";
 import {Account} from "../account/account";
-import {TournamentDefinition, TournamentTeamModel} from "../../client/src/utils/tournament-models";
+import {
+    TournamentDefinition,
+    TournamentMatchModel,
+    TournamentTeamModel
+} from "../../client/src/utils/tournament-models";
 import {DbTeamWithContent, DbTournamentData} from "./db-type-helper";
 
 class DbWrapper {
@@ -218,6 +222,29 @@ class DbWrapper {
                 })
                 .catch(error => reject(error));
         });
+    }
+
+    updateMatch(tournamentId: string, matchId: string, updateFunc: (match: TournamentMatchModel) => TournamentMatchModel): Promise<boolean> {
+        return new Promise((resolve) => {
+            this.rawQuery(`SELECT content
+                           FROM matches
+                           WHERE id = $1
+                             AND "tournamentId" = $2
+                           LIMIT 1`, [matchId, tournamentId])
+                .then(result => {
+                    if (result.rowCount <= 0) return resolve(false);
+                    const match = result.rows[0].content;
+                    const updatedMatch = updateFunc(match);
+                    if (!updatedMatch) return resolve(false);
+
+                    DbHelper.rawQuery(`UPDATE matches
+                                       SET content = $3
+                                       WHERE id = $1
+                                         AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(updatedMatch)])
+                        .then(r => resolve(r.rowCount > 0))
+                        .catch(_ => resolve(false));
+                }).catch(_ => resolve(false));
+        })
     }
 
     getTeamsNames(ids: string[]): Promise<{ id: string, name: string }[]> {
