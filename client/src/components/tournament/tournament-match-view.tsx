@@ -2,9 +2,23 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CancelIcon from '@mui/icons-material/Cancel';
 import {TournamentDefinition, TournamentMatchModel, TournamentMatchRoundModel} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
-import React, {SyntheticEvent, useContext, useState} from "react";
+import React, {ChangeEvent, SyntheticEvent, useContext, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
-import {Button, Card, CardContent, Grid, Icon, styled, Tab, Tabs, TextField, Typography} from "@mui/material";
+import {
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    Icon,
+    styled,
+    Tab,
+    Tabs,
+    TextField,
+    Typography
+} from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {useNavigate} from "react-router-dom";
@@ -46,6 +60,16 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const [fight, setFight] = useState(currentMatch.rounds[tab]);
     const [currentMatchDate, setCurrentMatchDate] = useState<string>();
     const [currentDraftDate, setCurrentDraftDate] = useState<string | null>(fight.draftDate || null);
+    const [statEditMode, setStatEditMode] = useState<boolean>(false);
+    const [stats, setStats] = useState<any[]>([undefined, {
+        turns: 0,
+        killedBreeds: [],
+        killerBreeds: []
+    }, {
+        turns: 0,
+        killedBreeds: [],
+        killerBreeds: []
+    }]);
 
     function setDraftDate(draftDate: string | null | undefined) {
         if (!draftDate) return;
@@ -76,6 +100,14 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
 
     function rerollFightMap(matchId: string | undefined) {
         socket.emit('tournament::admin:rerollMap', tournament.id, matchId, tab, (done: boolean) => {
+            if (done) {
+                window.location.reload();
+            }
+        })
+    }
+
+    function setFightStats(matchId: string | undefined) {
+        socket.emit('tournament::referee:setFightStats', tournament.id, matchId, tab, stats, (done: boolean) => {
             if (done) {
                 window.location.reload();
             }
@@ -226,8 +258,41 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                             {appropriateDraft && appropriateDraft.pickedClasses && appropriateDraft.pickedClasses.map(c => (
                                 <Grid item xs={4}>
                                     <img src={`/classes/${c}_0.png`} style={{width: "100%"}} alt={`Breed ${c}`}/>
+
+                                    {match.referee === me && statEditMode &&
+                                        <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                                    const s = [...stats];
+                                                    s[team].killedBreeds[c] = event.target.checked;
+                                                    setStats(s)
+                                                }} checked={stats[team].killedBreeds[c] === true}/>}
+                                                label={t('tournament.display.match.dead')}/>
+                                            <TextField label={t('tournament.display.match.killed')}
+                                                       type="number"
+                                                       value={stats[team].killerBreeds[c]}
+                                                       onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                                           const s = [...stats];
+                                                           s[team].killerBreeds[c] = event.target.value || 0;
+                                                           setStats(s);
+                                                       }}
+                                            />
+                                        </FormGroup>
+                                    }
                                 </Grid>
                             ))}
+
+                            {match.referee === me && statEditMode &&
+                                <TextField label={t('tournament.display.match.turnNumber')} sx={{mt: 1}}
+                                           type="number"
+                                           value={stats[team].turns || 0}
+                                           onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                               const s = [...stats];
+                                               s[team].turns = event.target.value || 0;
+                                               setStats(s);
+                                           }}
+                                />
+                            }
                         </Grid>
                         <Grid container sx={{p: 3}}>
                             {appropriateDraft && appropriateDraft.bannedClasses && appropriateDraft.bannedClasses.map(c => (
@@ -341,19 +406,33 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                     </Grid>
                                 }
                             </Grid>
+
+                            {match.referee === me && !fight.teamAStats && !fight.teamBStats &&
+                                <Grid item xs={12}>
+                                    <Grid item xs={12}>
+                                        <Button sx={{width: "30%", mt: 1, mr: 1}}
+                                                onClick={() => setStatEditMode(!statEditMode)}>{t('tournament.display.match.editFightStatsMode')}</Button>
+                                        <Button sx={{width: "30%", mt: 1, ml: 1}}
+                                                onClick={() => setFightStats(match.id)}>{t('tournament.display.match.editFightStats')}</Button>
+                                    </Grid>
+                                </Grid>
+                            }
                         </Grid>
                     </Grid>
                     <Grid item xs={4}>
-                        <Card sx={{backgroundColor: '#017d7f', borderRadius: 3, mb: 2}}>
-                            {/*TODO v2 stats */}
-                            <CardContent sx={{
-                                "&:last-child": {
-                                    pb: 2
-                                }
-                            }}>
-                                {t('coming.soon')}
-                            </CardContent>
-                        </Card>
+                        {fight.teamAStats &&
+                            <Card sx={{backgroundColor: '#017d7f', borderRadius: 3, mb: 2}}>
+                                <CardContent sx={{
+                                    "&:last-child": {
+                                        pb: 2
+                                    }
+                                }}>
+                                    <Typography textAlign="start"
+                                                variant="h6"><b>{t('tournament.display.match.fightTurns', {nb: fight.teamAStats.turns})}</b></Typography>
+                                </CardContent>
+                            </Card>
+                        }
+
                         <Card sx={{backgroundColor: '#213943', borderRadius: 3, mb: 2, textAlign: "start"}}>
                             <CardContent sx={{
                                 "&:last-child": {
@@ -440,7 +519,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Button sx={{mt: 1, width: "100%"}}
-                                                    onClick={() => setFightWinner(match.teamA)}>
+                                                    onClick={() => setFightWinner(match.teamB)}>
                                                 {t('tournament.display.match.buttonSetFightWinnerTeam', {name: teams.get(match.teamB)})}
                                             </Button>
                                         </Grid>
@@ -487,8 +566,9 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                     </Button>
                                 </Grid>
                                 <Grid item xs={4}>
-                                    <Button sx={{m: 1, width: "90%"}} onClick={() => validateMatch(match.id)}>
-                                        Valider match
+                                    <Button sx={{m: 1, width: "90%"}} onClick={() => validateMatch(match.id)}
+                                            disabled={match.done}>
+                                        {t('tournament.display.match.validateMatch')}
                                     </Button>
                                 </Grid>
                             </Grid>

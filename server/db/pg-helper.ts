@@ -224,17 +224,17 @@ class DbWrapper {
         });
     }
 
-    updateMatch(tournamentId: string, matchId: string, updateFunc: (match: TournamentMatchModel) => TournamentMatchModel): Promise<boolean> {
+    updateMatch(tournamentId: string, matchId: string, updateFunc: (match: TournamentMatchModel) => Promise<TournamentMatchModel | undefined>): Promise<boolean> {
         return new Promise((resolve) => {
             this.rawQuery(`SELECT content
                            FROM matches
                            WHERE id = $1
                              AND "tournamentId" = $2
                            LIMIT 1`, [matchId, tournamentId])
-                .then(result => {
+                .then(async result => {
                     if (result.rowCount <= 0) return resolve(false);
                     const match = result.rows[0].content;
-                    const updatedMatch = updateFunc(match);
+                    const updatedMatch = await updateFunc(match);
                     if (!updatedMatch) return resolve(false);
 
                     DbHelper.rawQuery(`UPDATE matches
@@ -245,6 +245,20 @@ class DbWrapper {
                         .catch(_ => resolve(false));
                 }).catch(_ => resolve(false));
         })
+    }
+
+    getTeams(ids: string[]): Promise<TournamentTeamModel[]> {
+        return new Promise((resolve, reject) => {
+            this.pool?.query(`SELECT content
+                              FROM teams
+                              WHERE id = ANY ($1)
+                              LIMIT $2`, [ids, ids.length])
+                .then(result => {
+                    if (result.rows.length <= 0) return resolve([]);
+                    resolve(result.rows.map(t => t.content));
+                })
+                .catch(_ => resolve([]));
+        });
     }
 
     getTeamsNames(ids: string[]): Promise<{ id: string, name: string }[]> {
