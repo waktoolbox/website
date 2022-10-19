@@ -161,17 +161,18 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
 
         if (!poolNumber || !poolSize) throw new Error("Bad configuration : missing pool information");
 
-        const computedStepToBalanceLoad = Math.floor(this.data.teams.length / poolNumber);
-
         const teams = [...this.data.teams].sort(() => Math.random() - 0.5)
 
         for (let i = 0; i < poolNumber; i++) {
             this.data.teamPool.push({
-                teams: [...teams.slice(i * computedStepToBalanceLoad, i * computedStepToBalanceLoad + computedStepToBalanceLoad).map(t => t.id || "")],
+                teams: [],
                 matches: []
             })
         }
-        this.data.teamPool[poolNumber - 1].teams.push(...teams.slice(poolNumber * computedStepToBalanceLoad, teams.length).map(t => t.id || ""));
+
+        for (let i = 0; i < teams.length; i++) {
+            this.data.teamPool[i % poolNumber].teams.push(teams[i].id);
+        }
 
         this.data.currentRound = 1;
         return this.prepareRound();
