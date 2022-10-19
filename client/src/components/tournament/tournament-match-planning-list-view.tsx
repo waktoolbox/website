@@ -61,6 +61,7 @@ export default function TournamentMatchPlanningListView({data}: { data: PropsTyp
                     <Grid item xs={12} sx={{ml: 4}}>
                         {matchesToDisplay && matchesToDisplay.map(m => (
                             <TournamentTeamMatchView key={m.id || ""}
+                                                     tournamentId={tournament.id || ""}
                                                      match={m}
                                                      displayedTeam={undefined}
                                                      displayedTeamName={teams.get(m.teamA)}

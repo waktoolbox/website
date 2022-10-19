@@ -4,6 +4,7 @@ import {TournamentMatchModel} from "../../utils/tournament-models";
 import {Button, Card, CardContent, Grid, Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import React from "react";
+import {Link} from "react-router-dom";
 
 const dateFormat = {
     date: {
@@ -13,6 +14,7 @@ const dateFormat = {
 }
 
 export default function TournamentTeamMatchViewShort({
+                                                         tournamentId,
                                                          match,
                                                          teamAName,
                                                          teamAQualification,
@@ -20,7 +22,7 @@ export default function TournamentTeamMatchViewShort({
                                                          teamBQualification,
                                                          goToMatch,
                                                          backgroundColor = "#162329"
-                                                     }: { match: TournamentMatchModel, teamAName?: string, teamAQualification?: string, teamBName: string, teamBQualification?: string, goToMatch: any, backgroundColor?: string }) {
+                                                     }: { tournamentId: string, match: TournamentMatchModel, teamAName?: string, teamAQualification?: string, teamBName: string, teamBQualification?: string, goToMatch: any, backgroundColor?: string }) {
     const {t} = useTranslation();
 
     return (
@@ -38,52 +40,58 @@ export default function TournamentTeamMatchViewShort({
             }}>
                 <Grid container direction="row" alignItems="center">
                     <Grid item xs={12} sx={{mt: "2px"}}>
-                        <Typography variant="h6" sx={{
-                            textAlign: "start",
-                            verticalAlign: "middle",
-                            color: match.winner === match.teamA ? '#07c6b6' : "#e64b4b"
-                        }}>
-                            {match.winner === match.teamA &&
-                                <EmojiEventsIcon sx={{
-                                    mr: 1,
-                                    mb: "3px",
-                                    height: '100%',
-                                    verticalAlign: "middle"
-                                }}/>
-                            }
-                            {match.winner === match.teamB &&
-                                <CancelIcon sx={{
-                                    mr: 1,
-                                    mb: "3px",
-                                    height: '100%',
-                                    verticalAlign: "middle"
-                                }}/>
-                            }
-                            <b>{teamAName}{teamAQualification ? " " + teamAQualification : ""}</b>
-                        </Typography>
-                        <Typography variant="h6" sx={{
-                            textAlign: "start",
-                            verticalAlign: "middle",
-                            color: match.winner === match.teamB ? '#07c6b6' : "#e64b4b"
-                        }}>
-                            {match.winner === match.teamB &&
-                                <EmojiEventsIcon sx={{
-                                    mr: 1,
-                                    mb: "3px",
-                                    height: '100%',
-                                    verticalAlign: "middle"
-                                }}/>
-                            }
-                            {match.winner === match.teamA &&
-                                <CancelIcon sx={{
-                                    mr: 1,
-                                    mb: "3px",
-                                    height: '100%',
-                                    verticalAlign: "middle"
-                                }}/>
-                            }
-                            <b>{teamBName}{teamBQualification ? " " + teamBQualification : ""}</b>
-                        </Typography>
+
+                        <Link to={`/tournament/${tournamentId}/tab/2/team/${match.teamA}`}>
+                            <Typography variant="h6" sx={{
+                                textAlign: "start",
+                                verticalAlign: "middle",
+                                color: match.winner === match.teamA ? '#07c6b6' : "#e64b4b"
+                            }}>
+                                {match.winner === match.teamA &&
+                                    <EmojiEventsIcon sx={{
+                                        mr: 1,
+                                        mb: "3px",
+                                        height: '100%',
+                                        verticalAlign: "middle"
+                                    }}/>
+                                }
+                                {match.winner === match.teamB &&
+                                    <CancelIcon sx={{
+                                        mr: 1,
+                                        mb: "3px",
+                                        height: '100%',
+                                        verticalAlign: "middle"
+                                    }}/>
+                                }
+                                <b>{teamAName}{teamAQualification ? " " + teamAQualification : ""}</b>
+                            </Typography>
+                        </Link>
+
+                        <Link to={`/tournament/${tournamentId}/tab/2/team/${match.teamB}`}>
+                            <Typography variant="h6" sx={{
+                                textAlign: "start",
+                                verticalAlign: "middle",
+                                color: match.winner === match.teamB ? '#07c6b6' : "#e64b4b"
+                            }}>
+                                {match.winner === match.teamB &&
+                                    <EmojiEventsIcon sx={{
+                                        mr: 1,
+                                        mb: "3px",
+                                        height: '100%',
+                                        verticalAlign: "middle"
+                                    }}/>
+                                }
+                                {match.winner === match.teamA &&
+                                    <CancelIcon sx={{
+                                        mr: 1,
+                                        mb: "3px",
+                                        height: '100%',
+                                        verticalAlign: "middle"
+                                    }}/>
+                                }
+                                <b>{teamBName}{teamBQualification ? " " + teamBQualification : ""}</b>
+                            </Typography>
+                        </Link>
                     </Grid>
                     <Grid item xs={12} sx={{mt: 1}}>
                         <Typography sx={{textAlign: "center"}}>

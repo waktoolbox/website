@@ -120,6 +120,7 @@ export default function WakfuWarriorsMatchResultListView({data}: { data: PropsTy
                     <Grid item xs={12} sx={{ml: 2}}>
                         {tab === 0 && matches.map((m: TournamentMatchModel) => (
                             <TournamentTeamMatchView key={m.id || ""}
+                                                     tournamentId={tournament.id || ""}
                                                      match={m}
                                                      displayedTeam={undefined}
                                                      displayedTeamName={teams.get(m.teamA)}
@@ -152,6 +153,7 @@ export default function WakfuWarriorsMatchResultListView({data}: { data: PropsTy
 
                                                 {matchList && matchList.length > 0 && matchList.map(match => (
                                                     <TournamentTeamMatchViewShort key={match.id}
+                                                                                  tournamentId={tournament.id || ""}
                                                                                   match={match}
                                                                                   teamAName={teams.get(match.teamA)}
                                                                                   teamAQualification={computeTeamQualification(match.round || 0, match.teamA)}

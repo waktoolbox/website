@@ -79,12 +79,24 @@ export default function Tournament() {
         socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
             setMyTeam(team);
         })
-
-        if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+        setTeam(undefined);
+        if (teamId) loadTeam(teamId, true);
+    }, [teamId])
+
+    useEffect(() => {
+        setCurrentMatch(undefined);
+        if (matchId) loadMatch();
+    }, [matchId])
+
+    useEffect(() => {
+        if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
+    }, [targetTab])
+
+
     const changeTab = (newTab: Tabs) => {
-        if (tab === newTab) return;
         switch (newTab) {
             case Tabs.HOME:
                 navigate(`/tournament/${id}`);
@@ -93,16 +105,10 @@ export default function Tournament() {
                 navigate(`/tournament/${id}/tab/1`);
                 loadTeams();
                 break;
-            case Tabs.SINGLE_TEAM:
-                loadTeam();
-                break;
             case Tabs.PLANNING:
                 setCurrentMatch(undefined);
                 navigate(`/tournament/${id}/tab/3`);
                 loadNextMatches();
-                break;
-            case Tabs.MATCH:
-                loadMatch();
                 break;
             case Tabs.RESULTS:
                 setCurrentMatch(undefined);
@@ -464,9 +470,12 @@ export default function Tournament() {
                                                 '.MuiCardContent-root': {p: 3}
                                             }}>
                                                 <CardContent sx={{backgroundColor: "#162329", textAlign: "start"}}>
-                                                    <Typography display="inline"
-                                                                variant="h6"
-                                                                sx={{mr: 2}}>{team.content.name}</Typography>
+
+                                                    <Link to={`/tournament/${id}/tab/2/team/${team.content.id}`}>
+                                                        <Typography display="inline"
+                                                                    variant="h6"
+                                                                    sx={{mr: 2}}>{team.content.name}</Typography>
+                                                    </Link>
                                                     <Typography display="inline" sx={{verticalAlign: "1px"}}><span
                                                         className="blueWord">{team.content.server}</span></Typography>
                                                     <Divider sx={{
@@ -529,9 +538,10 @@ export default function Tournament() {
                                                                                 }}/></Typography>
 
                                                 {teamMatches && teamMatches.filter(m => !m.done).map(match => (
-                                                    <TournamentTeamMatchView key={match.id} match={match}
+                                                    <TournamentTeamMatchView key={match.id} tournamentId={id || ""}
+                                                                             match={match}
                                                                              displayedTeam={team.id}
-                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamB) || "<undefined>"}
+                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamA) || ""}
                                                                              goToMatch={() => loadMatch(match.id, true)}/>
                                                 ))}
 
@@ -546,9 +556,10 @@ export default function Tournament() {
                                                             sx={{color: "#fefffa"}}>{t('tournament.display.results')}</Typography>
 
                                                 {teamMatches && teamMatches.length > 0 && teamMatches.filter(m => m.done).map(match => (
-                                                    <TournamentTeamMatchView key={match.id} match={match}
+                                                    <TournamentTeamMatchView key={match.id} tournamentId={id || ""}
+                                                                             match={match}
                                                                              displayedTeam={team.id}
-                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamB) || "<undefined>"}
+                                                                             otherTeamName={teamsNamesPersistence.get(match.teamA === team.id ? match.teamB : match.teamA) || ""}
                                                                              goToMatch={() => loadMatch(match.id, true)}/>
                                                 ))}
 

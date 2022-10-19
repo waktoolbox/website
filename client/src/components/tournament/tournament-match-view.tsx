@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {DraftTeam} from "../../utils/draft-controller";
 
 type PropsTypes = {
@@ -51,6 +51,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         currentMatch,
         addStreamer
     } = data;
+    const {id} = useParams();
     const {t} = useTranslation();
     const navigate = useNavigate();
     const socket = useContext(SocketContext)
@@ -251,7 +252,9 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         }
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography><b>{teams.get(appropriateTeam)}</b></Typography>
+                        <Link to={`/tournament/${id}/tab/2/team/${appropriateTeam}`}>
+                            <Typography><b>{teams.get(appropriateTeam)}</b></Typography>
+                        </Link>
                     </Grid>
                     <Grid item xs={12} sx={{p: 3}}>
                         <Grid container>
@@ -330,11 +333,15 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                             color: "#e64b4b"
                         }}/>
                     }
-                    {teams.get(match.teamA)}
+                    <Link to={`/tournament/${id}/tab/2/team/${match.teamA}`}>
+                        {teams.get(match.teamA)}
+                    </Link>
                 </Typography>
                 <Typography variant="h5" display="inline" className="blueWord" sx={{ml: 1, mr: 1}}>vs</Typography>
                 <Typography variant="h4" display="inline" sx={{color: "#fefffa"}}>
-                    {teams.get(match.teamB)}
+                    <Link to={`/tournament/${id}/tab/2/team/${match.teamB}`}>
+                        {teams.get(match.teamB)}
+                    </Link>
                     {match.winner === match.teamB &&
                         <EmojiEventsIcon sx={{
                             ml: 1,
