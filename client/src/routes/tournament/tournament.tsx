@@ -429,9 +429,9 @@ export default function Tournament() {
                                                         textAlign: "start",
                                                         mb: 1
                                                     }}>{t('tournament.referees')}</Typography>
-                                                    {tournament.streamers.map(streamer => (
-                                                        <Typography key={streamer}
-                                                                    sx={{color: "#8299a1"}}>{[accounts.get(streamer)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
+                                                    {tournament.referees.map(referees => (
+                                                        <Typography key={referees}
+                                                                    sx={{color: "#8299a1"}}>{[accounts.get(referees)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
                                                     ))}
                                                 </CardContent>
                                             </Card>
@@ -442,9 +442,9 @@ export default function Tournament() {
                                                         textAlign: "start",
                                                         mb: 1
                                                     }}>{t('tournament.streamers')}</Typography>
-                                                    {tournament.referees.map(referee => (
-                                                        <Typography key={referee}
-                                                                    sx={{color: "#8299a1"}}>{[accounts.get(referee)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
+                                                    {tournament.streamers.map(streamer => (
+                                                        <Typography key={streamer}
+                                                                    sx={{color: "#8299a1"}}>{[accounts.get(streamer)].map(a => !a ? "" : a.username + "#" + a.discriminator)}</Typography>
                                                     ))}
                                                 </CardContent>
                                             </Card>
