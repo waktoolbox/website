@@ -158,6 +158,7 @@ export class ServerDraftValidator implements DraftValidator {
 
     validate(action: DraftAction, user: string): boolean {
         if (!this.controller.areTeamReady()) return false;
+        if (!action.breed) return false;
 
         const teamToCheck = action.team === DraftTeam.TEAM_A ? this.controller.data.teamA : this.controller.data.teamB;
         const teamUser = teamToCheck?.find(u => u.id === user);
