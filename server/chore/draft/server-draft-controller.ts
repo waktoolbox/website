@@ -63,12 +63,18 @@ export class ServerDraftController implements DraftController<DraftNotifier, Ser
             if (!associatedTeam?.find(u => u.id === player.id)) {
                 associatedTeam?.push(player)
             }
+        } else {
+            const found = associatedTeam?.find(u => u.id === player.id);
+            if (found) {
+                found.username = player.username;
+                found.discriminator = player.discriminator
+                found.present = true
+            }
         }
         SocketManager.io()?.to(`draft-${this.data.id}`).emit('draft::userAssigned', player, team);
     }
 
     onTeamReady(team: DraftTeam, ready: boolean) {
-        if (this.data.currentAction > 0) return;
         if (team === DraftTeam.TEAM_A) this.data.teamAReady = ready;
         if (team === DraftTeam.TEAM_B) this.data.teamBReady = ready;
 

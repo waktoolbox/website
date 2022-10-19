@@ -68,18 +68,28 @@ class ClientDraftController implements DraftController<DraftNotifier, DraftValid
     onUserAssigned(player: DraftUser, team: DraftTeam): void {
         if (team === DraftTeam.TEAM_A) {
             const existingPlayer = this.data.teamA?.find(u => u.id === player.id);
-            if (existingPlayer) return;
+            if (existingPlayer) {
+                existingPlayer.present = true;
+                return;
+            }
             this.data?.teamA?.push(player);
         }
         if (team === DraftTeam.TEAM_B) {
             const existingPlayer = this.data.teamB?.find(u => u.id === player.id);
-            if (existingPlayer) return;
+            if (existingPlayer) {
+                existingPlayer.present = true;
+                return;
+            }
             this.data?.teamB?.push(player);
         }
     }
 
     onUserJoin(user: DraftUser): void {
-        if (this.data.users.find(u => u.id === user.id)) return;
+        const found = this.data.users.find(u => u.id === user.id);
+        if (found) {
+            found.present = true;
+            return;
+        }
         this.data.users.push(user);
     }
 
@@ -283,7 +293,7 @@ export default function Draft() {
                 socket.emit('draft::leave', id);
             }
         }
-    }, [id, socket]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
     function createDraft() {
         socket.emit('draft::create', {
@@ -360,7 +370,7 @@ export default function Draft() {
                         <Button disabled={!myTeam} sx={{width: "90%"}}
                                 onClick={() => socket.emit('draft::teamReady', id, myTeam, false)}>{t('draft.setTeamNotReady')}</Button>
                     }
-                    {draftData && draftData.history && draftData.history.length > 0 &&
+                    {teamReady && draftData && draftData.history && draftData.history.length > 0 &&
                         <Grid container>
                             {draftData.history.filter(e => e.team === draftTeam).map((e, index) => (
                                 <Grid item xs={3} md={2} key={index}>

@@ -1,10 +1,28 @@
-import {TournamentDefinition, TournamentMatchModel} from "../../utils/tournament-models";
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CancelIcon from '@mui/icons-material/Cancel';
+import {TournamentDefinition, TournamentMatchModel, TournamentMatchRoundModel} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
-import React, {SyntheticEvent, useContext, useState} from "react";
+import React, {ChangeEvent, SyntheticEvent, useContext, useState} from "react";
 import {SocketContext} from "../../context/socket-context";
-import {Button, Card, CardContent, Grid, Icon, styled, Tab, Tabs, TextField, Typography} from "@mui/material";
+import {
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    Icon,
+    styled,
+    Tab,
+    Tabs,
+    TextField,
+    Typography
+} from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
+import {useNavigate} from "react-router-dom";
+import {DraftTeam} from "../../utils/draft-controller";
 
 type PropsTypes = {
     accounts: Map<string, any>;
@@ -34,6 +52,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         addStreamer
     } = data;
     const {t} = useTranslation();
+    const navigate = useNavigate();
     const socket = useContext(SocketContext)
 
     const [tab, setTab] = useState(0);
@@ -41,6 +60,16 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const [fight, setFight] = useState(currentMatch.rounds[tab]);
     const [currentMatchDate, setCurrentMatchDate] = useState<string>();
     const [currentDraftDate, setCurrentDraftDate] = useState<string | null>(fight.draftDate || null);
+    const [statEditMode, setStatEditMode] = useState<boolean>(false);
+    const [stats, setStats] = useState<any[]>([undefined, {
+        turns: 0,
+        killedBreeds: [],
+        killerBreeds: []
+    }, {
+        turns: 0,
+        killedBreeds: [],
+        killerBreeds: []
+    }]);
 
     function setDraftDate(draftDate: string | null | undefined) {
         if (!draftDate) return;
@@ -65,6 +94,22 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                     ...fight,
                     winner: team
                 } as any)
+            }
+        })
+    }
+
+    function rerollFightMap(matchId: string | undefined) {
+        socket.emit('tournament::admin:rerollMap', tournament.id, matchId, tab, (done: boolean) => {
+            if (done) {
+                window.location.reload();
+            }
+        })
+    }
+
+    function setFightStats(matchId: string | undefined) {
+        socket.emit('tournament::referee:setFightStats', tournament.id, matchId, tab, stats, (done: boolean) => {
+            if (done) {
+                window.location.reload();
             }
         })
     }
@@ -158,6 +203,12 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         if (match.round) {
             result.push(t('tournament.display.match.round', {round: match.round}))
         }
+
+        const phase = tournament.phases.find(p => p.phase === match.phase);
+        if (phase) {
+            const round = phase.roundModel.find(r => r.round === match.round)
+            result.push(t('tournament.display.match.bo', {nb: round?.bo || 1}))
+        }
         return result.join(" - ")
     }
 
@@ -167,13 +218,142 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         setTab(newTab);
     }
 
-    // @ts-ignore
+    const startDraft = () => {
+        socket.emit('tournament::draftStart', tournament.id, match.id, tab, (isValid: boolean) => {
+            if (!isValid) return;
+            navigate(`/draft/${match.id}-${tab}`)
+        })
+    }
+
+    const TeamColumn = ({fight, team}: { fight: TournamentMatchRoundModel, team: DraftTeam }) => {
+        const appropriateTeam = team === DraftTeam.TEAM_A ? match.teamA : match.teamB;
+        const appropriateDraft = team === DraftTeam.TEAM_A ? fight.teamADraft : fight.teamBDraft;
+        const otherTeam = team === DraftTeam.TEAM_A ? match.teamB : match.teamA;
+        return (
+            <Grid item xs={6}>
+                <Grid container>
+                    <Grid item xs={12}>
+                        {fight.winner === appropriateTeam &&
+                            <EmojiEventsIcon sx={{
+                                height: '60px',
+                                width: '60px',
+                                verticalAlign: "middle",
+                                color: "#07c6b6"
+                            }}/>
+                        }
+                        {fight.winner === otherTeam &&
+                            <CancelIcon sx={{
+                                height: '60px',
+                                width: '60px',
+                                verticalAlign: "middle",
+                                color: "#e64b4b"
+                            }}/>
+                        }
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography><b>{teams.get(appropriateTeam)}</b></Typography>
+                    </Grid>
+                    <Grid item xs={12} sx={{p: 3}}>
+                        <Grid container>
+                            {appropriateDraft && appropriateDraft.pickedClasses && appropriateDraft.pickedClasses.map(c => (
+                                <Grid item xs={4}>
+                                    <img src={`/classes/${c}_0.png`} style={{width: "100%"}} alt={`Breed ${c}`}/>
+
+                                    {match.referee === me && statEditMode &&
+                                        <FormGroup>
+                                            <FormControlLabel
+                                                control={<Checkbox onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                                    const s = [...stats];
+                                                    s[team].killedBreeds[c] = event.target.checked;
+                                                    setStats(s)
+                                                }} checked={stats[team].killedBreeds[c] === true}/>}
+                                                label={t('tournament.display.match.dead')}/>
+                                            <TextField label={t('tournament.display.match.killed')}
+                                                       type="number"
+                                                       value={stats[team].killerBreeds[c]}
+                                                       onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                                           const s = [...stats];
+                                                           s[team].killerBreeds[c] = event.target.value || 0;
+                                                           setStats(s);
+                                                       }}
+                                            />
+                                        </FormGroup>
+                                    }
+                                </Grid>
+                            ))}
+
+                            {match.referee === me && statEditMode &&
+                                <TextField label={t('tournament.display.match.turnNumber')} sx={{mt: 1}}
+                                           type="number"
+                                           value={stats[team].turns || 0}
+                                           onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                               const s = [...stats];
+                                               s[team].turns = event.target.value || 0;
+                                               setStats(s);
+                                           }}
+                                />
+                            }
+                        </Grid>
+                        <Grid container sx={{p: 3}}>
+                            {appropriateDraft && appropriateDraft.bannedClasses && appropriateDraft.bannedClasses.map(c => (
+                                <Grid item xs={4}>
+                                    <img src={`/classes/${c}_0.png`} style={{width: "100%", filter: "grayscale(1)"}}
+                                         alt={`Breed ${c}`}/>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        )
+    }
+
     return (
         <Grid container>
             <Grid item xs={12} sx={{mt: 3}}>
-                <Typography variant="h5" display="inline" sx={{color: "#fefffa"}}>{teams.get(match.teamA)}</Typography>
-                <Typography variant="h6" display="inline" className="blueWord" sx={{ml: 1, mr: 1}}>vs</Typography>
-                <Typography variant="h5" display="inline" sx={{color: "#fefffa"}}>{teams.get(match.teamB)}</Typography>
+                <Typography variant="h4" display="inline" sx={{color: "#fefffa"}}>
+                    {match.winner === match.teamA &&
+                        <EmojiEventsIcon sx={{
+                            mr: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#07c6b6"
+                        }}/>
+                    }
+                    {match.winner === match.teamB &&
+                        <CancelIcon sx={{
+                            mr: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#e64b4b"
+                        }}/>
+                    }
+                    {teams.get(match.teamA)}
+                </Typography>
+                <Typography variant="h5" display="inline" className="blueWord" sx={{ml: 1, mr: 1}}>vs</Typography>
+                <Typography variant="h4" display="inline" sx={{color: "#fefffa"}}>
+                    {teams.get(match.teamB)}
+                    {match.winner === match.teamB &&
+                        <EmojiEventsIcon sx={{
+                            ml: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#07c6b6"
+                        }}/>
+                    }
+                    {match.winner === match.teamA &&
+                        <CancelIcon sx={{
+                            ml: 1,
+                            mb: "3px",
+                            height: '80px', width: '80px',
+                            verticalAlign: "middle",
+                            color: "#e64b4b"
+                        }}/>
+                    }
+                </Typography>
                 <Typography variant="h6" color="#8299a1">{match.date
                     ? t('date', {
                         date: Date.parse(match.date), formatParams: dateFormat
@@ -195,39 +375,64 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                     ))}
                 </Tabs>
                 <Grid container>
-                    <Grid item xs={8} sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                    <Grid item xs={8} sx={{
+                        display: "flex",
+                        alignItems: fight.teamADraft ? "start" : "center",
+                        justifyContent: "center"
+                    }}>
                         {/*TODO v2 bind draft link & draft results & winner */}
                         <Grid container>
                             <Grid item xs={12}>
-                                {fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
-                                    <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}>
+                                {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
+                                    <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}
+                                            onClick={startDraft}>
                                         {t('tournament.display.match.goToDraft')}
                                     </Button>
                                 }
-                                {!fight.draftDate &&
+                                {!fight.teamADraft && !fight.draftDate &&
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
                                 }
-                                {fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
+                                {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
                                     <Typography variant="h5">{t('tournament.display.match.draftDate', {
                                         date: Date.parse(fight.draftDate),
                                         formatParams: dateFormat
                                     })}</Typography>
                                 }
+                                {fight.teamADraft &&
+                                    <Grid container>
+                                        <TeamColumn fight={fight} team={DraftTeam.TEAM_A}/>
+                                        <TeamColumn fight={fight} team={DraftTeam.TEAM_B}/>
+                                    </Grid>
+                                }
                             </Grid>
+
+                            {match.referee === me && !fight.teamAStats && !fight.teamBStats &&
+                                <Grid item xs={12}>
+                                    <Grid item xs={12}>
+                                        <Button sx={{width: "30%", mt: 1, mr: 1}}
+                                                onClick={() => setStatEditMode(!statEditMode)}>{t('tournament.display.match.editFightStatsMode')}</Button>
+                                        <Button sx={{width: "30%", mt: 1, ml: 1}}
+                                                onClick={() => setFightStats(match.id)}>{t('tournament.display.match.editFightStats')}</Button>
+                                    </Grid>
+                                </Grid>
+                            }
                         </Grid>
                     </Grid>
                     <Grid item xs={4}>
-                        <Card sx={{backgroundColor: '#017d7f', borderRadius: 3, mb: 2}}>
-                            {/*TODO v2 stats */}
-                            <CardContent sx={{
-                                "&:last-child": {
-                                    pb: 2
-                                }
-                            }}>
-                                {t('coming.soon')}
-                            </CardContent>
-                        </Card>
+                        {fight.teamAStats &&
+                            <Card sx={{backgroundColor: '#017d7f', borderRadius: 3, mb: 2}}>
+                                <CardContent sx={{
+                                    "&:last-child": {
+                                        pb: 2
+                                    }
+                                }}>
+                                    <Typography textAlign="start"
+                                                variant="h6"><b>{t('tournament.display.match.fightTurns', {nb: fight.teamAStats.turns})}</b></Typography>
+                                </CardContent>
+                            </Card>
+                        }
+
                         <Card sx={{backgroundColor: '#213943', borderRadius: 3, mb: 2, textAlign: "start"}}>
                             <CardContent sx={{
                                 "&:last-child": {
@@ -237,6 +442,11 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                 <Typography variant="h5" display="inline">{t(`maps.${fight.map}`)}</Typography>
                                 <img src={`/maps/${fight.map}.jpg`} alt={`Map ${fight.map}`}
                                      style={{width: "100%", borderRadius: 6, marginTop: 8}}/>
+
+                                {tournament.admins.includes(me || "") &&
+                                    <Button sx={{backgroundColor: "#e64b4b", width: "100%", mt: 1}}
+                                            onClick={() => rerollFightMap(match.id)}>{t('tournament.display.match.rerollMap')}</Button>
+                                }
                             </CardContent>
                         </Card>
                         <Card sx={{backgroundColor: '#213943', borderRadius: 3, textAlign: "start", mb: 2}}>
@@ -309,7 +519,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Button sx={{mt: 1, width: "100%"}}
-                                                    onClick={() => setFightWinner(match.teamA)}>
+                                                    onClick={() => setFightWinner(match.teamB)}>
                                                 {t('tournament.display.match.buttonSetFightWinnerTeam', {name: teams.get(match.teamB)})}
                                             </Button>
                                         </Grid>
@@ -356,8 +566,9 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                     </Button>
                                 </Grid>
                                 <Grid item xs={4}>
-                                    <Button sx={{m: 1, width: "90%"}} onClick={() => validateMatch(match.id)}>
-                                        Valider match
+                                    <Button sx={{m: 1, width: "90%"}} onClick={() => validateMatch(match.id)}
+                                            disabled={match.done}>
+                                        {t('tournament.display.match.validateMatch')}
                                     </Button>
                                 </Grid>
                             </Grid>

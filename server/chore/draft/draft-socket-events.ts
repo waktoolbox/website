@@ -12,8 +12,8 @@ export function registerDraftEvents(socket: Socket) {
         callback(DraftManager.userCreateDraft(socket, data))
     })
 
-    socket.on('draft::action', (draftId, action) => {
-        DraftManager.onAction(draftId, action, socket)
+    socket.on('draft::action', async (draftId, action) => {
+        await DraftManager.onAction(draftId, action, socket)
     })
 
     socket.on('draft::assignUser', (draftId, userId, team) => {

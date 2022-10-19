@@ -75,7 +75,6 @@ export interface TournamentTeamModel {
 export interface TournamentStatsModel {
     played: number;
     victories: number;
-    turnByMatch: number;
     statsByClass: TournamentStatsClassModel[];
 }
 
@@ -108,7 +107,9 @@ export interface TournamentMatchRoundModel {
     draftFirstPicker?: string;
     draftDate?: string;
     teamADraft?: TournamentDraftResultModel;
+    teamAStats?: TournamentFightStatsModel;
     teamBDraft?: TournamentDraftResultModel;
+    teamBStats?: TournamentFightStatsModel;
     map?: number;
     winner?: string;
 }
@@ -116,6 +117,12 @@ export interface TournamentMatchRoundModel {
 export interface TournamentDraftResultModel {
     pickedClasses: number[];
     bannedClasses: number[];
+}
+
+export interface TournamentFightStatsModel {
+    turns?: number;
+    killedBreeds?: boolean[],
+    killerBreeds?: number[]
 }
 
 export enum TournamentPhaseType {

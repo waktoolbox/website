@@ -98,7 +98,8 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
             for (const pool of this.data.teamPool) {
                 const index = this.data.teamPool.indexOf(pool);
                 const teams: string[] = pool.teams
-                    .filter(t => Math.abs((winScore.get(t || "") || 0)) < 2);
+                    .filter(t => Math.abs((winScore.get(t || "") || 0)) < 2)
+                    .sort(() => Math.random() - 0.5);
                 if (!teams) continue;
 
                 const opponents = new Set();

@@ -1,5 +1,9 @@
 import {Socket} from "socket.io";
-import {TournamentDefinition, TournamentTeamModel} from "../../../client/src/utils/tournament-models";
+import {
+    TournamentDefinition,
+    TournamentMatchModel,
+    TournamentTeamModel
+} from "../../../client/src/utils/tournament-models";
 import * as crypto from "crypto";
 // TODO sorry, lack of time
 import {validateTournamentDefinition, validateTournamentTeam} from "../../../client/src/utils/tournament-validator";
@@ -7,6 +11,8 @@ import {DbHelper} from "../../db/pg-helper";
 import {TournamentHomeProvider} from "./tournament-home-provider";
 import {DiscordBot} from "../../discord/bot";
 import {getMatch, getMatchesResult, getNextMatches, goToNextPhaseOrRound} from "./tournament-controller";
+import {DraftData, DraftTeam} from "../../../client/src/utils/draft-controller";
+import {DraftTemplates} from "../../../client/src/utils/draft-templates";
 
 export function registerTournamentEvents(socket: Socket) {
     socket.on('tournament::get', (id, callback) => {
@@ -457,24 +463,13 @@ Ankama will not provide additional access!`)
         DbHelper.isTournamentReferee(tournamentId, socket.data.user)
             .then(isReferee => {
                 if (!isReferee) return callback(false);
-                DbHelper.rawQuery(`SELECT content
-                                   FROM matches
-                                   WHERE id = $1
-                                     AND "tournamentId" = $2
-                                   LIMIT 1`, [matchId, tournamentId])
-                    .then(result => {
-                        if (result.rowCount <= 0) return callback(false);
-
-                        const match = result.rows[0].content;
-                        if (!match.rounds || match.rounds.length < round) return callback(false);
-                        match.rounds[round].draftDate = date;
-                        DbHelper.rawQuery(`UPDATE matches
-                                           SET content = $3
-                                           WHERE id = $1
-                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
-                            .then(r => callback(r.rowCount > 0))
-                            .catch(_ => callback(false))
-                    }).catch(_ => callback(false))
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    match.rounds[round].draftDate = date;
+                    return Promise.resolve(match);
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false));
             })
             .catch(_ => callback(false))
     });
@@ -484,24 +479,54 @@ Ankama will not provide additional access!`)
         DbHelper.isTournamentReferee(tournamentId, socket.data.user)
             .then(isReferee => {
                 if (!isReferee) return callback(false);
-                DbHelper.rawQuery(`SELECT content
-                                   FROM matches
-                                   WHERE id = $1
-                                     AND "tournamentId" = $2
-                                   LIMIT 1`, [matchId, tournamentId])
-                    .then(result => {
-                        if (result.rowCount <= 0) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    match.rounds[round].winner = winner;
+                    return Promise.resolve(match);
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
 
-                        const match = result.rows[0].content;
-                        if (!match.rounds || match.rounds.length < round) return callback(false);
-                        match.rounds[round].winner = winner;
-                        DbHelper.rawQuery(`UPDATE matches
-                                           SET content = $3
-                                           WHERE id = $1
-                                             AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(match)])
-                            .then(r => callback(r.rowCount > 0))
-                            .catch(_ => callback(false))
-                    }).catch(_ => callback(false))
+    socket.on('tournament::admin:rerollMap', (tournamentId, matchId, round, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
+            .then(isAdmin => {
+                if (!isAdmin) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    // TODO later bind this to tournament configuration
+                    const maps = [976, 975, 969, 973, 972, 968, 971, 970];
+                    match.rounds[round].map = maps[Math.floor(Math.random() * maps.length)];
+                    return Promise.resolve(match);
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
+    socket.on('tournament::referee:setFightStats', (tournamentId, matchId, round, stats, callback) => {
+        if (!callback) return;
+        if (!stats || stats.length < 3) return callback(false);
+        if (!stats[DraftTeam.TEAM_A] || !stats[DraftTeam.TEAM_B]) return callback(false);
+
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    if (match.referee !== socket.data.user) return callback(false);
+                    const roundModel = match.rounds[round];
+
+                    if (!roundModel.teamAStats) roundModel.teamAStats = stats[DraftTeam.TEAM_A];
+                    if (!roundModel.teamBStats) roundModel.teamBStats = stats[DraftTeam.TEAM_B];
+                    return Promise.resolve(match);
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
             })
             .catch(_ => callback(false))
     });
@@ -560,13 +585,187 @@ Ankama will not provide additional access!`)
             .then(isReferee => {
                 if (!isReferee) return callback(false);
 
-                DbHelper.rawQuery(`UPDATE matches
-                                   SET content = jsonb_set(content, '{done}', $3)
-                                   WHERE id = $1
-                                     AND "tournamentId" = $2`, [matchId, tournamentId, JSON.stringify(true)])
-                    .then(result => callback(result.rowCount > 0))
+                DbHelper.updateMatch(tournamentId, matchId, match => {
+                    return new Promise((resolve, reject) => {
+                        if (match.done) return callback(false);
+
+                        match.done = true;
+
+                        DbHelper.getTeams([match.teamA, match.teamB])
+                            .then(result => {
+                                function createClassStats(breed: number, team: TournamentTeamModel) {
+                                    const stats = team?.stats?.statsByClass;
+                                    if (stats) stats[breed] = {
+                                        id: breed,
+                                        played: 0,
+                                        banned: 0,
+                                        victories: 0,
+                                        killed: 0,
+                                        death: 0
+                                    }
+                                }
+
+                                function applyToTeam(team: TournamentTeamModel, draftTeam: DraftTeam) {
+                                    if (!team) return;
+
+                                    if (!team.stats) team.stats = {
+                                        played: 0,
+                                        victories: 0,
+                                        statsByClass: []
+                                    };
+                                    team.stats.played++;
+                                    if (team.id === match.winner) team.stats.victories++;
+
+                                    match.rounds.forEach(round => {
+                                        const fightStats = draftTeam === DraftTeam.TEAM_A ? round.teamAStats : round.teamBStats;
+                                        fightStats?.killedBreeds?.forEach((killed, index) => {
+                                            if (!killed) return;
+                                            if (!team.stats) return;
+                                            if (!team.stats.statsByClass[index]) createClassStats(index, team);
+
+                                            if (team.stats.statsByClass[index]) team.stats.statsByClass[index].death++;
+                                        });
+                                        fightStats?.killerBreeds?.forEach((killed, index) => {
+                                            if (!killed) return;
+                                            if (!team.stats) return;
+                                            if (!team.stats.statsByClass[index]) createClassStats(index, team);
+
+                                            if (team.stats.statsByClass[index]) team.stats.statsByClass[index].killed += +killed;
+                                        });
+
+                                        const draft = draftTeam === DraftTeam.TEAM_A ? round.teamADraft : round.teamADraft;
+                                        draft?.pickedClasses?.forEach((picked) => {
+                                            if (!picked) return;
+                                            if (!team.stats) return;
+                                            if (!team.stats.statsByClass[picked]) createClassStats(picked, team);
+
+                                            if (team.stats.statsByClass[picked]) {
+                                                team.stats.statsByClass[picked].played++;
+                                                team.stats.statsByClass[picked].victories += (round.winner === team.id ? 1 : 0);
+                                            }
+                                        });
+                                        draft?.bannedClasses?.forEach((banned) => {
+                                            if (!banned) return;
+                                            if (!team.stats) return;
+                                            if (!team.stats.statsByClass[banned]) createClassStats(banned, team);
+
+                                            if (team.stats.statsByClass[banned]) team.stats.statsByClass[banned].banned++;
+
+                                        });
+                                    })
+                                }
+
+                                result.forEach(team => applyToTeam(team, team.id === match.teamA ? DraftTeam.TEAM_A : DraftTeam.TEAM_B))
+
+                                Promise.all(result.map(team => DbHelper.saveTeam(team)))
+                                    .then(result => {
+                                        if (result.find(p => p === undefined)) return callback(false) && resolve(undefined);
+
+                                        resolve(match);
+                                    })
+                                    .catch(_ => callback(false) && resolve(undefined))
+                            })
+                            .catch(_ => callback(false) && resolve(undefined))
+                    });
+                })
+                    .then(result => callback(result))
                     .catch(_ => callback(false))
             })
             .catch(_ => callback(false))
     });
+
+    // TODO later adapt this to other tournament format
+    socket.on('tournament::draftStart', (tournamentId, matchId, fightIndex, callback) => {
+        if (!callback) return;
+        DbHelper.rawQuery(`SELECT COUNT(*)
+                           FROM drafts_data
+                           WHERE id = $1`, [matchId + "-" + fightIndex])
+            .then(data => {
+                if (data.rowCount <= 0) return callback(false);
+                if (data.rows[0].count > 0) return callback(true);
+
+                DbHelper.rawQuery(`SELECT phase, content
+                                   FROM matches
+                                   WHERE id = $1
+                                     AND "tournamentId" = $2`, [matchId, tournamentId])
+                    .then(result => {
+                        if (result.rowCount <= 0) return callback(false);
+
+                        const phase: number = result.rows[0].phase;
+                        const match: TournamentMatchModel = result.rows[0].content;
+                        if (match.rounds.length <= fightIndex) return callback(false);
+
+                        DbHelper.rawQuery(`SELECT content
+                                           FROM teams
+                                           WHERE id = ANY ($1)`, [[match.teamA, match.teamB]])
+                            .then(teams => {
+                                if (teams.rowCount < 2) return callback(false);
+                                let teamA: TournamentTeamModel;
+                                let teamB: TournamentTeamModel;
+
+                                if (phase == 1) {
+                                    const sort = teams.rows.map(r => r.content).sort(() => Math.random() - 0.5);
+                                    teamA = sort[0];
+                                    teamB = sort[1];
+                                } else {
+                                    // TODO v2:
+                                    // - 16th: win at step 2 of phase 1 can pick side
+                                    // - then random
+                                    // - BO: first random, then loser will have hand
+                                    throw new Error("Not implemented");
+                                }
+
+                                const draft: DraftData = {
+                                    id: matchId + "-" + fightIndex,
+                                    configuration: {
+                                        leader: undefined,
+                                        providedByServer: true,
+                                        actions: DraftTemplates[0].actions
+                                    },
+                                    history: [],
+                                    currentAction: 0,
+
+                                    users: [],
+
+                                    teamA: teamA.players.map((p: string) => {
+                                        return {
+                                            id: p,
+                                            username: "",
+                                            discriminator: "",
+                                            captain: teamA.leader === p,
+                                            present: false
+                                        }
+                                    }),
+                                    teamAInfo: {
+                                        id: teamA.id || "",
+                                        name: teamA.name
+                                    },
+                                    teamAReady: false,
+                                    teamB: teamB.players.map((p: string) => {
+                                        return {
+                                            id: p,
+                                            username: "",
+                                            discriminator: "",
+                                            captain: teamB.leader === p,
+                                            present: false
+                                        }
+                                    }),
+                                    teamBInfo: {
+                                        id: teamB.id || "",
+                                        name: teamB.name
+                                    },
+                                    teamBReady: false
+                                }
+
+                                DbHelper.rawQuery(`INSERT INTO drafts_data
+                                                   VALUES ($1, $2)`, [draft.id, draft])
+                                    .then(success => callback(success.rowCount > 0))
+                                    .catch(_ => callback(false))
+                            })
+                            .catch(_ => callback(false))
+                    })
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    })
 }

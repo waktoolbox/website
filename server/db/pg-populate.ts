@@ -79,4 +79,12 @@ export const pgInitDb = `
         content JSONB
         );
 
+    CREATE TABLE IF NOT EXISTS drafts_data
+    (
+        id VARCHAR
+    (
+        50
+    ) NOT NULL PRIMARY KEY,
+        content JSONB
+        );
 `
