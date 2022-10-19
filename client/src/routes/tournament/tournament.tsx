@@ -84,16 +84,16 @@ export default function Tournament() {
     useEffect(() => {
         setTeam(undefined);
         if (teamId) loadTeam(teamId, true);
-    }, [teamId])
+    }, [teamId]) // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         setCurrentMatch(undefined);
         if (matchId) loadMatch();
-    }, [matchId])
+    }, [matchId]) // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
-    }, [targetTab])
+    }, [targetTab]) // eslint-disable-line react-hooks/exhaustive-deps
 
 
     const changeTab = (newTab: Tabs) => {
