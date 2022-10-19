@@ -97,6 +97,7 @@ export default function Tournament() {
                 loadTeam();
                 break;
             case Tabs.PLANNING:
+                setCurrentMatch(undefined);
                 navigate(`/tournament/${id}/tab/3`);
                 loadNextMatches();
                 break;
@@ -104,6 +105,7 @@ export default function Tournament() {
                 loadMatch();
                 break;
             case Tabs.RESULTS:
+                setCurrentMatch(undefined);
                 navigate(`/tournament/${id}/tab/5`);
                 loadMatchesResult()
                 break;

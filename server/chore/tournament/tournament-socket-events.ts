@@ -679,7 +679,7 @@ Ankama will not provide additional access!`)
         if (!callback) return;
         DbHelper.rawQuery(`SELECT COUNT(*)
                            FROM drafts_data
-                           WHERE id = $1`, [matchId + "-" + fightIndex])
+                           WHERE id = $1`, [matchId + "_" + fightIndex])
             .then(data => {
                 if (data.rowCount <= 0) return callback(false);
                 if (data.rows[0].count > 0) return callback(true);
@@ -716,7 +716,7 @@ Ankama will not provide additional access!`)
                                 }
 
                                 const draft: DraftData = {
-                                    id: matchId + "-" + fightIndex,
+                                    id: matchId + "_" + fightIndex,
                                     configuration: {
                                         leader: undefined,
                                         providedByServer: true,

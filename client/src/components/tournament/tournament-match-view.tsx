@@ -221,7 +221,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const startDraft = () => {
         socket.emit('tournament::draftStart', tournament.id, match.id, tab, (isValid: boolean) => {
             if (!isValid) return;
-            navigate(`/draft/${match.id}-${tab}`)
+            navigate(`/draft/${match.id}_${tab}`)
         })
     }
 

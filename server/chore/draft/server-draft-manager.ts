@@ -188,7 +188,7 @@ class Manager {
         return new Promise((resolve, reject) => {
             if (!draft.configuration.providedByServer) return resolve(true);
 
-            const draftIdAndRound = draft.id.split('-');
+            const draftIdAndRound = draft.id.split('_');
             DbHelper.rawQuery(`SELECT content
                                FROM matches
                                WHERE id = $1`, [draftIdAndRound[0]])
