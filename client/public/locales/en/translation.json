@@ -28,7 +28,7 @@
     "lockForBothDesc": "a class and locks it for both teams",
     "lockForNoneDesc": "a class",
     "lockForOpponentDesc": "a class and locks it for opponent team",
-    "lockForOwnDesc": "a class and locks it for it team",
+    "lockForOwnDesc": "a class and locks it for its team",
     "noUserToAssign": "Nobody to assign",
     "pick": "<span>Pick</span>",
     "pickDesc": "must <span>pick</span>",

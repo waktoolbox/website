@@ -21,12 +21,12 @@ export const DraftTemplates: DraftTemplate[] = [
             {type: DraftActionType.BAN, team: DraftTeam.TEAM_B, lockForPickingTeam: true, lockForOpponentTeam: true},
             {type: DraftActionType.PICK, team: DraftTeam.TEAM_B, lockForPickingTeam: true, lockForOpponentTeam: true},
             {type: DraftActionType.PICK, team: DraftTeam.TEAM_A, lockForPickingTeam: true, lockForOpponentTeam: true},
-            {type: DraftActionType.PICK, team: DraftTeam.TEAM_A},
-            {type: DraftActionType.PICK, team: DraftTeam.TEAM_B},
-            {type: DraftActionType.PICK, team: DraftTeam.TEAM_A},
-            {type: DraftActionType.PICK, team: DraftTeam.TEAM_B},
-            {type: DraftActionType.PICK, team: DraftTeam.TEAM_A},
-            {type: DraftActionType.PICK, team: DraftTeam.TEAM_B},
+            {type: DraftActionType.PICK, team: DraftTeam.TEAM_A, lockForPickingTeam: true},
+            {type: DraftActionType.PICK, team: DraftTeam.TEAM_B, lockForPickingTeam: true},
+            {type: DraftActionType.PICK, team: DraftTeam.TEAM_A, lockForPickingTeam: true},
+            {type: DraftActionType.PICK, team: DraftTeam.TEAM_B, lockForPickingTeam: true},
+            {type: DraftActionType.PICK, team: DraftTeam.TEAM_A, lockForPickingTeam: true},
+            {type: DraftActionType.PICK, team: DraftTeam.TEAM_B, lockForPickingTeam: true},
         ]
     }
 ]
