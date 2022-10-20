@@ -194,6 +194,8 @@ export default function Draft() {
 
     const onAction = (action: DraftAction) => {
         if (!controller) return;
+        setPickedBreed(undefined);
+
         controller.onAction(action);
         controller.data.history.push(action);
         controller.data.currentAction++;
