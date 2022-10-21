@@ -90,6 +90,7 @@ export default function WakfuWarriorsMatchResultListView({data}: { data: PropsTy
     }, [matches]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const computeTeamQualification = (round: number, team: string) => {
+        if (!team || team.length <= 0) return undefined;
         if (round < 2) return undefined;
         const qualification = teamQualification.get(team);
         if (!qualification) return undefined;
