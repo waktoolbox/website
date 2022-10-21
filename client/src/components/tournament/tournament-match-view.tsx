@@ -471,7 +471,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                         mt: 2
                                     }}>{match.streamer ? [accounts.get(match.streamer || "")].map(a => !a ? "" : a.username + "#" + a.discriminator) : t('tournament.display.match.noStreamer')}</Typography>
                                 {match.streamer && streamers.get(match.streamer || "") && streamers.get(match.streamer || "").twitchUrl &&
-                                    <a href={streamers.get(match.streamer || "").twitchUrl}>
+                                    <a href={streamers.get(match.streamer || "").twitchUrl} rel="noreferrer"
+                                       target="_blank">
                                         <Button sx={{backgroundColor: "#6441A5", width: "100%"}}>
                                             <Icon sx={{mr: 1, position: "relative", top: "-2px", zIndex: 0}}>
                                                 <img style={{width: "24px", height: "30px"}} src='/images/twitch.svg'
