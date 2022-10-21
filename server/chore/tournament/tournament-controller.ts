@@ -156,7 +156,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 
         const mustGoToNextPhase = await controller.mustGoToNextPhase();
         if (mustGoToNextPhase) {
-            goToNextPhase().then(r => resolve(r)).catch(error => reject(error));
+            goToNextPhase(tournament, maxPhase, dbData).then(r => resolve(r)).catch(error => reject(error));
             return;
         }
 
@@ -176,9 +176,23 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
     })
 }
 
-function goToNextPhase(): Promise<boolean> {
+function goToNextPhase(tournament: TournamentDefinition, currentPhase: number, previousData: TournamentPhaseData<any>): Promise<boolean> {
     return new Promise((resolve, reject) => {
-        // TODO v3
-        console.log("Next phase")
+        if (tournament.phases.length < currentPhase) return resolve(false);
+        console.log(`Starting next phase for ${tournament.id}`)
+
+        const phaseDefinition = tournament.phases[currentPhase + 1];
+
+        const baseData = getBaseData(phaseDefinition.phaseType);
+        const controller = getAppropriateController(tournament, phaseDefinition, baseData)
+        controller.initTeamsFromPreviousRound(previousData)
+        controller.prepareRound()
+            .then(prepared => {
+                    if (!prepared) resolve(false);
+                    insertTournamentData(tournament.id || "", currentPhase + 1, controller.data)
+                        .then(result => resolve(result))
+                        .catch(_ => reject("Unable to save tournament data"))
+                }
+            ).catch(error => reject("Unable to prepare round : " + error))
     })
 }

@@ -45,15 +45,13 @@ export interface TournamentPhaseController<T extends TournamentPhaseTeamModel, V
     data: V;
 
     initTeams: (teams: string[]) => void;
-    initTeamsFromPreviousRound: <W extends TournamentPhaseTeamModel, Y extends TournamentPhaseData<W>> (previousPhaseData: Y, qualifiedTeams: string[]) => void;
+    initTeamsFromPreviousRound: <W extends TournamentPhaseTeamModel, Y extends TournamentPhaseData<W>> (previousPhaseData: Y) => void;
 
     prepareRound(): Promise<boolean>;
 
     mustGoToNextPhase(): Promise<boolean>;
 
     mustGoToNextRound(): Promise<boolean>;
-
-    getQualifiedTeams(): string[];
 }
 
 export interface TournamentPhaseTeamModel {

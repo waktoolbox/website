@@ -13,6 +13,18 @@ import {
 import * as crypto from "crypto";
 import {DbHelper} from "../../../db/pg-helper";
 
+function allMatchesAreDoneForRound(tournamentId: string, phase: number, round: number): Promise<boolean> {
+    return new Promise(resolve => {
+        DbHelper.rawQuery(`SELECT COUNT(CASE WHEN content ->> ('done') = 'true' THEN 1 END) = COUNT(*) as done
+                           FROM matches
+                           WHERE "tournamentId" = $1
+                             AND phase = $2
+                             AND content ->> ('round') = $3`, [tournamentId, phase, JSON.stringify(round)])
+            .then(result => resolve(result.rowCount <= 0 ? false : result.rows[0].done))
+            .catch(_ => resolve(false))
+    })
+}
+
 export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsPhaseOneData> {
     tournament: TournamentDefinition;
     definition: TournamentPhaseDefinition;
@@ -24,20 +36,14 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
         this.data = data;
     }
 
-    getQualifiedTeams(): string[] {
-        // TODO v3
-        return [];
-        // return [...(this.data.teams.filter(t => t.winInPhaseOne >= 2).map(t => t.id) as string[])];
-    }
-
     mustGoToNextPhase(): Promise<boolean> {
         if (this.data.currentRound !== 4) return Promise.resolve(false);
-        return new Promise(resolve => this.allMatchesAreDoneForRound(3).then(res => resolve(res)))
+        return new Promise(resolve => allMatchesAreDoneForRound(this.tournament.id || "", this.definition.phase, 3).then(res => resolve(res)))
     }
 
     mustGoToNextRound(): Promise<boolean> {
         if (this.data.currentRound > 3) return Promise.resolve(false);
-        return new Promise(resolve => this.allMatchesAreDoneForRound(this.data.currentRound - 1).then(res => resolve(res)))
+        return new Promise(resolve => allMatchesAreDoneForRound(this.tournament.id || "", this.definition.phase, this.data.currentRound - 1).then(res => resolve(res)))
     }
 
     initTeams(teams: string[]) {
@@ -47,20 +53,8 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
     }
 
     // TODO later do something here to init from misc previous phase
-    initTeamsFromPreviousRound(previousPhaseData: any, qualifiedTeams: string[]) {
+    initTeamsFromPreviousRound(previousPhaseData: any) {
         throw new Error("Can't init with previous data from phase 1")
-    }
-
-    allMatchesAreDoneForRound(round: number): Promise<boolean> {
-        return new Promise(resolve => {
-            DbHelper.rawQuery(`SELECT COUNT(CASE WHEN content ->> ('done') = 'true' THEN 1 END) = COUNT(*) as done
-                               FROM matches
-                               WHERE "tournamentId" = $1
-                                 AND phase = $2
-                                 AND content ->> ('round') = $3`, [this.tournament.id, this.definition.phase, JSON.stringify(round)])
-                .then(result => resolve(result.rowCount <= 0 ? false : result.rows[0].done))
-                .catch(_ => resolve(false))
-        })
     }
 
     getAllMatchesOfPhase(phase: number): Promise<WakfuWarriorsMatchModel[]> {
@@ -190,16 +184,14 @@ export class WakfuWarriorPhaseOne implements TournamentPhaseController<WakfuWarr
 
 // TODO v3
 export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarriorsTeamModel, WakfuWarriorsPhaseTwoData> {
-    data: WakfuWarriorsPhaseTwoData;
+    tournament: TournamentDefinition;
     definition: TournamentPhaseDefinition;
+    data: WakfuWarriorsPhaseOneData;
 
-    constructor(tournament: TournamentDefinition, definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseTwoData) {
+    constructor(tournament: TournamentDefinition, definition: TournamentPhaseDefinition, data: WakfuWarriorsPhaseOneData) {
+        this.tournament = tournament;
         this.definition = definition;
         this.data = data;
-    }
-
-    getQualifiedTeams(): string[] {
-        return [];
     }
 
     mustGoToNextPhase(): Promise<boolean> {
@@ -207,16 +199,21 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
     }
 
     mustGoToNextRound(): Promise<boolean> {
-        return Promise.resolve(false);
+        if (this.data.currentRound > 3) return Promise.resolve(false);
+        return new Promise(resolve => allMatchesAreDoneForRound(this.tournament.id || "", this.definition.phase, this.data.currentRound - 1).then(res => resolve(res)))
     }
 
+    // TODO later implement this to be able to start with this phase
     initTeams(teams: string[]) {
-
+        throw new Error("Can't init this phase from start")
     }
 
     // TODO later improve signature to avoid any here
-    initTeamsFromPreviousRound(previousPhaseData: TournamentPhaseData<any>, qualifiedTeams: string[]) {
+    initTeamsFromPreviousRound(previousPhaseData: TournamentPhaseData<any>) {
         const previous = previousPhaseData as WakfuWarriorsPhaseOneData;
+
+        // DbHelper.rawQuery(`SELECT content->>('winner') FROM matches WHERE "tournamentId" = $1 AND phase = $2 GROUP BY content->>('winner') HAVING COUNT(*) >= 2`)
+        // TODO v2 compute top by pool
     }
 
     prepareRound(): Promise<boolean> {
