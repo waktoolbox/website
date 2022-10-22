@@ -6,11 +6,15 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CheckIcon from '@mui/icons-material/Check';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import VideogameAssetOffIcon from '@mui/icons-material/VideogameAssetOff';
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import SportsMmaIcon from '@mui/icons-material/SportsMma';
+import HealingIcon from '@mui/icons-material/Healing';
 import {TournamentDefinition, TournamentMatchModel, TournamentTeamModel} from "../../utils/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
-import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Typography} from "@mui/material";
+import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Tooltip, Typography} from "@mui/material";
 import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
 import TournamentMatchView from "../../components/tournament/tournament-match-view";
 import TournamentMatchPlanningListView from "../../components/tournament/tournament-match-planning-list-view";
@@ -587,19 +591,20 @@ export default function Tournament() {
                                             <Card>
                                                 <CardContent
                                                     sx={{backgroundColor: '#213943', textAlign: "start", pl: 3}}>
-                                                    {/*TODO v2 stats*/}
                                                     <Typography sx={{color: "#8299a1", mr: 2}}><ListAltIcon
                                                         sx={{
                                                             verticalAlign: "middle",
                                                             mr: 1,
                                                             mb: '3px'
-                                                        }}/>{t('tournament.nbMatchesPlayed', {nb: 0})}</Typography>
+                                                        }}/>{t('tournament.nbMatchesPlayed', {nb: team?.stats?.played || 0})}
+                                                    </Typography>
                                                     <Typography sx={{mr: 2, color: "#07c6b6"}}>
                                                         <EmojiEventsIcon sx={{
                                                             verticalAlign: "middle",
                                                             mr: 1,
                                                             mb: '3px'
-                                                        }}/>{t('tournament.nbVictories', {nb: 0})}</Typography>
+                                                        }}/>{t('tournament.nbVictories', {nb: team?.stats?.played || 0})}
+                                                    </Typography>
                                                 </CardContent>
                                             </Card>
                                             <Card>
@@ -623,6 +628,109 @@ export default function Tournament() {
                                                     ))}
                                                 </CardContent>
                                             </Card>
+                                            {team && team.stats && team.stats.statsByClass && team.stats.statsByClass.filter(b => b).length > 0 &&
+                                                <Card>
+                                                    <CardContent
+                                                        sx={{backgroundColor: '#213943', textAlign: "start", pl: 3}}>
+                                                        <Grid container alignItems="center">
+                                                            {team.stats.statsByClass.filter(b => b).map(breed => (
+                                                                <Grid item xs={4} lg={12} key={breed.id}>
+                                                                    <Grid container>
+                                                                        <Grid item xs={4}>
+                                                                            <img src={`/classes/${breed.id}_0.png`}
+                                                                                 style={{width: "100%"}}
+                                                                                 alt={`Breed ${breed.id}`}/>
+                                                                        </Grid>
+                                                                        <Grid item xs={8}>
+                                                                            <Tooltip
+                                                                                title={t('tournament.display.match.stats.played')}
+                                                                                placement="top">
+                                                                                <Typography
+                                                                                    display={breed.played ? "inline" : "none"}
+                                                                                    sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        color: '#4be64b',
+                                                                                        ml: 1
+                                                                                    }}>
+                                                                                    <VideogameAssetIcon sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        mb: "3px"
+                                                                                    }}/> {breed.played}
+                                                                                </Typography>
+                                                                            </Tooltip>
+                                                                            <Tooltip
+                                                                                title={t('tournament.display.match.stats.banned')}
+                                                                                placement="top">
+                                                                                <Typography
+                                                                                    display={breed.banned ? "inline" : "none"}
+                                                                                    sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        color: '#e64b4b',
+                                                                                        ml: 1
+                                                                                    }}>
+                                                                                    <VideogameAssetOffIcon sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        mb: "3px"
+                                                                                    }}/> {breed.banned}
+                                                                                </Typography>
+                                                                            </Tooltip>
+                                                                            <br/>
+                                                                            <Tooltip
+                                                                                title={t('tournament.display.match.stats.victories')}
+                                                                                placement="top">
+                                                                                <Typography
+                                                                                    display={breed.victories ? "inline" : "none"}
+                                                                                    sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        color: '#07c6b6',
+                                                                                        ml: 1
+                                                                                    }}>
+                                                                                    <EmojiEventsIcon sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        mb: "3px"
+                                                                                    }}/> {breed.victories}
+                                                                                </Typography>
+                                                                            </Tooltip>
+                                                                            <Tooltip
+                                                                                title={t('tournament.display.match.stats.killed')}
+                                                                                placement="top">
+                                                                                <Typography
+                                                                                    display={breed.killed ? "inline" : "none"}
+                                                                                    sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        color: '#C50756',
+                                                                                        ml: 1
+                                                                                    }}>
+                                                                                    <SportsMmaIcon sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        mb: "3px"
+                                                                                    }}/> {breed.killed}
+                                                                                </Typography>
+                                                                            </Tooltip>
+                                                                            <Tooltip
+                                                                                title={t('tournament.display.match.stats.death')}
+                                                                                placement="top">
+                                                                                <Typography
+                                                                                    display={breed.death ? "inline" : "none"}
+                                                                                    sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        color: "#8299a1",
+                                                                                        ml: 1
+                                                                                    }}>
+                                                                                    <HealingIcon sx={{
+                                                                                        verticalAlign: "middle",
+                                                                                        mb: "3px"
+                                                                                    }}/> {breed.death}
+                                                                                </Typography>
+                                                                            </Tooltip>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            ))}
+                                                        </Grid>
+                                                    </CardContent>
+                                                </Card>
+                                            }
                                         </Stack>
                                     </Grid>
                                 </Grid>

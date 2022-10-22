@@ -414,7 +414,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                 }
                             </Grid>
 
-                            {match.referee === me && !fight.teamAStats && !fight.teamBStats &&
+                            {match.referee === me &&
                                 <Grid item xs={12}>
                                     <Grid item xs={12}>
                                         <Button sx={{width: "30%", mt: 1, mr: 1}}

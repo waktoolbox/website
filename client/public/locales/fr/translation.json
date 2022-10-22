@@ -103,6 +103,13 @@
         "round": "Round {{round}}",
         "setMeAsStreamer": "Me désigner comme streamer",
         "setNullAsStreamer": "Retirer le streamer",
+        "stats": {
+          "banned": "Banni",
+          "death": "Est mort",
+          "killed": "A tué",
+          "played": "Joué",
+          "victories": "Victoires"
+        },
         "turnNumber": "Nombre de tours",
         "validateMatch": "Valider le match",
         "watchStream": "Regarder le stream"
