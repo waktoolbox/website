@@ -65,21 +65,9 @@ function getValidTeamsWithLimitWithinTournament(id: string): Promise<string[] | 
     });
 }
 
-function getMaxPhase(id: string): Promise<number | undefined> {
-    return new Promise((resolve) => {
-        DbHelper.rawQuery(`SELECT MAX(phase) as max
-                           FROM tournaments_data
-                           WHERE "tournamentId" = $1`, [id])
-            .then(result => resolve(result.rows[0].max || 0))
-            .catch(error => {
-                console.error(error);
-                resolve(undefined);
-            })
-    })
-}
-
 export function getNextMatches(id: string, phase: number): Promise<TournamentMatchModel[]> {
     return new Promise((resolve) => {
+        if (phase <= 0) return Promise.resolve([]);
         DbHelper.rawQuery(`SELECT content
                            FROM matches
                            WHERE "tournamentId" = $1
@@ -92,6 +80,7 @@ export function getNextMatches(id: string, phase: number): Promise<TournamentMat
 
 export function getMatchesResult(id: string, phase: number): Promise<TournamentMatchModel[]> {
     return new Promise((resolve) => {
+        if (phase <= 0) return Promise.resolve([]);
         DbHelper.rawQuery(`SELECT content
                            FROM matches
                            WHERE "tournamentId" = $1
@@ -118,9 +107,9 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
         if (!tournament) return reject("No tournament found");
         if (!tournament.phases) return reject("No phases on tournament");
 
-        const maxPhase = await getMaxPhase(id);
+        const maxPhase = await DbHelper.getTournamentDataMaxPhase(id);
         if (maxPhase === undefined || maxPhase === null) return; // can't happen
-        if (maxPhase >= tournament.phases.length) return resolve(false);
+        if (maxPhase > tournament.phases.length) return resolve(false);
 
         const isTournamentStart = maxPhase === 0;
         const phaseDefinition = tournament.phases[isTournamentStart ? 0 : (maxPhase - 1)];

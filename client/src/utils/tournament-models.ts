@@ -102,6 +102,7 @@ export interface TournamentMatchModel {
 }
 
 export interface TournamentMatchRoundModel {
+    round: number,
     draftFirstPicker?: string;
     draftDate?: string;
     teamADraft?: TournamentDraftResultModel;

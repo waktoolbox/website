@@ -363,7 +363,25 @@ export class WakfuWarriorPhaseTwo implements TournamentPhaseController<WakfuWarr
                     break;
                 }
                 case 5: {
-                    throw new Error("Not implemented");
+                    const matches = await getAllMatchesOfPhaseAndRoundOrderedByPool(this.tournament.id || "", 2, this.data.currentRound - 1);
+                    const first = matches[0];
+                    const second = matches[1];
+
+                    createdMatches.push(this.createMatch(first?.winner, second?.winner, 1, generateRoundForMatch(undefined)))
+                    createdMatches.push(this.createMatch(first?.winner === first?.teamA ? first?.teamB : first?.teamA, second?.winner === second?.teamA ? second?.teamB : second?.teamA, 2, [
+                        {
+                            round: this.data.currentRound,
+                            map: this.tournament.maps[Math.floor(Math.random() * this.tournament.maps.length)]
+                        },
+                        {
+                            round: this.data.currentRound,
+                            map: this.tournament.maps[Math.floor(Math.random() * this.tournament.maps.length)]
+                        },
+                        {
+                            round: this.data.currentRound,
+                            map: this.tournament.maps[Math.floor(Math.random() * this.tournament.maps.length)]
+                        }
+                    ]))
                     break;
                 }
             }

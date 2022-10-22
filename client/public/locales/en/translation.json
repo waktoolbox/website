@@ -172,6 +172,7 @@
     "nbVictories": "{{nb}} Victories",
     "nbMatchesPlayed": "{{nb}} Matches played",
     "not.found": "Tournament not found",
+    "phase": "Phase {{phase}}",
     "referees": "Referees",
     "registrations": "Registrations",
     "rewards": "Prizees",

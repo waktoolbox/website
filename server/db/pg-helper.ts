@@ -59,6 +59,30 @@ class DbWrapper {
         });
     }
 
+    getTournamentPhases(id: string): Promise<number[]> {
+        return new Promise((resolve) => {
+            DbHelper.rawQuery(`SELECT phase
+                               FROM tournaments_data
+                               WHERE "tournamentId" = $1`, [id])
+                .then(result => resolve(result.rowCount > 0 ? result.rows.map(r => r.phase) : []))
+                .catch(_ => {
+                    resolve([]);
+                })
+        })
+    }
+
+    getTournamentDataMaxPhase(id: string): Promise<number | undefined> {
+        return new Promise((resolve) => {
+            DbHelper.rawQuery(`SELECT MAX(phase) as max
+                               FROM tournaments_data
+                               WHERE "tournamentId" = $1`, [id])
+                .then(result => resolve(result.rowCount > 0 ? result.rows[0].max : 0))
+                .catch(_ => {
+                    resolve(undefined);
+                })
+        })
+    }
+
     getTournament(id: string): Promise<TournamentDefinition | undefined> {
         return new Promise((resolve, reject) => {
             this.pool?.query(`SELECT content

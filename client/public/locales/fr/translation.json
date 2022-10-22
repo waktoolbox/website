@@ -172,6 +172,7 @@
     "nbVictories": "{{nb}} Victoires",
     "nbMatchesPlayed": "{{nb}} Matchs joués",
     "not.found": "Tournoi introuvable",
+    "phase": "Phase {{phase}}",
     "referees": "Arbitres",
     "registrations": "Inscriptions",
     "rewards": "Récompenses",

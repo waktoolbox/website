@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {ChangeEvent, useContext, useEffect, useState} from "react";
 import BookmarksIcon from '@mui/icons-material/Bookmarks';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -14,7 +14,20 @@ import {TournamentDefinition, TournamentMatchModel, TournamentTeamModel} from ".
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
-import {Button, Card, CardContent, Divider, Grid, Icon, Stack, Tooltip, Typography} from "@mui/material";
+import {
+    Button,
+    Card,
+    CardContent,
+    Divider,
+    FormControlLabel,
+    Grid,
+    Icon,
+    Radio,
+    RadioGroup,
+    Stack,
+    Tooltip,
+    Typography
+} from "@mui/material";
 import TournamentTeamMatchView from "../../components/tournament/tournament-team-match-view";
 import TournamentMatchView from "../../components/tournament/tournament-match-view";
 import TournamentMatchPlanningListView from "../../components/tournament/tournament-match-planning-list-view";
@@ -60,6 +73,9 @@ export default function Tournament() {
     const [resultToDisplay, setResultToDisplay] = useState<TournamentMatchModel[]>();
     const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
+    const [phases, setPhases] = useState<number[]>([]);
+    const [phase, setPhase] = useState<number>(0);
+
     const [me] = useState(localStorage.getItem("discordId"))
     const socket = useContext(SocketContext)
     const {t} = useTranslation();
@@ -80,6 +96,12 @@ export default function Tournament() {
 
         });
 
+        socket.emit('tournament::getPhases', id, (phases: number[]) => {
+            if (!phases) return;
+            setPhases(phases);
+            setPhase(Math.max(...phases))
+        })
+
         socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
             setMyTeam(team);
         })
@@ -98,6 +120,15 @@ export default function Tournament() {
     useEffect(() => {
         if (targetTab && targetTab !== "0") changeTab(Tabs[Tabs[targetTab as any] as any] as unknown as Tabs);
     }, [targetTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (tab === Tabs.PLANNING) {
+            loadNextMatches();
+        }
+        if (tab === Tabs.RESULTS) {
+            loadMatchesResult();
+        }
+    }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
 
     const changeTab = (newTab: Tabs) => {
@@ -172,8 +203,7 @@ export default function Tournament() {
     }
 
     const loadMatchesToDisplay = (event: string, callbackSetter: any) => {
-        // TODO v3 bind real phase here
-        socket.emit(event, id, 1, (matches: TournamentMatchModel[]) => {
+        socket.emit(event, id, phase, (matches: TournamentMatchModel[]) => {
             const namesToRequest: string[] = [];
             matches.forEach(t => {
                 if (!t || !t.id) return;
@@ -229,6 +259,35 @@ export default function Tournament() {
     const goToTeam = (tid: string) => {
         setLocalTeamId(tid);
         loadTeam(tid, true)
+    }
+
+    function PhaseButton() {
+        return (
+            <Grid item xs={12} sx={{mb: 2}}>
+                {phases && phases.length > 0 &&
+                    <RadioGroup name="tournament-phase" value={phase} row sx={{ml: 4}}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setPhase(parseInt((event.target as HTMLInputElement).value))}>
+                        {phases.map(p => (
+                            <FormControlLabel key={p} value={p}
+                                              sx={{
+                                                  p: 1,
+                                                  borderRadius: 3,
+                                                  fontTransform: 'uppercase',
+                                                  backgroundColor: phase === p ? '#017d7f' : 'inherit',
+                                                  ':hover': {
+                                                      color: '#017d7f',
+                                                      backgroundColor: 'inherit'
+                                                  }
+                                              }}
+                                              control={<Radio sx={{display: "none"}}/>}
+                                              label={t('tournament.phase', {phase: p})}
+                            />
+                        ))}
+                    </RadioGroup>
+
+                }
+            </Grid>
+        )
     }
 
     return (
@@ -742,6 +801,7 @@ export default function Tournament() {
                                         <Typography
                                             variant="h4">{t('tournament.display.' + (tab === Tabs.PLANNING ? "planning" : "results"))}</Typography>
                                     </Grid>
+                                    <PhaseButton/>
                                     {planningToDisplay && planningToDisplay.length > 0 &&
                                         <TournamentMatchPlanningListView data={{
                                             tournament: tournament,
@@ -766,6 +826,7 @@ export default function Tournament() {
                                         <Typography
                                             variant="h4">{t('tournament.display.results')}</Typography>
                                     </Grid>
+                                    <PhaseButton/>
                                     {resultToDisplay && resultToDisplay.length > 0 &&
                                         <WakfuWarriorsMatchResultListView data={{
                                             tournament: tournament,

@@ -23,6 +23,20 @@ export function registerTournamentEvents(socket: Socket) {
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
 
+    socket.on('tournament::getCurrentPhase', (id, callback) => {
+        if (!callback) return;
+        DbHelper.getTournamentDataMaxPhase(id)
+            .then(result => callback(result))
+            .catch(_ => callback(1))
+    })
+
+    socket.on('tournament::getPhases', (id, callback) => {
+        if (!callback) return;
+        DbHelper.getTournamentPhases(id)
+            .then(result => callback(result))
+            .catch(_ => callback(1))
+    })
+
     socket.on('tournament::getTeam', (id, callback) => {
         if (!callback) return;
         DbHelper.getTeam(id)
