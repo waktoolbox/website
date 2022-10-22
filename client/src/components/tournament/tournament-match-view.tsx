@@ -63,13 +63,13 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const [currentDraftDate, setCurrentDraftDate] = useState<string | null>(fight.draftDate || null);
     const [statEditMode, setStatEditMode] = useState<boolean>(false);
     const [stats, setStats] = useState<any[]>([undefined, {
-        turns: 0,
-        killedBreeds: [],
-        killerBreeds: []
+        turns: fight.teamAStats?.turns || 0,
+        killedBreeds: fight.teamAStats ? fight.teamAStats.killedBreeds : [],
+        killerBreeds: fight.teamAStats ? fight.teamAStats.killerBreeds : []
     }, {
-        turns: 0,
-        killedBreeds: [],
-        killerBreeds: []
+        turns: fight.teamBStats?.turns || 0,
+        killedBreeds: fight.teamBStats ? fight.teamBStats.killedBreeds : [],
+        killerBreeds: fight.teamBStats ? fight.teamBStats.killerBreeds : []
     }]);
 
     function setDraftDate(draftDate: string | null | undefined) {
