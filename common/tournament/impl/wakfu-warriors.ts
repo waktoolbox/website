@@ -10,9 +10,13 @@ export interface WakfuWarriorsPhaseOneData extends TournamentPhaseData<WakfuWarr
 }
 
 export interface WakfuWarriorsPhaseTwoData extends TournamentPhaseData<WakfuWarriorsTeamModel> {
+    basePlacement: string[];
 }
 
 export interface WakfuWarriorsTeamModel extends TournamentPhaseTeamModel {
+    poolOnPhaseOne?: number;
+    qualifyingStepOnPhaseOne?: number;
+    initialPlacement?: number;
 }
 
 export interface WakfuWarriorsMatchModel extends TournamentMatchModel {

@@ -136,7 +136,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
             controller.initTeams(teams)
             controller.prepareRound()
                 .then(prepared => {
-                        if (!prepared) resolve(false);
+                        if (!prepared) return resolve(false);
                         insertTournamentData(id, 1, controller.data)
                             .then(result => resolve(result))
                             .catch(_ => reject("Unable to save tournament data"))
@@ -167,7 +167,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 
         controller.prepareRound()
             .then(prepared => {
-                    if (!prepared) resolve(false);
+                if (!prepared) return resolve(false);
                     saveTournamentData(id, maxPhase, controller.data)
                         .then(result => resolve(result))
                         .catch(_ => reject("Unable to save tournament data"))
@@ -181,18 +181,22 @@ function goToNextPhase(tournament: TournamentDefinition, currentPhase: number, p
         if (tournament.phases.length < currentPhase) return resolve(false);
         console.log(`Starting next phase for ${tournament.id}`)
 
-        const phaseDefinition = tournament.phases[currentPhase + 1];
+        const phaseDefinition = tournament.phases[currentPhase]; // phase has a default +1
 
         const baseData = getBaseData(phaseDefinition.phaseType);
         const controller = getAppropriateController(tournament, phaseDefinition, baseData)
         controller.initTeamsFromPreviousRound(previousData)
-        controller.prepareRound()
-            .then(prepared => {
-                    if (!prepared) resolve(false);
-                    insertTournamentData(tournament.id || "", currentPhase + 1, controller.data)
-                        .then(result => resolve(result))
-                        .catch(_ => reject("Unable to save tournament data"))
-                }
-            ).catch(error => reject("Unable to prepare round : " + error))
+            .then(success => {
+                if (!success) return resolve(false);
+                controller.prepareRound()
+                    .then(prepared => {
+                            if (!prepared) return resolve(false);
+                            insertTournamentData(tournament.id || "", currentPhase + 1, controller.data)
+                                .then(result => resolve(result))
+                                .catch(_ => reject("Unable to save tournament data"))
+                        }
+                    ).catch(error => reject("Unable to prepare round : " + error))
+            })
+            .catch(_ => resolve(false))
     })
 }
