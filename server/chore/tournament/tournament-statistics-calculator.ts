@@ -68,7 +68,7 @@ export function applyStatistics(tournamentId: string, matchId: string, skipDone:
         return new Promise((resolve, reject) => {
             if (match.done && skipDone) return callback(false);
 
-            match.done = true;
+            if (skipDone) match.done = true;
 
             DbHelper.getTeams([match.teamA, match.teamB])
                 .then(result => {
