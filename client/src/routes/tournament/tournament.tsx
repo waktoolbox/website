@@ -470,37 +470,49 @@ export default function Tournament() {
                                                 '.MuiCardContent-root': {p: 3}
                                             }}>
                                                 <CardContent sx={{backgroundColor: "#162329", textAlign: "start"}}>
+                                                    <Grid container alignItems="center">
+                                                        <Grid item xs={12} lg={6}>
+                                                            <Link to={`/tournament/${id}/tab/2/team/${team.id}`}>
+                                                                <Typography display="inline"
+                                                                            variant="h6"
+                                                                            sx={{mr: 2}}>{team.name}</Typography>
+                                                                <Typography display="inline"
+                                                                            sx={{verticalAlign: "1px"}}><span
+                                                                    className="blueWord">{team.server}</span></Typography>
+                                                            </Link>
+                                                        </Grid>
+                                                        <Grid item xs={12} lg={4}>
+                                                            <Divider sx={{
+                                                                mr: 2, mt: 0, mb: 0,
+                                                                display: {lg: "inline", xs: 'none'},
+                                                                pt: 2, pb: 2
+                                                            }}
+                                                                     orientation="vertical" variant="middle" flexItem/>
+                                                            <Typography display="inline" sx={{mr: 2}}><EmojiEventsIcon
+                                                                sx={{
+                                                                    verticalAlign: "middle",
+                                                                    mr: 1,
+                                                                    mb: '3px'
+                                                                }}/>{t('tournament.nbVictories', {nb: team?.stats?.victories || 0})}
+                                                            </Typography>
+                                                            <Typography display="inline"
+                                                                        sx={{color: "#8299a1", mr: 2}}><ListAltIcon
+                                                                sx={{
+                                                                    verticalAlign: "middle",
+                                                                    mr: 1,
+                                                                    mb: '3px'
+                                                                }}/>{t('tournament.nbMatchesPlayed', {nb: team?.stats?.played || 0})}
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={12} lg={2}>
+                                                            <Link to={`/tournament/${id}/tab/2/team/${team.id}`}>
+                                                                <Button sx={{float: "right"}}
+                                                                        onClick={() => goToTeam(team.id)}>{t('tournament.team.goTo')}</Button>
+                                                            </Link>
+                                                        </Grid>
+                                                    </Grid>
 
-                                                    <Link to={`/tournament/${id}/tab/2/team/${team.content.id}`}>
-                                                        <Typography display="inline"
-                                                                    variant="h6"
-                                                                    sx={{mr: 2}}>{team.content.name}</Typography>
-                                                    </Link>
-                                                    <Typography display="inline" sx={{verticalAlign: "1px"}}><span
-                                                        className="blueWord">{team.content.server}</span></Typography>
-                                                    <Divider sx={{
-                                                        ml: 2, mr: 2, mt: 0, mb: 0,
-                                                        display: "inline",
-                                                        pt: 1, pb: 1
-                                                    }}
-                                                             orientation="vertical" variant="middle" flexItem/>
-                                                    <Typography display="inline" sx={{mr: 2}}><EmojiEventsIcon sx={{
-                                                        verticalAlign: "middle",
-                                                        mr: 1,
-                                                        mb: '3px'
-                                                    }}/>{t('tournament.nbVictories', {nb: 0})}</Typography>
-                                                    <Typography display="inline"
-                                                                sx={{color: "#8299a1", mr: 2}}><ListAltIcon
-                                                        sx={{
-                                                            verticalAlign: "middle",
-                                                            mr: 1,
-                                                            mb: '3px'
-                                                        }}/>{t('tournament.nbMatchesPlayed', {nb: 0})}</Typography>
 
-                                                    <Link to={`/tournament/${id}/tab/2/team/${team.content.id}`}>
-                                                        <Button sx={{float: "right"}}
-                                                                onClick={() => goToTeam(team.content.id)}>{t('tournament.team.goTo')}</Button>
-                                                    </Link>
                                                 </CardContent>
                                             </Card>
                                         ))}

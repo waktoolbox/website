@@ -189,7 +189,7 @@ class DbWrapper {
                               LIMIT 64`, [id])
                 .then(result => {
                     if (result.rows.length <= 0) return resolve([]);
-                    resolve(result.rows as DbTeamWithContent[]);
+                    resolve(result.rows.map(row => row.content) as DbTeamWithContent[]);
                 })
                 .catch(error => reject(error));
         })

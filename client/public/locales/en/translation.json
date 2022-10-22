@@ -126,6 +126,7 @@
         "teams": "Teams",
         "users": "Users"
       },
+      "recomputeAllStatistics": "Recompute all statistics",
       "registrationDate": "Registration date",
       "reminderAnkamaInfo": "Send a Waktool DM for missing Ankama info",
       "streamerLink": "Streamer's channel",

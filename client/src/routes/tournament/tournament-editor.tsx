@@ -269,6 +269,11 @@ export default function TournamentEditor() {
                         })}>
                             {t('tournament.editor.goToNextPhase')}
                         </Button>
+                        <Button sx={{m: 3}}
+                                onClick={() => socket.emit('tournament::admin:recomputeStatistics', id, () => {
+                                })}>
+                            {t('tournament.editor.recomputeAllStatistics')}
+                        </Button>
                     </Box>
                 )}
             </div>
