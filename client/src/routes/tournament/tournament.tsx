@@ -632,10 +632,10 @@ export default function Tournament() {
                                                 <Card>
                                                     <CardContent
                                                         sx={{backgroundColor: '#213943', textAlign: "start", pl: 3}}>
-                                                        <Grid container alignItems="center">
+                                                        <Grid container>
                                                             {team.stats.statsByClass.filter(b => b).map(breed => (
                                                                 <Grid item xs={4} lg={12} key={breed.id}>
-                                                                    <Grid container>
+                                                                    <Grid container alignItems="center">
                                                                         <Grid item xs={4}>
                                                                             <img src={`/classes/${breed.id}_0.png`}
                                                                                  style={{width: "100%"}}

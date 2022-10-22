@@ -273,7 +273,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                                 label={t('tournament.display.match.dead')}/>
                                             <TextField label={t('tournament.display.match.killed')}
                                                        type="number"
-                                                       value={stats[team].killerBreeds[c]}
+                                                       value={stats[team].killerBreeds[c] || 0}
                                                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
                                                            const s = [...stats];
                                                            s[team].killerBreeds[c] = event.target.value || 0;
