@@ -259,7 +259,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                     <Grid item xs={12} sx={{p: 3}}>
                         <Grid container>
                             {appropriateDraft && appropriateDraft.pickedClasses && appropriateDraft.pickedClasses.map(c => (
-                                <Grid item xs={4}>
+                                <Grid item xs={4} key={c}>
                                     <img src={`/classes/${c}_0.png`} style={{width: "100%"}} alt={`Breed ${c}`}/>
 
                                     {match.referee === me && statEditMode &&
@@ -299,7 +299,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         </Grid>
                         <Grid container sx={{p: 3}}>
                             {appropriateDraft && appropriateDraft.bannedClasses && appropriateDraft.bannedClasses.map(c => (
-                                <Grid item xs={4}>
+                                <Grid item xs={4} key={c}>
                                     <img src={`/classes/${c}_0.png`} style={{width: "100%", filter: "grayscale(1)"}}
                                          alt={`Breed ${c}`}/>
                                 </Grid>
