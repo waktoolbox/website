@@ -2,10 +2,12 @@ import {createContext, Dispatch, ReactElement, ReactNode, useReducer} from 'reac
 
 export interface UserData {
     connected: boolean;
+    myTeam?: string;
 }
 
 const defaultUserData: UserData = {
-    connected: false
+    connected: false,
+    myTeam: undefined
 }
 
 export type ActionType = {
@@ -24,6 +26,11 @@ const Reducer = (state: UserData, action: ActionType): any => {
             return {
                 ...state,
                 connected: action.payload
+            };
+        case 'setMyTeam':
+            return {
+                ...state,
+                myTeam: action.payload
             };
 
         default:

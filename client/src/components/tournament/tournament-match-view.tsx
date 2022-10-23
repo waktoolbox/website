@@ -23,6 +23,7 @@ import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {DraftTeam} from "../../utils/draft-controller";
+import {UserContext} from "../../context/user-context";
 
 type PropsTypes = {
     accounts: Map<string, any>;
@@ -55,6 +56,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const socket = useContext(SocketContext)
+    const userContext = useContext(UserContext)
 
     const [tab, setTab] = useState(0);
     const [match, setMatch] = useState(currentMatch)
@@ -219,8 +221,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         setTab(newTab);
     }
 
-    const startDraft = () => {
-        socket.emit('tournament::draftStart', tournament.id, match.id, tab, (isValid: boolean) => {
+    const startDraft = (sidePick: DraftTeam | undefined) => {
+        socket.emit('tournament::draftStart', tournament.id, match.id, tab, sidePick, (isValid: boolean) => {
             if (!isValid) return;
             navigate(`/draft/${match.id}_${tab}`)
         })
@@ -390,15 +392,31 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         {/*TODO v2 bind draft link & draft results & winner */}
                         <Grid container>
                             <Grid item xs={12}>
-                                {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
+                                {((!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() && (!fight.draftFirstPicker && (match.teamA === userContext.userState.myTeam || match.teamB === userContext.userState.myTeam))) || fight.draftId) &&
                                     <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}
-                                            onClick={startDraft}>
+                                            onClick={() => startDraft(undefined)}>
                                         {t('tournament.display.match.goToDraft')}
                                     </Button>
+                                }
+                                {fight.draftFirstPicker && !fight.draftId && !fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() && fight.draftFirstPicker === userContext.userState.myTeam &&
+                                    <>
+                                        <Button sx={{width: "40%", pt: 2, pb: 2, mr: 1}} disabled={!fight.draftDate}
+                                                onClick={() => startDraft(DraftTeam.TEAM_A)}>
+                                            {t('tournament.display.match.goToDraftTeamA')}
+                                        </Button>
+                                        <Button sx={{width: "40%", pt: 2, pb: 2, ml: 1}} disabled={!fight.draftDate}
+                                                onClick={() => startDraft(DraftTeam.TEAM_B)}>
+                                            {t('tournament.display.match.goToDraftTeamB')}
+                                        </Button>
+                                    </>
                                 }
                                 {!fight.teamADraft && !fight.draftDate &&
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
+                                }
+                                {(!fight.draftId && (match.teamA !== userContext.userState.myTeam && match.teamB !== userContext.userState.myTeam && !fight.draftFirstPicker) || (fight.draftFirstPicker && fight.draftFirstPicker !== userContext.userState.myTeam)) &&
+                                    <Typography
+                                        variant="h5">{t('tournament.display.match.draftNotStartedYet')}</Typography>
                                 }
                                 {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
                                     <Typography variant="h5">{t('tournament.display.match.draftDate', {

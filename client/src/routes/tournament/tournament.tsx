@@ -32,6 +32,7 @@ import TournamentTeamMatchView from "../../components/tournament/tournament-team
 import TournamentMatchView from "../../components/tournament/tournament-match-view";
 import TournamentMatchPlanningListView from "../../components/tournament/tournament-match-planning-list-view";
 import WakfuWarriorsMatchResultListView from "../../components/tournament/impl/wakfu-warriors-match-result-list-view";
+import {UserContext} from "../../context/user-context";
 
 enum Tabs {
     HOME,
@@ -77,7 +78,8 @@ export default function Tournament() {
     const [phase, setPhase] = useState<number>(0);
 
     const [me] = useState(localStorage.getItem("discordId"))
-    const socket = useContext(SocketContext)
+    const socket = useContext(SocketContext);
+    const userContext = useContext(UserContext);
     const {t} = useTranslation();
     const navigate = useNavigate();
 
@@ -104,6 +106,9 @@ export default function Tournament() {
 
         socket.emit('tournament::getMyTeam', id, (team: TournamentTeamModel) => {
             setMyTeam(team);
+            if (team) {
+                userContext.dispatch({type: "setMyTeam", payload: team.id});
+            }
         })
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
