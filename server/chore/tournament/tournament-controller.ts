@@ -65,21 +65,9 @@ function getValidTeamsWithLimitWithinTournament(id: string): Promise<string[] | 
     });
 }
 
-function getMaxPhase(id: string): Promise<number | undefined> {
-    return new Promise((resolve) => {
-        DbHelper.rawQuery(`SELECT MAX(phase) as max
-                           FROM tournaments_data
-                           WHERE "tournamentId" = $1`, [id])
-            .then(result => resolve(result.rows[0].max || 0))
-            .catch(error => {
-                console.error(error);
-                resolve(undefined);
-            })
-    })
-}
-
 export function getNextMatches(id: string, phase: number): Promise<TournamentMatchModel[]> {
     return new Promise((resolve) => {
+        if (phase <= 0) return Promise.resolve([]);
         DbHelper.rawQuery(`SELECT content
                            FROM matches
                            WHERE "tournamentId" = $1
@@ -92,6 +80,7 @@ export function getNextMatches(id: string, phase: number): Promise<TournamentMat
 
 export function getMatchesResult(id: string, phase: number): Promise<TournamentMatchModel[]> {
     return new Promise((resolve) => {
+        if (phase <= 0) return Promise.resolve([]);
         DbHelper.rawQuery(`SELECT content
                            FROM matches
                            WHERE "tournamentId" = $1
@@ -118,9 +107,9 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
         if (!tournament) return reject("No tournament found");
         if (!tournament.phases) return reject("No phases on tournament");
 
-        const maxPhase = await getMaxPhase(id);
+        const maxPhase = await DbHelper.getTournamentDataMaxPhase(id);
         if (maxPhase === undefined || maxPhase === null) return; // can't happen
-        if (maxPhase >= tournament.phases.length) return resolve(false);
+        if (maxPhase > tournament.phases.length) return resolve(false);
 
         const isTournamentStart = maxPhase === 0;
         const phaseDefinition = tournament.phases[isTournamentStart ? 0 : (maxPhase - 1)];
@@ -136,7 +125,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
             controller.initTeams(teams)
             controller.prepareRound()
                 .then(prepared => {
-                        if (!prepared) resolve(false);
+                        if (!prepared) return resolve(false);
                         insertTournamentData(id, 1, controller.data)
                             .then(result => resolve(result))
                             .catch(_ => reject("Unable to save tournament data"))
@@ -156,7 +145,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 
         const mustGoToNextPhase = await controller.mustGoToNextPhase();
         if (mustGoToNextPhase) {
-            goToNextPhase().then(r => resolve(r)).catch(error => reject(error));
+            goToNextPhase(tournament, maxPhase, dbData).then(r => resolve(r)).catch(error => reject(error));
             return;
         }
 
@@ -167,7 +156,7 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
 
         controller.prepareRound()
             .then(prepared => {
-                    if (!prepared) resolve(false);
+                if (!prepared) return resolve(false);
                     saveTournamentData(id, maxPhase, controller.data)
                         .then(result => resolve(result))
                         .catch(_ => reject("Unable to save tournament data"))
@@ -176,9 +165,27 @@ export function goToNextPhaseOrRound(id: string): Promise<boolean> {
     })
 }
 
-function goToNextPhase(): Promise<boolean> {
+function goToNextPhase(tournament: TournamentDefinition, currentPhase: number, previousData: TournamentPhaseData<any>): Promise<boolean> {
     return new Promise((resolve, reject) => {
-        // TODO v3
-        console.log("Next phase")
+        if (tournament.phases.length < currentPhase) return resolve(false);
+        console.log(`Starting next phase for ${tournament.id}`)
+
+        const phaseDefinition = tournament.phases[currentPhase]; // phase has a default +1
+
+        const baseData = getBaseData(phaseDefinition.phaseType);
+        const controller = getAppropriateController(tournament, phaseDefinition, baseData)
+        controller.initTeamsFromPreviousRound(previousData)
+            .then(success => {
+                if (!success) return resolve(false);
+                controller.prepareRound()
+                    .then(prepared => {
+                            if (!prepared) return resolve(false);
+                            insertTournamentData(tournament.id || "", currentPhase + 1, controller.data)
+                                .then(result => resolve(result))
+                                .catch(_ => reject("Unable to save tournament data"))
+                        }
+                    ).catch(error => reject("Unable to prepare round : " + error))
+            })
+            .catch(_ => resolve(false))
     })
 }

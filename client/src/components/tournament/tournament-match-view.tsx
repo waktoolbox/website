@@ -1,5 +1,6 @@
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CancelIcon from '@mui/icons-material/Cancel';
+import LooksOneIcon from '@mui/icons-material/LooksOne';
 import {TournamentDefinition, TournamentMatchModel, TournamentMatchRoundModel} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
 import React, {ChangeEvent, SyntheticEvent, useContext, useState} from "react";
@@ -17,12 +18,14 @@ import {
     Tab,
     Tabs,
     TextField,
+    Tooltip,
     Typography
 } from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {DraftTeam} from "../../utils/draft-controller";
+import {UserContext} from "../../context/user-context";
 
 type PropsTypes = {
     accounts: Map<string, any>;
@@ -55,6 +58,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const socket = useContext(SocketContext)
+    const userContext = useContext(UserContext)
 
     const [tab, setTab] = useState(0);
     const [match, setMatch] = useState(currentMatch)
@@ -95,6 +99,17 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                     ...fight,
                     winner: team
                 } as any)
+            }
+        })
+    }
+
+    function setFightDraftFirstPicker(team: string) {
+        socket.emit('tournament::referee:setFightDraftFirstPicker', tournament.id, match.id, tab, team, (done: boolean) => {
+            if (done) {
+                setFight({
+                    ...fight,
+                    draftFirstPicker: team
+                })
             }
         })
     }
@@ -219,8 +234,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
         setTab(newTab);
     }
 
-    const startDraft = () => {
-        socket.emit('tournament::draftStart', tournament.id, match.id, tab, (isValid: boolean) => {
+    const startDraft = (sidePick: DraftTeam | undefined) => {
+        socket.emit('tournament::draftStart', tournament.id, match.id, tab, sidePick, (isValid: boolean) => {
             if (!isValid) return;
             navigate(`/draft/${match.id}_${tab}`)
         })
@@ -252,8 +267,15 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         }
                     </Grid>
                     <Grid item xs={12}>
+
                         <Link to={`/tournament/${id}/tab/2/team/${appropriateTeam}`}>
-                            <Typography><b>{teams.get(appropriateTeam)}</b></Typography>
+                            {fight.draftTeamA === appropriateTeam &&
+                                <Tooltip title={t('tournament.display.match.draft.teamA')} placement="top">
+                                    <LooksOneIcon sx={{verticalAlign: "middle", mb: "3px", mr: 1, color: "#8299a1"}}/>
+                                </Tooltip>
+                            }
+                            <Typography display="inline">
+                                <b>{teams.get(appropriateTeam)}</b></Typography>
                         </Link>
                     </Grid>
                     <Grid item xs={12} sx={{p: 3}}>
@@ -390,15 +412,32 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         {/*TODO v2 bind draft link & draft results & winner */}
                         <Grid container>
                             <Grid item xs={12}>
-                                {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() &&
+                                {((!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() && (!fight.draftFirstPicker && (match.teamA === userContext.userState.myTeam || match.teamB === userContext.userState.myTeam))) || fight.draftId) &&
                                     <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}
-                                            onClick={startDraft}>
+                                            onClick={() => startDraft(undefined)}>
                                         {t('tournament.display.match.goToDraft')}
                                     </Button>
+                                }
+                                {fight.draftFirstPicker && !fight.draftId && !fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() && fight.draftFirstPicker === userContext.userState.myTeam &&
+                                    <>
+                                        <Button sx={{width: "40%", pt: 2, pb: 2, mr: 1}} disabled={!fight.draftDate}
+                                                onClick={() => startDraft(DraftTeam.TEAM_A)}>
+                                            {t('tournament.display.match.goToDraftTeamA')}
+                                        </Button>
+                                        <Button sx={{width: "40%", pt: 2, pb: 2, ml: 1}} disabled={!fight.draftDate}
+                                                onClick={() => startDraft(DraftTeam.TEAM_B)}>
+                                            {t('tournament.display.match.goToDraftTeamB')}
+                                        </Button>
+                                    </>
                                 }
                                 {!fight.teamADraft && !fight.draftDate &&
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
+                                }
+                                {((fight.draftDate && !fight.draftId && ((match.teamA !== userContext.userState.myTeam && match.teamB !== userContext.userState.myTeam && !fight.draftFirstPicker)
+                                        || (fight.draftFirstPicker && fight.draftFirstPicker !== userContext.userState.myTeam)))) &&
+                                    <Typography
+                                        variant="h5">{t('tournament.display.match.draftNotStartedYet')}</Typography>
                                 }
                                 {!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() > Date.now().toString() &&
                                     <Typography variant="h5">{t('tournament.display.match.draftDate', {
@@ -517,6 +556,18 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                         <Grid item xs={12}>
                                             <Button sx={{mt: 1, width: "100%"}} onClick={validateDraftDate}>
                                                 {t('tournament.display.match.buttonSetDraftDate')}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}}
+                                                    onClick={() => setFightDraftFirstPicker(match.teamA)}>
+                                                {t('tournament.display.match.buttonSetFightDraftFirstPicker', {name: teams.get(match.teamA)})}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}}
+                                                    onClick={() => setFightDraftFirstPicker(match.teamB)}>
+                                                {t('tournament.display.match.buttonSetFightDraftFirstPicker', {name: teams.get(match.teamB)})}
                                             </Button>
                                         </Grid>
                                         <Grid item xs={12}>

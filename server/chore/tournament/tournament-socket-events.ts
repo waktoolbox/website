@@ -23,6 +23,20 @@ export function registerTournamentEvents(socket: Socket) {
             .catch(_ => socket?.emit('error', 'tournament.not.found'));
     });
 
+    socket.on('tournament::getCurrentPhase', (id, callback) => {
+        if (!callback) return;
+        DbHelper.getTournamentDataMaxPhase(id)
+            .then(result => callback(result))
+            .catch(_ => callback(1))
+    })
+
+    socket.on('tournament::getPhases', (id, callback) => {
+        if (!callback) return;
+        DbHelper.getTournamentPhases(id)
+            .then(result => callback(result))
+            .catch(_ => callback(1))
+    })
+
     socket.on('tournament::getTeam', (id, callback) => {
         if (!callback) return;
         DbHelper.getTeam(id)
@@ -491,6 +505,22 @@ Ankama will not provide additional access!`)
             .catch(_ => callback(false))
     });
 
+    socket.on('tournament::referee:setFightDraftFirstPicker', (tournamentId, matchId, round, team, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    match.rounds[round].draftFirstPicker = team;
+                    return Promise.resolve(match);
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
     socket.on('tournament::admin:rerollMap', (tournamentId, matchId, round, callback) => {
         if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
@@ -603,7 +633,7 @@ Ankama will not provide additional access!`)
     });
 
     // TODO later adapt this to other tournament format
-    socket.on('tournament::draftStart', (tournamentId, matchId, fightIndex, callback) => {
+    socket.on('tournament::draftStart', (tournamentId, matchId, fightIndex, sidePick, callback) => {
         if (!callback) return;
         DbHelper.rawQuery(`SELECT COUNT(*)
                            FROM drafts_data
@@ -626,21 +656,36 @@ Ankama will not provide additional access!`)
                         DbHelper.rawQuery(`SELECT content
                                            FROM teams
                                            WHERE id = ANY ($1)`, [[match.teamA, match.teamB]])
-                            .then(teams => {
-                                if (teams.rowCount < 2) return callback(false);
+                            .then(async rawTeams => {
+                                if (rawTeams.rowCount < 2) return callback(false);
                                 let teamA: TournamentTeamModel;
                                 let teamB: TournamentTeamModel;
 
+                                const teams: TournamentTeamModel[] = rawTeams.rows.map(r => r.content);
+
+                                // TODO later: clean this code
                                 if (phase == 1) {
-                                    const sort = teams.rows.map(r => r.content).sort(() => Math.random() - 0.5);
+                                    const sort = teams.sort(() => Math.random() - 0.5);
                                     teamA = sort[0];
                                     teamB = sort[1];
                                 } else {
-                                    // TODO v2:
-                                    // - 16th: win at step 2 of phase 1 can pick side
-                                    // - then random
-                                    // - BO: first random, then loser will have hand
-                                    throw new Error("Not implemented");
+                                    const draftFirstPicker = match.rounds[0].draftFirstPicker;
+
+                                    if (draftFirstPicker) {
+                                        const foundInTeam = teams.find((t: any) => t.validatedPlayers.find((p: string) => p === socket.data.user))
+                                        if (!foundInTeam) return callback(false);
+                                        const otherTeam = teams[0].id === foundInTeam.id ? teams[1] : teams[0];
+                                        if (draftFirstPicker === foundInTeam?.id) {
+                                            teamA = sidePick === DraftTeam.TEAM_A ? foundInTeam : otherTeam
+                                            teamB = sidePick === DraftTeam.TEAM_A ? otherTeam : foundInTeam
+                                        } else {
+                                            return callback(false)
+                                        }
+                                    } else {
+                                        const sort = teams.sort(() => Math.random() - 0.5);
+                                        teamA = sort[0];
+                                        teamB = sort[1];
+                                    }
                                 }
 
                                 const draft: DraftData = {
@@ -684,6 +729,11 @@ Ankama will not provide additional access!`)
                                     },
                                     teamBReady: false
                                 }
+
+                                match.rounds[fightIndex].draftId = draft.id
+                                await DbHelper.rawQuery(`UPDATE matches
+                                                         SET content = $1
+                                                         WHERE id = $2`, [JSON.stringify(match), match.id])
 
                                 DbHelper.rawQuery(`INSERT INTO drafts_data
                                                    VALUES ($1, $2)`, [draft.id, draft])

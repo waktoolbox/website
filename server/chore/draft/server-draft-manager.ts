@@ -200,6 +200,7 @@ class Manager {
                     const teamB = match.teamA === draft.teamAInfo?.id ? DraftTeam.TEAM_B : DraftTeam.TEAM_A;
 
                     const round = match.rounds[draftIdAndRound[1]];
+                    round.draftTeamA = draft.teamAInfo?.id
                     round.teamADraft = {
                         pickedClasses: draft.history.filter(a => a.type === DraftActionType.PICK && a.team === teamA).map(a => a.breed),
                         bannedClasses: draft.history.filter(a => a.type === DraftActionType.BAN && a.team === teamA).map(a => a.breed),
