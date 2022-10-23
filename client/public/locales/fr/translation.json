@@ -74,12 +74,16 @@
         "arbitration": "Arbitrage",
         "bo": "BO {{nb}}",
         "buttonSetDraftDate": "Définir la date du draft",
+        "buttonSetFightDraftFirstPicker": "{{name}} choisit son côté de draft",
         "buttonSetFightWinnerTeam": "{{name}} gagne ce combat",
         "buttonSetMatchDate": "Définir la date du match",
         "buttonSetMatchReferee": "Me définir comme arbitre",
         "buttonSetMatchWinnerTeam": "Définir {{name}} comme équipe gagnante",
         "buttonValidateMatch": "Valider le match",
         "dead": "Mort",
+        "draft": {
+          "teamA": "Équipe A en draft"
+        },
         "draftDate": "Draft à partir du : {{date, datetime}}",
         "draftNotAvailableYet": "Ce draft n'est pas disponible pour l'instant",
         "draftNotStartedYet": "Ce draft n'est pas encore démarré",

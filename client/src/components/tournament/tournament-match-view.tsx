@@ -1,5 +1,6 @@
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CancelIcon from '@mui/icons-material/Cancel';
+import LooksOneIcon from '@mui/icons-material/LooksOne';
 import {TournamentDefinition, TournamentMatchModel, TournamentMatchRoundModel} from "../../utils/tournament-models";
 import {useTranslation} from "react-i18next";
 import React, {ChangeEvent, SyntheticEvent, useContext, useState} from "react";
@@ -17,6 +18,7 @@ import {
     Tab,
     Tabs,
     TextField,
+    Tooltip,
     Typography
 } from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
@@ -97,6 +99,17 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                     ...fight,
                     winner: team
                 } as any)
+            }
+        })
+    }
+
+    function setFightDraftFirstPicker(team: string) {
+        socket.emit('tournament::referee:setFightDraftFirstPicker', tournament.id, match.id, tab, team, (done: boolean) => {
+            if (done) {
+                setFight({
+                    ...fight,
+                    draftFirstPicker: team
+                })
             }
         })
     }
@@ -254,8 +267,15 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         }
                     </Grid>
                     <Grid item xs={12}>
+
                         <Link to={`/tournament/${id}/tab/2/team/${appropriateTeam}`}>
-                            <Typography><b>{teams.get(appropriateTeam)}</b></Typography>
+                            {fight.draftTeamA === appropriateTeam &&
+                                <Tooltip title={t('tournament.display.match.draft.teamA')} placement="top">
+                                    <LooksOneIcon sx={{verticalAlign: "middle", mb: "3px", mr: 1, color: "#8299a1"}}/>
+                                </Tooltip>
+                            }
+                            <Typography display="inline">
+                                <b>{teams.get(appropriateTeam)}</b></Typography>
                         </Link>
                     </Grid>
                     <Grid item xs={12} sx={{p: 3}}>
@@ -414,7 +434,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
                                 }
-                                {(!fight.draftId && (match.teamA !== userContext.userState.myTeam && match.teamB !== userContext.userState.myTeam && !fight.draftFirstPicker) || (fight.draftFirstPicker && fight.draftFirstPicker !== userContext.userState.myTeam)) &&
+                                {((fight.draftDate && !fight.draftId && ((match.teamA !== userContext.userState.myTeam && match.teamB !== userContext.userState.myTeam && !fight.draftFirstPicker)
+                                        || (fight.draftFirstPicker && fight.draftFirstPicker !== userContext.userState.myTeam)))) &&
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotStartedYet')}</Typography>
                                 }
@@ -535,6 +556,18 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                         <Grid item xs={12}>
                                             <Button sx={{mt: 1, width: "100%"}} onClick={validateDraftDate}>
                                                 {t('tournament.display.match.buttonSetDraftDate')}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}}
+                                                    onClick={() => setFightDraftFirstPicker(match.teamA)}>
+                                                {t('tournament.display.match.buttonSetFightDraftFirstPicker', {name: teams.get(match.teamA)})}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Button sx={{mt: 1, width: "100%"}}
+                                                    onClick={() => setFightDraftFirstPicker(match.teamB)}>
+                                                {t('tournament.display.match.buttonSetFightDraftFirstPicker', {name: teams.get(match.teamB)})}
                                             </Button>
                                         </Grid>
                                         <Grid item xs={12}>

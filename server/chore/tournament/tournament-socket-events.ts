@@ -505,6 +505,22 @@ Ankama will not provide additional access!`)
             .catch(_ => callback(false))
     });
 
+    socket.on('tournament::referee:setFightDraftFirstPicker', (tournamentId, matchId, round, team, callback) => {
+        if (!callback) return;
+        DbHelper.isTournamentReferee(tournamentId, socket.data.user)
+            .then(isReferee => {
+                if (!isReferee) return callback(false);
+                DbHelper.updateMatch(tournamentId, matchId, (match) => {
+                    if (!match.rounds || match.rounds.length < round) return callback(false);
+                    match.rounds[round].draftFirstPicker = team;
+                    return Promise.resolve(match);
+                })
+                    .then(result => callback(result))
+                    .catch(_ => callback(false))
+            })
+            .catch(_ => callback(false))
+    });
+
     socket.on('tournament::admin:rerollMap', (tournamentId, matchId, round, callback) => {
         if (!callback) return;
         DbHelper.isTournamentAdmin(tournamentId, socket.data.user)
