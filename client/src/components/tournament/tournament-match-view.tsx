@@ -214,7 +214,8 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
     function matchText() {
         const result: string[] = [];
         if (match.pool !== undefined) {
-            result.push(t('tournament.display.match.pool', {pool: match.pool + 1}))
+            // TODO later : clean this
+            result.push(t('tournament.display.match.pool', {pool: match.pool + (match.phase === 1 ? 1 : 0)}))
         }
         if (match.round) {
             result.push(t('tournament.display.match.round', {round: match.round}))
