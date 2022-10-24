@@ -1,4 +1,7 @@
-import {Button, Grid, Typography} from "@mui/material";
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import GroupRemoveOutlinedIcon from '@mui/icons-material/GroupRemoveOutlined';
+
+import {Box, Button, Grid, Typography} from "@mui/material";
 import {useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
 import React, {useContext, useEffect, useState} from "react";
@@ -357,7 +360,10 @@ export default function Draft() {
                   }}>
                 <Grid item xs={12} sx={{pt: 1, height: "200px"}}>
                     <Typography variant="h5"
-                                sx={{mb: 2}}>{draftTeam === DraftTeam.TEAM_A ? draftData?.teamAInfo?.name : draftData?.teamBInfo?.name}</Typography>
+                                sx={{
+                                    mb: 2,
+                                    color: (draftTeam === DraftTeam.TEAM_A ? "#07c6b6" : "#00A4E9")
+                                }}>{draftTeam === DraftTeam.TEAM_A ? draftData?.teamAInfo?.name : draftData?.teamBInfo?.name}</Typography>
                     {team && team.filter(u => u.present).map(u => (
                         <Typography key={u.id}>{u.username}<span
                             style={{color: "#848889"}}>{"#" + u.discriminator}</span></Typography>
@@ -395,6 +401,44 @@ export default function Draft() {
                     }
                 </Grid>
             </Grid>
+        )
+    }
+
+    function TimelineEntry({action, index}: { action: DraftAction, index: number }) {
+        const teamColor = action.team === DraftTeam.TEAM_A ? "#07c6b6" : "#00A4E9";
+        const pastAction = index < (draftData?.currentAction || 0);
+        const color = pastAction ? "" : teamColor;
+
+        return (
+            <Box key={index} sx={{display: "inline-block", m: 1, width: "75px", height: "75px"}}>
+                <div style={{display: "inline", position: "relative"}}>
+                    {action.type === DraftActionType.PICK && !pastAction &&
+                        <GroupAddIcon
+                            sx={{color: color, position: "absolute", height: "60px", width: "60px", left: "-30px"}}/>
+                    }
+                    {action.type === DraftActionType.BAN && !pastAction &&
+                        <GroupRemoveOutlinedIcon
+                            sx={{color: color, position: "absolute", height: "60px", width: "60px", left: "-30px"}}/>
+                    }
+                    {draftData && draftData.history && draftData.history[index] &&
+                        <img style={{
+                            position: "absolute", left: "-30px",
+                            width: "60px",
+                            filter: (action.type === DraftActionType.BAN ? "grayscale(1)" : "")
+                        }} src={`/classes/${draftData.history[index].breed}_0.png`}
+                             alt={`Breed ${draftData.history[index].breed}`}/>
+                    }
+                    <Typography
+                        sx={{position: "absolute", top: "60px", left: "-32px", color: teamColor, fontWeight: "bold"}}>
+                        {action.team === DraftTeam.TEAM_A ? "A " : "B "}
+                    </Typography>
+                    <Typography sx={{position: "absolute", top: "60px", left: "-7px", color: teamColor}}>
+                        <Trans sx={{display: "inline"}}
+                               i18nKey={action.type === DraftActionType.PICK ? 'draft.pick' : 'draft.ban'}
+                               components={{span: <span style={{fontWeight: "bold"}}/>}}/>
+                    </Typography>
+                </div>
+            </Box>
         )
     }
 
@@ -522,6 +566,14 @@ export default function Draft() {
                             }
                         </Grid>
                     }
+                </Grid>
+            }
+            {draftData && draftData.configuration && draftData.configuration.actions && draftData.configuration.actions.length > 0 &&
+                <Grid item xs={12} order={{xs: 4}}
+                      sx={{backgroundColor: "#162834", borderRadius: 3, pt: 2, pb: 2, mb: 2, ml: 1, mr: 1}}>
+                    {draftData.configuration.actions.map((action, index) => (
+                        <TimelineEntry action={action} index={index}/>
+                    ))}
                 </Grid>
             }
         </Grid>
