@@ -63,6 +63,15 @@
     "display": {
       "allTournaments": "All tournaments",
       "allRegistrations": "All registrations",
+      "bracket": {
+        "round": {
+          "1": "Round of 32",
+          "2": "Round of 16",
+          "3": "Quarterfinals",
+          "4": "Semifinals",
+          "5": "Final"
+        }
+      },
       "captain": "Captain",
       "information": "Information",
       "level": "Level: {{lvl}}",
@@ -127,7 +136,8 @@
       "player": "Player",
       "register": "Register",
       "results": "Results",
-      "teamsButton": "Teams"
+      "teamsButton": "Teams",
+      "tree": "Tree"
     },
     "endDate": "End date",
     "editor": {

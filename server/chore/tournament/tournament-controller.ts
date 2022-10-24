@@ -91,6 +91,19 @@ export function getMatchesResult(id: string, phase: number): Promise<TournamentM
     })
 }
 
+export function getAllMatchesFromPhase(id: string, phase: number): Promise<TournamentMatchModel[]> {
+    return new Promise((resolve) => {
+        if (phase <= 0) return Promise.resolve([]);
+        DbHelper.rawQuery(`SELECT content
+                           FROM matches
+                           WHERE "tournamentId" = $1
+                             AND phase = $2
+                           ORDER BY content -> ('pool')`, [id, phase])
+            .then(result => resolve(result.rowCount > 0 ? result.rows.map(r => r.content) : []))
+            .catch(_ => resolve([]))
+    })
+}
+
 export function getMatch(id: string): Promise<TournamentMatchModel | undefined> {
     return new Promise(resolve => {
         DbHelper.rawQuery(`SELECT content

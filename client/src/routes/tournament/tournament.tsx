@@ -10,6 +10,7 @@ import VideogameAssetOffIcon from '@mui/icons-material/VideogameAssetOff';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 import SportsMmaIcon from '@mui/icons-material/SportsMma';
 import HealingIcon from '@mui/icons-material/Healing';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import {TournamentDefinition, TournamentMatchModel, TournamentTeamModel} from "../../utils/tournament-models";
 import {SocketContext} from "../../context/socket-context";
 import {Link, useNavigate, useParams} from "react-router-dom";
@@ -33,6 +34,7 @@ import TournamentMatchView from "../../components/tournament/tournament-match-vi
 import TournamentMatchPlanningListView from "../../components/tournament/tournament-match-planning-list-view";
 import WakfuWarriorsMatchResultListView from "../../components/tournament/impl/wakfu-warriors-match-result-list-view";
 import {UserContext} from "../../context/user-context";
+import WakfuWarriorsTreeView from "../../components/tournament/impl/wakfu-warriors-match-tree-view";
 
 enum Tabs {
     HOME,
@@ -40,7 +42,8 @@ enum Tabs {
     SINGLE_TEAM,
     PLANNING,
     MATCH,
-    RESULTS
+    RESULTS,
+    TREE
 }
 
 const MenuButtonsStyle = {
@@ -72,6 +75,7 @@ export default function Tournament() {
     const [myTeam, setMyTeam] = useState<TournamentTeamModel | undefined>();
     const [planningToDisplay, setPlanningToDisplay] = useState<TournamentMatchModel[]>();
     const [resultToDisplay, setResultToDisplay] = useState<TournamentMatchModel[]>();
+    const [allMatches, setAllMatches] = useState<TournamentMatchModel[]>();
     const [teamMatches, setTeamMatches] = useState<TournamentMatchModel[]>();
     const [currentMatch, setCurrentMatch] = useState<TournamentMatchModel>();
     const [phases, setPhases] = useState<number[]>([]);
@@ -133,6 +137,9 @@ export default function Tournament() {
         if (tab === Tabs.RESULTS) {
             loadMatchesResult();
         }
+        if (tab === Tabs.TREE) {
+            loadAllMatches();
+        }
     }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
 
@@ -154,6 +161,11 @@ export default function Tournament() {
                 setCurrentMatch(undefined);
                 navigate(`/tournament/${id}/tab/5`);
                 loadMatchesResult()
+                break;
+            case Tabs.TREE:
+                setCurrentMatch(undefined);
+                navigate(`/tournament/${id}/tab/6`);
+                loadAllMatches()
                 break;
         }
         setTab(newTab)
@@ -207,8 +219,12 @@ export default function Tournament() {
         loadMatchesToDisplay('tournament::getMatchesResult', setResultToDisplay)
     }
 
-    const loadMatchesToDisplay = (event: string, callbackSetter: any) => {
-        socket.emit(event, id, phase, (matches: TournamentMatchModel[]) => {
+    const loadAllMatches = () => {
+        loadMatchesToDisplay('tournament::getAllMatches', setAllMatches, 2)
+    }
+
+    const loadMatchesToDisplay = (event: string, callbackSetter: any, forcedPhase: number = phase) => {
+        socket.emit(event, id, forcedPhase, (matches: TournamentMatchModel[]) => {
             const namesToRequest: string[] = [];
             matches.forEach(t => {
                 if (!t || !t.id) return;
@@ -370,6 +386,15 @@ export default function Tournament() {
                                         onClick={() => changeTab(Tabs.RESULTS)}>
                                     <EmojiEventsIcon sx={{mr: 1}}/>
                                     {t('tournament.display.results')}
+                                </Button>
+                                <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
+                                <Button variant="text"
+                                    // TODO later some better condition here
+                                        disabled={!phases.find(p => p === 2)}
+                                        style={{...MenuButtonsStyle, ...(tab === Tabs.TREE ? ActiveMenuButtonsStyle : {})}}
+                                        onClick={() => changeTab(Tabs.TREE)}>
+                                    <AccountTreeIcon sx={{mr: 1}}/>
+                                    {t('tournament.display.tree')}
                                 </Button>
                                 <Divider sx={{ml: 1, mr: 1}} orientation="vertical" variant="middle" flexItem/>
                                 <Link to={`/edit-tournament/${tournament.id}`}
@@ -862,6 +887,16 @@ export default function Tournament() {
                                         streamerPersistence.set(id, data)
                                         setStreamers(streamerPersistence)
                                     }
+                                }}
+                                />
+
+                            }
+
+                            {tab === Tabs.TREE && allMatches &&
+                                <WakfuWarriorsTreeView data={{
+                                    teams: teamsNamesPersistence,
+                                    matches: allMatches,
+                                    goToMatch: (matchId) => loadMatch(matchId, true)
                                 }}
                                 />
 

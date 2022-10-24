@@ -63,6 +63,15 @@
     "display": {
       "allTournaments": "Tous les tournois",
       "allRegistrations": "Toutes les inscriptions",
+      "bracket": {
+        "round": {
+          "1": "16ème de finale",
+          "2": "8ème de finale",
+          "3": "Quart de finale",
+          "4": "Demi-finale",
+          "5": "Finale"
+        }
+      },
       "captain": "Capitaine",
       "information": "Informations",
       "level": "Niveau : {{lvl}}",
@@ -127,7 +136,8 @@
       "player": "Joueur",
       "register": "S'inscrire",
       "results": "Résultats",
-      "teamsButton": "Équipes"
+      "teamsButton": "Équipes",
+      "tree": "Arbre"
     },
     "endDate": "Date de fin",
     "editor": {
