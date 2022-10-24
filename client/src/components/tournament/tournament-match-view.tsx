@@ -413,7 +413,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                         {/*TODO v2 bind draft link & draft results & winner */}
                         <Grid container>
                             <Grid item xs={12}>
-                                {((!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() && (!fight.draftFirstPicker && (match.teamA === userContext.userState.myTeam || match.teamB === userContext.userState.myTeam))) || fight.draftId) &&
+                                {((!fight.teamADraft && fight.draftDate && Date.parse(fight.draftDate).toString() < Date.now().toString() && (!fight.draftFirstPicker && (match.teamA === userContext.userState.myTeam || match.teamB === userContext.userState.myTeam))) || (fight.draftId && !fight.teamADraft)) &&
                                     <Button sx={{width: "50%", pt: 2, pb: 2}} disabled={!fight.draftDate}
                                             onClick={() => startDraft(undefined)}>
                                         {t('tournament.display.match.goToDraft')}
@@ -435,7 +435,7 @@ export default function TournamentMatchView({data}: { data: PropsTypes }) {
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotAvailableYet')}</Typography>
                                 }
-                                {((fight.draftDate && !fight.draftId && ((match.teamA !== userContext.userState.myTeam && match.teamB !== userContext.userState.myTeam && !fight.draftFirstPicker)
+                                {!fight.teamADraft && ((fight.draftDate && !fight.draftId && ((match.teamA !== userContext.userState.myTeam && match.teamB !== userContext.userState.myTeam && !fight.draftFirstPicker)
                                         || (fight.draftFirstPicker && fight.draftFirstPicker !== userContext.userState.myTeam)))) &&
                                     <Typography
                                         variant="h5">{t('tournament.display.match.draftNotStartedYet')}</Typography>
