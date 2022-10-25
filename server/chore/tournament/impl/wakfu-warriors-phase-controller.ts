@@ -34,7 +34,7 @@ function getAllMatchesOfPhaseAndRoundOrderedByPool(tournamentId: string, phase: 
                            WHERE "tournamentId" = $1
                              AND phase = $2
                              AND content ->> ('round') = $3
-                           ORDER BY content ->> ('pool')`, [tournamentId, phase, round])
+                           ORDER BY content -> ('pool')`, [tournamentId, phase, round])
             .then(result => resolve(result.rowCount <= 0 ? [] : result.rows.map(r => r.content)))
             .catch(_ => resolve([]))
     })
