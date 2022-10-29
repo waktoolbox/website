@@ -680,7 +680,7 @@ Ankama will not provide additional access!`)
                                     teamA = sort[0];
                                     teamB = sort[1];
                                 } else {
-                                    const draftFirstPicker = match.rounds[0].draftFirstPicker;
+                                    const draftFirstPicker = match.rounds[fightIndex].draftFirstPicker;
 
                                     if (draftFirstPicker) {
                                         const foundInTeam = teams.find((t: any) => t.validatedPlayers.find((p: string) => p === socket.data.user))
