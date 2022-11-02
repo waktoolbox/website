@@ -97,13 +97,17 @@ export function recomputeAllStatistics(tournamentId: string, callback: (result: 
             DbHelper.rawQuery(`SELECT id
                                FROM matches
                                WHERE "tournamentId" = $1`, [tournamentId])
-                .then(result => {
+                .then(async result => {
                     if (result.rowCount <= 0) return callback(false);
 
-                    Promise.all(result.rows.map(row => applyStatistics(tournamentId, row.id, false, () => {
-                    })))
-                        .then(_ => callback(true))
-                        .catch(_ => callback(false))
+                    function apply(pop: any) {
+                        if (!pop) return;
+                        applyStatistics(tournamentId, pop.id, false, () => {
+                            apply(result.rows.pop());
+                        })
+                    }
+
+                    apply(result.rows.pop());
                 })
                 .catch(_ => callback(false))
         })
