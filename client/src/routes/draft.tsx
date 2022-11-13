@@ -1,10 +1,21 @@
+import DeleteIcon from '@mui/icons-material/Delete';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import GroupRemoveOutlinedIcon from '@mui/icons-material/GroupRemoveOutlined';
 
-import {Box, Button, Grid, Typography} from "@mui/material";
+import {
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    Typography
+} from "@mui/material";
 import {useNavigate, useParams} from "react-router-dom";
 import {Trans, useTranslation} from "react-i18next";
-import React, {useContext, useEffect, useState} from "react";
+import React, {ChangeEvent, useContext, useEffect, useState} from "react";
 import {SocketContext} from "../context/socket-context";
 import {
     DraftAction,
@@ -164,6 +175,8 @@ export default function Draft() {
     const [usersToAssign, setUsersToAssign] = useState<DraftUser[]>();
     const [pickedBreed, setPickedBreed] = useState<Breeds | undefined>(undefined);
     const [hoveredBreed, setHoveredBreed] = useState<Breeds | undefined>(undefined);
+    const [draftTemplate, setDraftTemplate] = useState(DraftTemplates[0]);
+    const [importDraftTemplate, setImportDraftTemplate] = useState(0);
 
     const cleanDraft = () => {
         controller = undefined;
@@ -300,6 +313,33 @@ export default function Draft() {
         }
     }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+    function addTemplateAction() {
+        const actions = [...draftTemplate.actions];
+        actions.push({
+            type: DraftActionType.BAN,
+            team: DraftTeam.TEAM_A,
+            lockForPickingTeam: true,
+            lockForOpponentTeam: true
+        })
+        setDraftTemplate({
+            ...draftTemplate,
+            actions: actions
+        })
+    }
+
+    function removeTemplateAction(index: number) {
+        const actions = [...draftTemplate.actions.slice(0, index), ...draftTemplate.actions.slice(index + 1)];
+
+        setDraftTemplate({
+            ...draftTemplate,
+            actions: actions
+        })
+    }
+
+    function doImportDraftTemplate() {
+        setDraftTemplate(DraftTemplates[importDraftTemplate]);
+    }
+
     function createDraft() {
         socket.emit('draft::create', {
             configuration: {
@@ -323,7 +363,56 @@ export default function Draft() {
         return result;
     }
 
-    function draftTemplateAction(action: DraftAction, index: number, textAlign: string = "start", variant: Variant = "body1") {
+    function DraftTemplateAction(action: DraftAction, index: number) {
+        const teamColor = action.team === DraftTeam.TEAM_A ? "#07c6b6" : "#00A4E9";
+        const actionColor = action.type === DraftActionType.PICK ? "#4be64b" : "#e64b4b";
+
+        function update(apply: (a: DraftAction) => void) {
+            const actions = [...draftTemplate.actions];
+            apply(actions[index])
+            setDraftTemplate({
+                ...draftTemplate,
+                actions: actions
+            });
+        }
+
+        return (
+            <div key={index}>
+                <Select value={action.team as unknown as string} label={t('draft.team')}
+                        sx={{color: teamColor, fontWeight: 'bold', m: 1}}
+                        onChange={(event: SelectChangeEvent) => {
+                            update(a => a.team = event.target.value as unknown as DraftTeam || DraftTeam.TEAM_A)
+                        }}>
+                    <MenuItem value={DraftTeam.TEAM_A} sx={{color: "#07c6b6"}}>{t('draft.teamA')}</MenuItem>
+                    <MenuItem value={DraftTeam.TEAM_B} sx={{color: "#00A4E9"}}>{t('draft.teamB')}</MenuItem>
+                </Select>
+                <Select value={action.type as unknown as string} label={t('draft.type')}
+                        sx={{color: actionColor, fontWeight: 'bold', m: 1}}
+                        onChange={(event: SelectChangeEvent) => {
+                            update(a => a.type = event.target.value as unknown as DraftActionType || DraftActionType.PICK);
+                        }}>
+                    <MenuItem value={DraftActionType.PICK} sx={{color: "#4be64b"}}>
+                        <Trans i18nKey={'draft.pick'} components={{span: <span/>}}/>
+                    </MenuItem>
+                    <MenuItem value={DraftActionType.BAN} sx={{color: "#e64b4b"}}>
+                        <Trans i18nKey={'draft.ban'} components={{span: <span/>}}/>
+                    </MenuItem>
+                </Select>
+                <FormControlLabel control={
+                    <Checkbox checked={action.lockForPickingTeam}
+                              onChange={(event: ChangeEvent<HTMLInputElement>) => update(a => a.lockForPickingTeam = event.target.checked)}/>
+                } label={t('draft.lockForPicking')}/>
+                <FormControlLabel control={
+                    <Checkbox checked={action.lockForOpponentTeam}
+                              onChange={(event: ChangeEvent<HTMLInputElement>) => update(a => a.lockForOpponentTeam = event.target.checked)}/>
+                } label={t('draft.lockForOpponent')}/>
+                <Button sx={{backgroundColor: "#e64b4b"}}
+                        onClick={() => removeTemplateAction(index)}><DeleteIcon/></Button>
+            </div>
+        )
+    }
+
+    function DraftAction(action: DraftAction, index: number, textAlign: string = "start", variant: Variant = "body1") {
         const teamA = action.team === DraftTeam.TEAM_A;
         const teamColor = teamA ? "#07c6b6" : "#00A4E9";
 
@@ -464,13 +553,31 @@ export default function Draft() {
                         <Grid container>
                             <Grid item xs={12} sx={{mt: 1}}>
                                 <Typography variant="h4">{t('draft.template')}</Typography>
-                                <Typography variant="h5">{DraftTemplates[0].name}</Typography>
-                                {DraftTemplates[0].actions.map((action, index) => (
-                                    draftTemplateAction(action, index)
+                            </Grid>
+                            <Grid item xs={6} sx={{mt: 1}}>
+                                <Button onClick={addTemplateAction}
+                                        sx={{width: "95%", height: "100%"}}>{t('draft.addAction')}</Button>
+                            </Grid>
+                            <Grid item xs={6} sx={{mt: 1}}>
+                                <Select value={importDraftTemplate as unknown as string} label={t('draft.template')}
+                                        sx={{p: 0}}
+                                        onChange={(event: SelectChangeEvent) => {
+                                            setImportDraftTemplate(+event.target.value || 0)
+                                        }}>
+                                    {DraftTemplates.map((template, index) => (
+                                        <MenuItem value={index}>{template.name}</MenuItem>
+                                    ))}
+                                </Select>
+                                <Button onClick={doImportDraftTemplate}>{t('draft.importTemplate')}</Button>
+                            </Grid>
+                            <Grid item xs={12} sx={{mt: 1}}>
+                                {draftTemplate.actions.map((action, index) => (
+                                    DraftTemplateAction(action, index)
                                 ))}
                             </Grid>
                             <Grid item xs={12}>
-                                <Button onClick={createDraft} sx={{width: "95%", m: 1}}>{t('draft.create')}</Button>
+                                <Button onClick={createDraft}
+                                        sx={{width: "95%", m: 1, mt: 3}}>{t('draft.create')}</Button>
                             </Grid>
                         </Grid>
                     }
@@ -479,7 +586,7 @@ export default function Draft() {
                             {currentAction &&
                                 <Grid item xs={12} sx={{mt: 1}}>
                                     <Typography variant="h5">{t('draft.currentAction')}</Typography>
-                                    {draftTemplateAction(currentAction, 0, "center", "h6")}
+                                    {DraftAction(currentAction, 0, "center", "h6")}
                                 </Grid>
                             }
                             <Grid item xs={12} sx={{m: 2}}>

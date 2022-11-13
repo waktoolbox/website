@@ -15,6 +15,7 @@
   "date": "{{date, datetime}}",
   "delete": "Supprimer",
   "draft": {
+    "addAction": "Ajouter une action",
     "assignToA": "Assigner à l'équipe A",
     "assignToB": "Assigner à l'équipe B",
     "bugs": "En cas de bug, merci de MP Maude Clonet#8238 avec un screenshot via Discord",
@@ -24,9 +25,12 @@
     "ban": "<span>Ban</span>",
     "banDesc": "doit <span>bannir</span>",
     "ended": "Draft terminé",
+    "importTemplate": "Importer",
     "link": "Draft",
     "lockForBothDesc": "une classe et la bloque pour les deux équipes",
     "lockForNoneDesc": "une classe",
+    "lockForPicking": "et bloque la classe pour son équipe",
+    "lockForOpponent": "et bloque la classe pour l'autre équipe",
     "lockForOpponentDesc": "une classe et la bloque pour l'équipe adverse",
     "lockForOwnDesc": "une classe et la bloque pour son équipe",
     "noUserToAssign": "Personne à assigner",
@@ -34,9 +38,11 @@
     "pickDesc": "doit <span>choisir</span>",
     "setTeamNotReady": "Mon équipe n'est pas prête",
     "setTeamReady": "Mon équipe est prête",
+    "team": "Équipe",
     "teamA": "Équipe A",
     "teamB": "Équipe B",
-    "template": "Template de draft"
+    "template": "Template de draft",
+    "type": "Type"
   },
   "discord.discriminator": "# Discord",
   "discord.pseudo": "Pseudo Discord",
